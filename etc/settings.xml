@@ -1,0 +1,62 @@
+<settings xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <profiles>
+        <profile>
+            <id>mavenSettings</id>
+            <properties>
+                <tomcat.dev.server.url>http://192.168.1.100/manager</tomcat.dev.server.url>
+                <tomcat.uat.server.url>http://192.168.1.198/manager</tomcat.uat.server.url>
+                <flex.home>c:/Program\ Files/Adobe/Flex\ SDK\ 2</flex.home>
+            </properties>
+            <repositories>
+                <repository>
+                    <id>mavenRepo</id>
+                    <name>Mindblossom Repository for Maven</name>
+                    <url>http://192.168.1.100/mavenRepo</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>daily</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>maven.restlet.org</id>
+                    <name>Restlet repo</name>
+                    <url>http://maven.restlet.org</url>
+                    <layout>default</layout>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>mavenSettings</activeProfile>
+    </activeProfiles>
+
+    <servers>
+        <server>
+            <id>mavenRepo</id>
+            <username></username>
+            <password></password>
+            <filePermissions>664</filePermissions>
+            <directoryPermissions>775</directoryPermissions>
+        </server>
+        <server>
+            <id>tomcatDevServer</id>
+            <username>admin</username>
+            <password></password>
+        </server>
+        <server>
+            <id>tomcatUATServer</id>
+            <username>admin</username>
+            <password></password>
+        </server>
+    </servers>
+</settings>
