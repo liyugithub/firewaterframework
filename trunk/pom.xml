@@ -7,6 +7,10 @@
     <version>0.9-SNAPSHOT</version>
     <name>Firewater</name>
 
+    <scm>
+        <connection>scm:svn:https://firewaterframework.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
+    </scm>
     <build>
         <plugins>
             <plugin>
