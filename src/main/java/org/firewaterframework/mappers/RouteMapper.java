@@ -1,7 +1,6 @@
 package org.firewaterframework.mappers;
 
 import org.firewaterframework.rest.*;
-import org.firewaterframework.mappers.Mapper;
 import org.firewaterframework.WSException;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -15,7 +14,7 @@ import java.util.Map;
  * Time: 10:48:53 AM
  * To change this template use File | Settings | File Templates.
  */
-public class RouteMapper implements Mapper
+public class RouteMapper extends Mapper
 {
     protected Map<String, Mapper> urlMap;
     protected ParseNode parseTree;
@@ -26,12 +25,12 @@ public class RouteMapper implements Mapper
         ParseResult result = parseTree.find( request.getBaseUrl() );
         if( result == null )
         {
-            return new Response( Status.STATUS_NOT_FOUND );
+            throw new WSException( "URL: " + request.getBaseUrl() + " not found.", Status.STATUS_NOT_FOUND );
         }
 
         if( result.getRestArguments() != null )
         {
-            request.getArgs().putAll( result.getRestArguments() );
+            request.getArgs().addPropertyValues( result.getRestArguments() );
         }
         Response restResponse = result.getMapper().handle( request );
         return restResponse;

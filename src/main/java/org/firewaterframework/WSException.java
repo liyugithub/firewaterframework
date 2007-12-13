@@ -29,6 +29,12 @@ public class WSException extends RuntimeException
         this.status = status;
     }
 
+    public WSException( String description, Status status )
+    {
+        super( description );
+        this.status = status;
+    }
+
     public Status getStatus() {
         return status;
     }

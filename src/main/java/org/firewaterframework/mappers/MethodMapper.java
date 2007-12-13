@@ -4,6 +4,7 @@ import com.opensymphony.oscache.general.GeneralCacheAdministrator;
 import com.opensymphony.oscache.base.EntryRefreshPolicy;
 import com.opensymphony.oscache.base.NeedsRefreshException;
 import org.firewaterframework.rest.*;
+import org.firewaterframework.WSException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,7 +13,7 @@ import org.firewaterframework.rest.*;
  * Time: 10:29:33 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MethodMapper implements Mapper
+public class MethodMapper extends Mapper
 {
     // these settings control the OSCache
     protected GeneralCacheAdministrator cache;
@@ -24,31 +25,14 @@ public class MethodMapper implements Mapper
     protected Mapper putMapper;
     protected Mapper postMapper;
     protected Mapper deleteMapper;
+    protected Mapper optionsMapper;
 
     public Response handle( Request request )
     {
-        Response rval = null;
+        Response rval;
         if( request.getMethod() == Method.GET )
         {
-            if( cache != null )
-            {
-                // note that the entries are cached using the full URL of the request
-                try
-                {
-                    rval = (Response)cache.getFromCache( request.getUrl() );
-                }
-                catch( NeedsRefreshException ex )
-                {
-                    // we  need to fetch the resource and cache it
-                    rval = doGet( request );
-                    cache.putInCache( request.getUrl(), rval, cacheGroups, entryRefreshPolicy );
-                }
-            }
-            else
-            {
-                rval = doGet( request );
-            }
-            return rval;
+            return processGet( request );
         }
         else if( request.getMethod() == Method.POST )
         {
@@ -62,9 +46,19 @@ public class MethodMapper implements Mapper
         {
             rval = doDelete( request );
         }
+        else if( request.getMethod() == Method.HEAD )
+        {
+            rval = processGet( request );
+            // head doesn't include the actual content, create a new response excluding it
+            return new Response( rval.getStatus(), rval.getMimeType() );
+        }
+        else if( request.getMethod() == Method.OPTIONS )
+        {
+            return doOptions( request );
+        }
         else
         {
-            return getMethodNotAllowedResponse( request );
+            throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
         }
 
         // note that the POST, PUT and DELETE will flush the entry and groups for this URL
@@ -82,13 +76,37 @@ public class MethodMapper implements Mapper
         return rval;
     }
 
+    protected Response processGet( Request request )
+    {
+        Response rval;
+        if( cache != null )
+        {
+            // note that the entries are cached using the full URL of the request
+            try
+            {
+                rval = (Response)cache.getFromCache( request.getUrl() );
+            }
+            catch( NeedsRefreshException ex )
+            {
+                // we  need to fetch the resource and cache it
+                rval = doGet( request );
+                cache.putInCache( request.getUrl(), rval, cacheGroups, entryRefreshPolicy );
+            }
+        }
+        else
+        {
+            rval = doGet( request );
+        }
+        return rval;
+    }
+
     protected Response doGet( Request request )
     {
         if( getMapper != null )
         {
             return getMapper.handle( request );
         }
-        return getMethodNotAllowedResponse( request );
+        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
     }
 
     protected Response doPost( Request request )
@@ -97,7 +115,7 @@ public class MethodMapper implements Mapper
         {
             return postMapper.handle( request );
         }
-        return getMethodNotAllowedResponse( request );
+        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
     }
 
     protected Response doPut( Request request )
@@ -106,7 +124,7 @@ public class MethodMapper implements Mapper
         {
             return putMapper.handle( request );
         }
-        return getMethodNotAllowedResponse( request );
+        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
     }
 
     protected Response doDelete( Request request )
@@ -115,12 +133,16 @@ public class MethodMapper implements Mapper
         {
             return deleteMapper.handle( request );
         }
-        return getMethodNotAllowedResponse( request );
+        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
     }
 
-    protected Response getMethodNotAllowedResponse( Request request )
+    protected Response doOptions( Request request )
     {
-        return new Response( Status.STATUS_METHOD_NOT_ALLOWED );
+        if( optionsMapper != null )
+        {
+            return optionsMapper.handle( request );
+        }
+        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
     }
 
     public GeneralCacheAdministrator getCache() {

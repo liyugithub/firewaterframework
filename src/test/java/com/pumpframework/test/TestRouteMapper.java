@@ -1,24 +1,23 @@
 package com.pumpframework.test;
 
-import com.pumpframework.test.XMLUtil;
-import org.firewaterframework.mappers.RouteMapper;
-import org.firewaterframework.rest.Method;
-import org.firewaterframework.rest.Request;
-import org.firewaterframework.rest.Response;
 import junit.framework.Assert;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
-import org.dom4j.io.SAXReader;
+import org.firewaterframework.mappers.RouteMapper;
+import org.firewaterframework.rest.Method;
+import org.firewaterframework.rest.Request;
+import org.firewaterframework.rest.Response;
+import org.firewaterframework.rest.Status;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +84,9 @@ public class TestRouteMapper extends Assert
      */
     public void testSimpleGetAll()
     {
-        Document rval = get( "/users" );
+        Response response = get( "/users" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
         //print(rval);
         assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
         assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
@@ -100,7 +101,9 @@ public class TestRouteMapper extends Assert
      */
     public void testNestedGetAll()
     {
-        Document rval = get( "/users" );
+        Response response = get( "/users" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
         //print(rval);
         assertEquals( rval.selectNodes( "/result/user[@id='1']/pet" ).size(), 3 );
         assertEquals( rval.selectSingleNode( "/result/user[@id='1']/pet[@id='0']/@name" ).getStringValue(), "trixie" );
@@ -111,7 +114,9 @@ public class TestRouteMapper extends Assert
     @Test
     public void testSimpleGetSingle()
     {
-        Document rval = get( "/users/1" );
+        Response response = get( "/users/1" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
         assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
         assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
         assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@last_name" ).getStringValue(), "who" );
@@ -132,11 +137,15 @@ public class TestRouteMapper extends Assert
         args.put( "state","TN" );
 
         // write the user to the database
-        Document res = put( "/users", args );
+        Response response = put( "/users", args );
+        Document res = response.toDocument();
+        assertEquals( response.getStatus(), Status.STATUS_OK );
         print( res );
 
         // fetch it back and ensure it's there
-        Document rval = get( "/users/6" );
+        response = get( "/users/6" );
+        Document rval = response.toDocument();
+        assertEquals( response.getStatus(), Status.STATUS_OK );
         assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
         assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@first_name" ).getStringValue(), "hanky" );
         assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@last_name" ).getStringValue(), "winters" );
@@ -157,10 +166,13 @@ public class TestRouteMapper extends Assert
         args.put( "state","FL" );
 
         // write the user to the database
-        post( "/users/2", args );
+        Response response = post( "/users/2", args );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
 
         // fetch it back and ensure it's there
-        Document rval = get( "/users/2" );
+        response = get( "/users/2" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
         assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
         assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "newby" );
         assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@last_name" ).getStringValue(), "summers" );
@@ -168,35 +180,27 @@ public class TestRouteMapper extends Assert
         assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@city" ).getStringValue(), "miami" );
     }
 
-    private Document get( String url )
+    private Response get( String url )
     {
         return handle( Method.GET, url, null );
     }
 
-    private Document put( String url, Map args )
+    private Response put( String url, Map args )
     {
         return handle( Method.PUT, url, args );
     }
 
-    private Document post( String url, Map args )
+    private Response post( String url, Map args )
     {
         return handle( Method.POST, url, args );
     }
 
-    private Document handle( Method method, String url, Map<String,Object> args )
+    private Response handle( Method method, String url, Map<String,Object> args )
     {
         RouteMapper service = (RouteMapper) appContext.getBean( "routingService" );
-        Request request = new Request( url, method, args );
-        try
-        {
-            Response response = service.handle( request );
-            Document rval = response.getContent();
-            return rval;
-        }
-        catch( Exception e )
-        {
-            return null;
-        }
+        MutablePropertyValues mpvs = new MutablePropertyValues( args );
+        Request request = new Request( url, method, mpvs );
+        return service.handle( request );
     }
 
     private void print( Document doc )

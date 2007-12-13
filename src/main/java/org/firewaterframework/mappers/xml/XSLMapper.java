@@ -1,17 +1,15 @@
 package org.firewaterframework.mappers.xml;
 
-import org.firewaterframework.mappers.Mapper;
-import org.firewaterframework.rest.Request;
-import org.firewaterframework.rest.Response;
-import org.firewaterframework.rest.Status;
-import org.firewaterframework.rest.MIMEType;
-import org.firewaterframework.WSException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.io.DocumentResult;
 import org.dom4j.io.DocumentSource;
+import org.firewaterframework.WSException;
+import org.firewaterframework.mappers.Mapper;
+import org.firewaterframework.rest.*;
+import org.springframework.beans.PropertyValue;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -22,7 +20,7 @@ import java.io.StringReader;
 /**
  * Created By: tspurway
  */
-public class XSLMapper implements Mapper
+public class XSLMapper extends Mapper
 {
     protected static final Log log = LogFactory.getLog( XSLMapper.class );
     public static DocumentFactory docFactory = DocumentFactory.getInstance();
@@ -49,14 +47,14 @@ public class XSLMapper implements Mapper
             DocumentResult result = new DocumentResult();
 
             // add all of the attributes of the request as parameters to the XSL stylesheet
-            for( String attr: request.getArgs().keySet() )
+            for( PropertyValue attr: request.getArgs().getPropertyValues() )
             {
-                transformer.setParameter( attr, request.getArgs().get( attr ));
+                transformer.setParameter( attr.getName(), attr.getValue() );
             }
             transformer.transform( docSource, result );
 
-            Response rval = new Response( Status.STATUS_OK, MIMEType.application_xml );
-            rval.setContent( result.getDocument() );
+            DocumentResponse rval = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
+            rval.setDocument( result.getDocument() );
             return rval;
 
         }

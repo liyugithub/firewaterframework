@@ -33,10 +33,21 @@
             from user u
             left outer join pet p on u.id = p.owner_id
             left outer join species r on p.species_id = r.id
-            order by u.id, p.id" />
+            group by u.id, p.id
+            order by $sort$"/>
         <property name="dataSource" ref="dataSource"/>
-        <property name="pivotMap">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotNode">
+        <property name="fields">
+            <map>
+                <entry key="sort">
+                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                        <property name="pattern" value="last_name|email"/>
+                        <property name="defaultValue" value="email"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="rowTreeMapper">
+            <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
                 <property name="pivotColumn" value="user"/>
                 <property name="pivotURLSelector" value="users"/>
                 <property name="attributeColumnList">
@@ -49,7 +60,7 @@
                 </property>
                 <property name="subNodes">
                     <list>
-                        <bean class="org.firewaterframework.mappers.jdbc.PivotNode">
+                        <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
                             <property name="pivotColumn" value="pet"/>
                             <property name="pivotURLSelector" value="pets"/>
                             <property name="attributeColumns">
@@ -71,9 +82,37 @@
             <list>
                 <value>
                     insert into user (first_name, last_name, email, city, state, password, zip_small)
-                    values('$first_name$', '$last_name$', '$email$', '$city$', '$state$', '$password$', $zip_small$)
+                    values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip_small$)
                 </value>
             </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="first_name">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="last_name">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="city">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="state">
+                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                        <property name="pattern" value="[A-Z][A-Z]"/>
+                        <property name="quote" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="email">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="password">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="zip">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                </entry>
+            </map>
         </property>
     </bean>
 
@@ -89,8 +128,8 @@
             from user u
             where u.id = $userID$"/>
         <property name="dataSource" ref="dataSource"/>
-        <property name="pivotMap">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotNode">
+        <property name="rowTreeMapper">
+            <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
                 <property name="pivotColumn" value="user"/>
                 <property name="pivotURLSelector" value="users"/>
                 <property name="attributeColumnList">
