@@ -1,28 +1,24 @@
 package org.firewaterframework.mappers.jdbc;
 
-import org.firewaterframework.WSException;
-import org.firewaterframework.mappers.Mapper;
-import org.firewaterframework.rest.Request;
-import org.firewaterframework.rest.Response;
-import org.firewaterframework.rest.Status;
-import org.firewaterframework.rest.MIMEType;
 import org.antlr.stringtemplate.StringTemplate;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.firewaterframework.WSException;
+import org.firewaterframework.rest.*;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.ObjectError;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,11 +28,10 @@ import java.util.Map;
  * Time: 2:47:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UpdateMapper implements Mapper
+public class UpdateMapper extends JDBCMapper
 {
     public static DocumentFactory factory = DocumentFactory.getInstance();
 
-    protected JdbcTemplate template;
     protected String[] queries;
 
     @Transactional( readOnly=false,isolation=Isolation.READ_COMMITTED )
@@ -48,18 +43,32 @@ public class UpdateMapper implements Mapper
             queryTemplates[i] = new StringTemplate( queries[i] );
         }
 
+        Document rval = factory.createDocument();
+        Element root = rval.addElement( "result" );
+        Object[] keys = new Object[ queryTemplates.length ];
+        Integer i = 0;
+
+        // bind the Request args before applying to template
+        DataBinder dataBinder = getDataBinder();
+        dataBinder.bind( request.getArgs() );
+        if( dataBinder.getBindingResult().getErrorCount() > 0 )
+        {
+            StringBuffer errors = new StringBuffer( "Request Parameter error: " );
+            for( ObjectError error: (List<ObjectError>)dataBinder.getBindingResult().getAllErrors() )
+            {
+                errors.append( error.toString() ).append( ',' );
+            }
+            throw new WSException( errors.toString(), Status.STATUS_SERVER_ERROR );
+        }
+
         try
         {
-            Document rval = factory.createDocument();            
-            Element root = rval.addElement( "result" );
-            Object[] keys = new Object[ queryTemplates.length ];
-            Integer i = 0;
             for( StringTemplate queryTemplate: queryTemplates )
             {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
 
                 Integer rowsAffected = template.update(
-                    new UpdateMapperStatementCreator( queryTemplate, request.getArgs(), keys ),
+                    new UpdateMapperStatementCreator( queryTemplate, (Map)dataBinder.getBindingResult().getTarget(), keys ),
                     keyHolder );
 
                 Element element = root.addElement( "update" );
@@ -74,9 +83,13 @@ public class UpdateMapper implements Mapper
                 }
                 i++;
             }
-            Response response = new Response( Status.STATUS_OK, MIMEType.application_xml );
-            response.setContent( rval );
+            DocumentResponse response = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
+            response.setDocument( rval );
             return response;
+        }
+        catch( WSException e )
+        {
+            throw e;
         }
         catch( Exception e )
         {
@@ -100,10 +113,9 @@ public class UpdateMapper implements Mapper
         public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
         {
             // substitute stringTemplate values
-            for( Map.Entry<String,Object> arg: args.entrySet() )
-            {
-                queryTemplate.setAttribute( arg.getKey(), arg.getValue() );
-            }
+
+            // apply template
+            queryTemplate.setAttributes( args );
 
             // also substitute all keys that have been generated thusfar
             queryTemplate.setAttribute( "_keys", keys );
@@ -112,15 +124,11 @@ public class UpdateMapper implements Mapper
         }
     }
 
-    @Required
-    public void setDataSource( DataSource ds )
-    {
-        template = new JdbcTemplate( ds );
+    public String[] getQueries() {
+        return queries;
     }
 
-    @Required
-    public void setQueries(String[] queries)
-    {
+    public void setQueries(String[] queries) {
         this.queries = queries;
     }
 }

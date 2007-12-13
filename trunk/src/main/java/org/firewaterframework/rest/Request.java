@@ -1,16 +1,16 @@
 package org.firewaterframework.rest;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValues;
 
 public class Request
 {
     protected String url;
     protected String baseUrl;
-    protected Map<String,Object> args;
+    protected MutablePropertyValues args;
     protected Method method;
 
-    public Request( String url, Method method, Map<String,Object> args )
+    public Request( String url, Method method, MutablePropertyValues args )
     {
         setUrl( url );
         this.method = method;
@@ -47,36 +47,16 @@ public class Request
             if( questionIndex > -1 )
             {
                 this.baseUrl = url.substring( 0, questionIndex );
-                queryURL = url.substring( questionIndex + 1, url.length() - 1 );
-
-                // add the query args to the argument map
-                String[] argPairs = queryURL.split( "&" );
-                for( String argPair: argPairs )
-                {
-                    int equalsIndex = argPair.indexOf( '=' );
-                    String key = argPair;
-                    String value = "true";
-                    if( equalsIndex > -1 )
-                    {
-                        key = argPair.substring( 0, equalsIndex );
-                        value = argPair.substring( equalsIndex + 1, argPair.length() - 1 );
-                    }
-                    this.getArgs().put( key, value );
-                }
             }
         }
     }
 
-    public Map<String, Object> getArgs()
+    public MutablePropertyValues getArgs()
     {
-        if( args == null )
-        {
-            args = new HashMap<String,Object>();
-        }
         return args;
     }
 
-    public void setArgs( Map<String, Object> args ) {
+    public void setArgs( MutablePropertyValues args ) {
         this.args = args;
     }
 

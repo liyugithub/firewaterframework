@@ -1,6 +1,10 @@
 package org.firewaterframework.rest;
 
 import org.dom4j.Document;
+import org.dom4j.DocumentFactory;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,9 +15,10 @@ import org.dom4j.Document;
  */
 public class Response
 {
+    protected static DocumentFactory df = DocumentFactory.getInstance();
+
     protected MIMEType mimeType;
     protected Status status;
-    protected Document content;
 
     public Response( Status status, MIMEType mimeType )
     {
@@ -47,11 +52,12 @@ public class Response
         this.mimeType = mimeType;
     }
 
-    public Document getContent() {
-        return content;
+    public Document toDocument()
+    {
+        return null;
     }
 
-    public void setContent(Document content) {
-        this.content = content;
+    public void write( Writer out ) throws IOException
+    {
     }
 }

@@ -1,21 +1,19 @@
 package org.firewaterframework.mappers.xml;
 
-import org.firewaterframework.mappers.Mapper;
-import org.firewaterframework.rest.Request;
-import org.firewaterframework.rest.Response;
-import org.firewaterframework.rest.Status;
-import org.firewaterframework.rest.MIMEType;
-import org.firewaterframework.WSException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
+import org.firewaterframework.WSException;
+import org.firewaterframework.mappers.Mapper;
+import org.firewaterframework.rest.*;
+import org.springframework.beans.PropertyValue;
 
 import java.util.List;
 
-public class XPathMapper implements Mapper
+public class XPathMapper extends Mapper
 {
     protected static final Log log = LogFactory.getLog( XPathMapper.class );
     public static DocumentFactory factory = DocumentFactory.getInstance();
@@ -72,8 +70,8 @@ public class XPathMapper implements Mapper
 
             }
             Document target = factory.createDocument( root );
-            Response rval = new Response( Status.STATUS_OK, MIMEType.application_xml );
-            rval.setContent( target );
+            DocumentResponse rval = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
+            rval.setDocument( target );
             
             return rval;
         }
@@ -105,9 +103,9 @@ public class XPathMapper implements Mapper
         if( subbedPath == null )
         {
             subbedPath = path;
-            for( String attr: request.getArgs().keySet() )
+            for( PropertyValue attr: request.getArgs().getPropertyValues() )
             {
-                subbedPath = subbedPath.replaceAll( "\\{" + attr + "\\}", request.getArgs().get( attr ).toString() );
+                subbedPath = subbedPath.replaceAll( "\\{" + attr.getName() + "\\}", attr.getValue().toString() );
             }
         }
         return subbedPath;

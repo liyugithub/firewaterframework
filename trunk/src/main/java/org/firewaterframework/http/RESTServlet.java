@@ -2,12 +2,12 @@ package org.firewaterframework.http;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.CDATA;
 import org.firewaterframework.WSException;
 import org.firewaterframework.mappers.Mapper;
 import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
+import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -64,7 +64,7 @@ public class RESTServlet extends HttpServlet
         {
             String getModel = request.getPathInfo();
             log.debug( "REST GET " + getModel );
-            Request restRequest = new Request( getModel, Method.GET, setupArguments( request.getParameterMap() ));
+            Request restRequest = new Request( getModel, Method.GET, new ServletRequestParameterPropertyValues( request ));
             Response restResponse = dispatcher.handle( restRequest );
             handleResponse( restResponse, request, response );
         }
@@ -155,7 +155,7 @@ public class RESTServlet extends HttpServlet
         }
         catch( Exception e )
         {
-            log.error( "Error handling Restlet: ", e );
+            log.error( "Error handling Firewater Request: ", e );
             StringWriter writer = new StringWriter();
             PrintWriter pw = new PrintWriter( writer );
             e.printStackTrace( pw );
@@ -187,22 +187,9 @@ public class RESTServlet extends HttpServlet
         else
         {
             response.setContentType( restResponse.getMimeType().getType() );
-
-            // TODO: if the root node of the document is a CDATA, then spit it out rather than the whole document
-            restResponse.getContent().write( response.getWriter() );
+            restResponse.write( response.getWriter() );
         }
         response.getWriter().flush();
     }
 
-    protected Map<String,Object> setupArguments( Map<String,String[]> requestParameters )
-    {
-        // map the arguments from Form variables in the request to REST attributes
-        Map<String,Object> args = new HashMap<String,Object>();
-        for( Map.Entry<String,String[]> entry: requestParameters.entrySet() )
-        {
-            if( entry.getValue() != null && entry.getValue().length > 0 )
-                args.put( entry.getKey(), entry.getValue()[0] );
-        }
-        return args;
-    }
 }

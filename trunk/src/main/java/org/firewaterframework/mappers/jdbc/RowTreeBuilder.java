@@ -16,9 +16,9 @@ import java.util.*;
  * Time: 10:32:11 AM
  * To change this template use File | Settings | File Templates.
  */
-public class PivotNode
+public class RowTreeBuilder
 {
-    protected static final Log log = LogFactory.getLog( PivotNode.class );
+    protected static final Log log = LogFactory.getLog( RowTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
     // the pivotTag and pivotTagAttribute work together to create the XML element name for each
@@ -31,16 +31,16 @@ public class PivotNode
     protected String pivotURLSelector;
     protected String pivotColumn;
     protected Map<String,String> attributeColumns;
-    protected PivotNode[] subNodes;
+    protected RowTreeBuilder[] subNodes;
 
-    public PivotNode(){}
+    public RowTreeBuilder(){}
     
-    public PivotNode( String pivotTag,
+    public RowTreeBuilder( String pivotTag,
                       String pivotURLSelector,
                       String pivotColumn,
                       String[] attributeColumnColumnNames,
                       String[] attributeColumnTagNames,
-                      PivotNode[] subNodes )
+                      RowTreeBuilder[] subNodes )
     {
         this.pivotTag = pivotTag;
         this.pivotURLSelector = pivotURLSelector;
@@ -90,7 +90,7 @@ public class PivotNode
         // process each subnode, loop through the current range for this node and recurse on each unique subnode
         if( subNodes != null )
         {
-            for( PivotNode subNode: subNodes )
+            for( RowTreeBuilder subNode: subNodes )
             {
                 String subNodeColumnName = subNode.getPivotColumn();
                 Set<Object> processedSubPivotValues = new HashSet<Object>();
@@ -171,11 +171,11 @@ public class PivotNode
         }
     }
 
-    public PivotNode[] getSubNodes() {
+    public RowTreeBuilder[] getSubNodes() {
         return subNodes;
     }
 
-    public void setSubNodes(PivotNode[] subNodes)
+    public void setSubNodes(RowTreeBuilder[] subNodes)
     {
         this.subNodes = subNodes;
     }

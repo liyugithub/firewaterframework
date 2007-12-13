@@ -15,6 +15,8 @@ public class Method
     public static Method PUT = new Method( "PUT" );
     public static Method DELETE = new Method( "DELETE" );
     public static Method POST = new Method( "POST" );
+    public static Method HEAD = new Method( "HEAD" );
+    public static Method OPTIONS = new Method( "OPTIONS" );
 
     public Method( String method )
     {
