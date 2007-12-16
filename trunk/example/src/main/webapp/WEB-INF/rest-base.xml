@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean id="dispatcher" class="org.firewaterframework.mappers.RouteMapper">
+        <property name="urlMap" ref="urlMap"/>
+    </bean>
+
+    <bean id="urlMap" class="java.util.HashMap">
+        <constructor-arg index="0">
+            <map>
+                <entry key="/photos" value-ref="photosMapper"/>
+                <!--<entry key="/photos/{photoID}" value-ref="photoMapper"/>
+                <entry key="/photos/{photoID}/owner" value-ref="photoOwnerMapper"/>
+                <entry key="/owners" value-ref="ownersMapper"/>-->
+            </map>
+        </constructor-arg>
+    </bean>
+    <!--
+create table photo(id int primary key, link varchar(128), thumbnail varchar(128),
+    owner_id varchar(32), title varchar(255));
+create table owner(id varchar(32) primary key, name varchar(64));
+create table photo_tag(photo_id int, tag varchar(255));
+    -->
+    <bean id="photosMapper" class="org.firewaterframework.mappers.MethodMapper">
+        <property name="getMapper" ref="photosGetMapper"/>
+    </bean>
+
+    <bean id="photosGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+        <property name="query">
+            <value>
+                select p.id as photo, p.thumbnail as thumbnail, p.title as title,
+                    p.owner_id as owner, o.name as owner_name, pt.tag as tag, p.row_num
+                from (select id, thumbnail, title, owner_id, rownum() as row_num from photo $page_token$) as p
+                left outer join owner o on o.id = p.owner_id
+                left outer join photo_tag pt on pt.photo_id = p.id
+                order by p.row_num, p.owner_id
+            </value>
+        </property>
+        <property name="defaultPageSize" value="5"/>
+        <property name="pageWindowSize" value="10"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="rowTreeMapper">
+            <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
+                <property name="pivotColumn" value="photo"/>
+                <property name="pivotURLSelector" value="photos"/>
+                <property name="attributeColumnList">
+                    <list>
+                        <value>thumbnail</value>
+                        <value>title</value>
+                        <value>owner</value>
+                    </list>
+                </property>
+                <property name="subNodes">
+                    <list>
+                        <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
+                            <property name="pivotColumn" value="owner"/>
+                            <property name="pivotURLSelector" value="owners"/>
+                            <property name="attributeColumnList">
+                                <list>
+                                    <value>owner_name</value>
+                                </list>
+                            </property>
+                        </bean>
+                        <bean class="org.firewaterframework.mappers.jdbc.RowTreeBuilder">
+                            <property name="pivotColumn" value="tag"/>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- dev -->
+    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:mem:test"/>
+    </bean>
+
+    <bean id="executedSQL" class="org.firewaterframework.util.DatabaseUtil" factory-method="loadSQL" depends-on="dataSource">
+        <constructor-arg index="0" value="/WEB-INF/classes/flickrSampleData.sql"/>
+        <constructor-arg index="1" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>
