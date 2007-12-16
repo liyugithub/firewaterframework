@@ -1,4 +1,4 @@
-package com.pumpframework.test;
+package org.firewaterframework.test;
 
 import junit.framework.Assert;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -42,9 +42,8 @@ public class TestRouteMapper extends Assert
         appContext = new ClassPathXmlApplicationContext( "rest-base.xml" );
         BasicDataSource ds = (BasicDataSource)appContext.getBean( "dataSource" );
         JdbcTemplate template = new JdbcTemplate( ds );
-        String sql =
-                "create table user(id int auto_increment primary key, first_name varchar(255), last_name varchar(255)," +
-                "city varchar(255), state char(2), email varchar(255), password varchar(255), zip_small int)";
+        String sql =   "create table user(id int auto_increment primary key, first_name varchar(255), last_name varchar(255)," +
+                "city varchar(255), state char(2), email varchar(255), password varchar(255), zip int)";
         template.execute( sql );
 
         sql = "create table pet(id int auto_increment primary key, name varchar(255), species_id int, owner_id int)";
@@ -53,7 +52,7 @@ public class TestRouteMapper extends Assert
         sql = "create table species(id int auto_increment primary key, name varchar(255))";
         template.execute( sql );
 
-        sql = "insert into user( id, first_name, last_name, city, state, email, password, zip_small ) " +
+        sql = "insert into user( id, first_name, last_name, city, state, email, password, zip ) " +
                 "values( 0, 'joe', 'who', 'new york', 'NY', 'joe@who.com', 'yahoo', 10012 )," +
                 "( 1, 'willie', 'who', 'new york', 'NY', 'willie@who.com', 'yahoo', 10012 )," +
                 "( 2, 'joe', 'wonka', 'new york', 'NY', 'joe@wonka.com', 'yahoo', 10033 )," +
@@ -76,6 +75,72 @@ public class TestRouteMapper extends Assert
                 "( 2, 'birdy' )," +
                 "( 3, 'fish' )";
         template.update( sql );
+    }
+
+    @Test
+    /**
+     * Tests getting all users from database using REST /users url
+     */
+    public void testSortedGetAll()
+    {
+        // default sort is by email address
+        Response response = get( "/users" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
+        print(rval);
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
+        assertEquals( rval.selectSingleNode( "/result/user[1]/@email" ).getStringValue(), "jane@who.com" );
+        assertEquals( rval.selectSingleNode( "/result/user[6]/@email" ).getStringValue(), "zorker@who.com" );
+
+        // sort again, by last name
+        response = get( "/users?sort=last_name" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        rval = response.toDocument();
+        print(rval);
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
+        assertEquals( rval.selectSingleNode( "/result/user[1]/@last_name" ).getStringValue(), "morrison" );
+        assertEquals( rval.selectSingleNode( "/result/user[6]/@last_name" ).getStringValue(), "wonka" );
+    }
+
+    @Test
+    public void testSelectFilteredGetAll()
+    {
+        // get all users in 10033 zipcode
+        Response response = get( "/users?zipcode=10033" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
+        print(rval);
+        // should only return joe
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "joe" );
+
+        // get all users in 10012 zipcode
+        response = get( "/users?zipcode=10012" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        rval = response.toDocument();
+        print(rval);
+        // should only return joe, willie, and jim
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 3 );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='0']/@first_name" ).getStringValue(), "joe" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='4']/@first_name" ).getStringValue(), "jim" );
+    }
+
+    @Test
+    public void testMultiFilteredGetAll()
+    {
+        // get all users with either dogs and/or fishes
+        Response response = get( "/users?species_list=1,3" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
+        //print(rval);
+        // should only return willie and jane and their dogs and fishes
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 2 );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='3']/@first_name" ).getStringValue(), "jane" );
+        // willie should have only two pets which are dogs and/or fishes, jane should have 1
+        assertEquals( rval.selectNodes( "/result/user[@id='1']/pet" ).size(), 2 );
+        assertEquals( rval.selectNodes( "/result/user[@id='3']/pet" ).size(), 1 );
     }
 
     @Test
@@ -132,7 +197,7 @@ public class TestRouteMapper extends Assert
         args.put( "last_name","winters" );
         args.put( "email","mesuthela@hell.com" );
         args.put( "password","yahoo" );
-        args.put( "zip_small","12345" );
+        args.put( "zip","12345" );
         args.put( "city","nashville" );
         args.put( "state","TN" );
 
@@ -140,7 +205,7 @@ public class TestRouteMapper extends Assert
         Response response = put( "/users", args );
         Document res = response.toDocument();
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        print( res );
+        //print( res );
 
         // fetch it back and ensure it's there
         response = get( "/users/6" );
@@ -161,7 +226,7 @@ public class TestRouteMapper extends Assert
         args.put( "last_name","summers" );
         args.put( "email","crap@shoot.com" );
         args.put( "password","yippie" );
-        args.put( "zip_small","54321" );
+        args.put( "zip","54321" );
         args.put( "city","miami" );
         args.put( "state","FL" );
 

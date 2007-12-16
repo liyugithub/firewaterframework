@@ -25,19 +25,4 @@ public class MapDataBinder extends DataBinder
         return this.myBindingResult;
     }
 
-    @Override
-    protected void applyPropertyValues( MutablePropertyValues mpvs )
-    {
-        // process 'default' values
-        Map<String,MapPropertyEditor> propertyEditors = ((MapPropertyBindingResult.MapPropertyAccessor)getPropertyAccessor()).getPropertyEditors();
-        for( Map.Entry<String,MapPropertyEditor> entry: propertyEditors.entrySet() )
-        {
-            if( entry.getValue().hasDefaultValue() && mpvs.getPropertyValue( entry.getKey() ) == null )
-            {
-                mpvs.addPropertyValue( entry.getKey(), entry.getValue().getDefaultValue() );
-            }
-        }
-        super.applyPropertyValues( mpvs );
-    }
-
 }

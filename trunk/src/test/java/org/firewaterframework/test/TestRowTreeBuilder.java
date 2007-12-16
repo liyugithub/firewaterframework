@@ -1,4 +1,4 @@
-package com.pumpframework.test;
+package org.firewaterframework.test;
 
 import org.junit.Test;
 import org.junit.Assert;
@@ -10,7 +10,7 @@ import java.util.*;
 import java.io.StringWriter;
 
 import org.firewaterframework.mappers.jdbc.RowTreeBuilder;
-import com.pumpframework.test.XMLUtil;
+import org.firewaterframework.test.XMLUtil;
 
 /**
  * Created by IntelliJ IDEA.

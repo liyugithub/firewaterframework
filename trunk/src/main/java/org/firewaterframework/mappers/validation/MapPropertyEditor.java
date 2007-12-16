@@ -13,25 +13,9 @@ import java.beans.PropertyEditorSupport;
  */
 public abstract class MapPropertyEditor extends PropertyEditorSupport
 {
-    protected Object defaultValue;
-
     public MapPropertyEditor copy()
     {
         MapPropertyEditor newCopy = (MapPropertyEditor)BeanUtils.instantiateClass( this.getClass() );
-        newCopy.defaultValue = this.defaultValue;
         return newCopy;
-    }
-
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public boolean hasDefaultValue()
-    {
-        return defaultValue != null;
-    }
-
-    public void setDefaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
     }
 }

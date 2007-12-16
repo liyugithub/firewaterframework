@@ -12,9 +12,9 @@ public class Request
 
     public Request( String url, Method method, MutablePropertyValues args )
     {
-        setUrl( url );
         this.method = method;
         this.args = args;
+        setUrl( url );
     }
 
     public Request( String url, Method method )
@@ -47,12 +47,33 @@ public class Request
             if( questionIndex > -1 )
             {
                 this.baseUrl = url.substring( 0, questionIndex );
+                queryURL = url.substring( questionIndex + 1, url.length() );
+
+                // add the query args to the argument map
+                String[] argPairs = queryURL.split( "&" );
+                for( String argPair: argPairs )
+                {
+                    int equalsIndex = argPair.indexOf( '=' );
+                    String key = argPair;
+                    String value = "true";
+                    if( equalsIndex > -1 )
+                    {
+                        key = argPair.substring( 0, equalsIndex );
+                        value = argPair.substring( equalsIndex + 1, argPair.length() );
+                    }
+                    this.getArgs().addPropertyValue( key, value );
+                }
             }
         }
     }
 
     public MutablePropertyValues getArgs()
     {
+        // lazily instantiate args
+        if( args == null )
+        {
+            args = new MutablePropertyValues();
+        }
         return args;
     }
 
