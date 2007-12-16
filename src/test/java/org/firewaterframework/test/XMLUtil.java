@@ -1,4 +1,4 @@
-package com.pumpframework.test;
+package org.firewaterframework.test;
 
 import org.dom4j.Document;
 import org.dom4j.io.XMLWriter;

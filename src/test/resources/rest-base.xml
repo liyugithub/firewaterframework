@@ -27,22 +27,46 @@
     </bean>
 
     <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
-        <property name="query" value="
-            select  u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
-            u.last_name as last_name, u.email as email, u.city as city
-            from user u
-            left outer join pet p on u.id = p.owner_id
-            left outer join species r on p.species_id = r.id
-            group by u.id, p.id
-            order by $sort$"/>
+        <property name="query">
+            <value>
+                select  u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
+                u.last_name as last_name, u.email as email, u.city as city
+                from user u
+                left outer join pet p on u.id = p.owner_id 
+                left outer join species r on p.species_id = r.id
+                where
+                    $if(species_list)$
+                        p.species_id in ($species_list;separator=","$)
+                    $else$
+                        1 = 1
+                    $endif$
+                    and
+                    $if(zipcode)$
+                        u.zip = $zipcode$
+                    $else$
+                        1 = 1
+                    $endif$
+                order by
+                    $if(sort)$
+                        $sort$
+                    $else$
+                        email
+                    $endif$,u.id
+            </value>
+        </property>
         <property name="dataSource" ref="dataSource"/>
         <property name="fields">
             <map>
                 <entry key="sort">
                     <bean class="org.firewaterframework.mappers.validation.Pattern">
                         <property name="pattern" value="last_name|email"/>
-                        <property name="defaultValue" value="email"/>
                     </bean>
+                </entry>
+                <entry key="species_list">
+                    <bean class="org.firewaterframework.mappers.validation.SQLLiteralList"/>
+                </entry>
+                <entry key="zipcode">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
                 </entry>
             </map>
         </property>
@@ -81,8 +105,8 @@
         <property name="queries">
             <list>
                 <value>
-                    insert into user (first_name, last_name, email, city, state, password, zip_small)
-                    values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip_small$)
+                    insert into user (first_name, last_name, email, city, state, password, zip)
+                    values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
                 </value>
             </list>
         </property>
@@ -124,7 +148,7 @@
     <bean id="userGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
         <property name="query" value="
             select  u.id as user, u.first_name as first_name, u.last_name as last_name, u.email as email, u.city as city,
-                u.state as state, u.zip_small zip
+                u.state as state, u.zip zip
             from user u
             where u.id = $userID$"/>
         <property name="dataSource" ref="dataSource"/>
@@ -151,8 +175,8 @@
         <property name="queries">
             <list>
                 <value>
-                    update user set (first_name, last_name, city, state, email, zip_small) =
-                        ('$first_name$', '$last_name$', '$city$','$state$', '$email$', $zip_small$)
+                    update user set (first_name, last_name, city, state, email, zip) =
+                        ('$first_name$', '$last_name$', '$city$','$state$', '$email$', $zip$)
                     where id = $userID$
                 </value>
             </list>
