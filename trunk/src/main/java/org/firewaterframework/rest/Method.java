@@ -1,11 +1,9 @@
 package org.firewaterframework.rest;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Nov 28, 2007
- * Time: 10:27:05 AM
- * To change this template use File | Settings | File Templates.
+ * This class corresponds to the HTTP METHOD header argument in that protocol.  The class provides a number
+ * of static properties to define all of the METHODs used by Firewater.
+ * @author Tim Spurway
  */
 public class Method
 {

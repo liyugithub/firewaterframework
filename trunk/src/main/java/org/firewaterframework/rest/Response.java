@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Nov 28, 2007
- * Time: 10:26:54 AM
- * To change this template use File | Settings | File Templates.
+ * This class is responsible for result representation of a REST Request.  It contains the MIMEType of the
+ * response and the HTTP status code.  
  */
 public class Response
 {

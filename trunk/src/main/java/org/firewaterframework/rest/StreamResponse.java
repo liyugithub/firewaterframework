@@ -5,11 +5,9 @@ import org.dom4j.Document;
 import java.io.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 2:15:25 PM
- * To change this template use File | Settings | File Templates.
+ * This class wraps an unstructured byte stream to hold the response payload.  It is typically used for text
+ * or binary response payloads.
+ * @author Tim Spurway
  */
 public class StreamResponse extends Response
 {
