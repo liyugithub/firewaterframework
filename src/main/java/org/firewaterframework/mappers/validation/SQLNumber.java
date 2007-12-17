@@ -1,11 +1,8 @@
 package org.firewaterframework.mappers.validation;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 8:32:09 AM
- * To change this template use File | Settings | File Templates.
+ * This PropertyEditor will match only numeric input.  No processing is done on binding.
+ * @author Tim Spurway
  */
 public class SQLNumber extends MapPropertyEditor
 {

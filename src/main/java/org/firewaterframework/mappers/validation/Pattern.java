@@ -1,11 +1,11 @@
 package org.firewaterframework.mappers.validation;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 12, 2007
- * Time: 11:48:11 PM
- * To change this template use File | Settings | File Templates.
+ * This PropertyEditor is the most general one defined for the framework.  It will match the incoming value
+ * with a configured regular expression and fail if they don't match.  Additionally, it allows the output string
+ * to be conditionally quoted (with single quotes) as it is bound to the output.
+ * @see java.util.regex.Pattern
+ * @author Tim Spurway
  */
 public class Pattern extends MapPropertyEditor
 {
@@ -49,6 +49,10 @@ public class Pattern extends MapPropertyEditor
         return pattern;
     }
 
+    /**
+     *
+     * @param pattern the regular expression {@link Pattern} string to be used for validation.
+     */
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
@@ -57,6 +61,11 @@ public class Pattern extends MapPropertyEditor
         return quote;
     }
 
+    /**
+     *
+     * @param quote indicated whether or not to wrap sucessfully validated results in single quotes before
+     * binding to the output.
+     */
     public void setQuote(boolean quote) {
         this.quote = quote;
     }

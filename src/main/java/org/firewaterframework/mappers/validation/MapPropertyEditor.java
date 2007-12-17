@@ -5,11 +5,14 @@ import org.springframework.beans.BeanUtils;
 import java.beans.PropertyEditorSupport;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 8:37:43 AM
- * To change this template use File | Settings | File Templates.
+ * This is a PropertyEditor that supports a simple copy mechanism.  This is the base class of Firewater's validation
+ * scheme.  It is important because the framework is inherintly susceptible to SQL injection attacks, as it is
+ * totally possible have string passed in from the web layer be copied directly into SQL queries.  This class and it's
+ * subclasses represent the line of defense against attacks like this, plus giving a mechanism for transforming
+ * incoming Request data in a number of ways.
+ *
+ * @see org.springframework.validation.DataBinder
+ * @author Tim Spurway
  */
 public abstract class MapPropertyEditor extends PropertyEditorSupport
 {

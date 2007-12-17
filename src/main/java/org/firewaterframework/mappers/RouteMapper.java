@@ -8,17 +8,59 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: May 11, 2007
- * Time: 10:48:53 AM
- * To change this template use File | Settings | File Templates.
+ * This Mapper will delegate incoming REST Requests to downstream Mappers based on the
+ * baseUrl of Request.  It is typically the top Mapper in the chain.  It's purpose is
+ * to parse the Request URL, building a symbol table of arguments contained in the URL
+ * and to dispatch the Request to another Mapper for handling the actual Request.
+ * <p>
+ * A Spring configuration file for creating a top level RouteMapper for handling REST
+ * Requests for a simple Pet Store may look like:
+ * <code>
+ *      <bean id="urlMap" class="java.util.HashMap">
+ *       <constructor-arg index="0">
+ *           <map>
+ *               <entry key="/users" value-ref="usersMapper"/>
+ *               <entry key="/users/{userID}" value-ref="userMapper"/>
+ *               <entry key="/users/{userID}/pets" value-ref="userPetsMapper"/>
+ *               <entry key="/pets" value-ref="petsMapper"/>
+ *               <entry key="/pets/{petID}" value-ref="petMapper"/>
+ *           </map>
+ *       </constructor-arg>
+ *   </bean>
+ * </code>
+ * <p>
+ * Here we have a RouteMapper that handles five URL patterns.  If, for example, the
+ * RouteMapper were requested to handle an incoming URL pattern like /users/123, it
+ * would parse the '123' out of the request, assigning it to the Request object's
+ * arguments Map (as userID=123), and delegate the Request onto the userMapper bean.
+ * <p>
+ * It is important to realize that the variables inside of the URL patterns must be
+ * consistent with each other in name.  An error would be raised if the 'userPetsMapper'
+ * pattern above contained the URL pattern "/users/{myUserId}/pets".
+ * 
+ * @author Tim Spurway
  */
 public class RouteMapper extends Mapper
 {
+    /**
+     * A Map keyed by URL patterns who's values are the delegate Mapper objects to
+     * handle matching incoming Request URLs
+     */
     protected Map<String, Mapper> urlMap;
+
+    /**
+     * All URL patterns are combined together into a cached tree structure for efficient
+     * lookup.  Note that the process of resolving
+     */
     protected ParseNode parseTree;
 
+    /**
+     * Process incoming URLs, and delegate them to downstream Mappers based on pattern
+     * matching the URL against the stored urlMap.
+     *
+     * @param request the REST Request
+     * @return the Response
+     */
     public Response handle( Request request )
     {
         // match the incoming URL against the parseTree
@@ -36,11 +78,18 @@ public class RouteMapper extends Mapper
         return restResponse;
     }
 
+    /**
+     * @return the Map containing URL patterns and their associated Mapper
+     */
     public Map<String, Mapper> getUrlMap()
     {
         return urlMap;
     }
 
+    /**
+     * set the urlMap, and compile the parseTree based on patterns contained in the map
+     * @param urlMap
+     */
     @Required
     public void setUrlMap(Map<String, Mapper> urlMap)
     {
@@ -50,7 +99,11 @@ public class RouteMapper extends Mapper
         this.parseTree = ParseNode.compile( urlMap );
     }
 
-    public static class ParseNode
+    /**
+     * An internal tree representation of the urlMap to provide rapid pattern matching
+     * for incoming REST Request URLs
+     */
+    protected static class ParseNode
     {
         protected Mapper mapper;
         protected String variable;
@@ -105,8 +158,8 @@ public class RouteMapper extends Mapper
         /**
          * The guts of the ParseNode - find the node that matches the url, building the argument symbol table along the way
          *
-         * @param url
-         * @return
+         * @param url the baseUrl of the Request
+         * @return the symbol table of URL arguments and the corresponding Mapper to handle the Request
          */
         public ParseResult find( String url )
         {
@@ -200,7 +253,11 @@ public class RouteMapper extends Mapper
         }
     }
 
-    public static class ParseResult
+    /**
+     * An aggregate return class for wrapping the resultant Mapper that can handle the
+     * incoming URL and the arguments that were collected from the incoming pattern.
+     */
+    protected static class ParseResult
     {
         protected Mapper mapper;
         protected Map<String,Object> restArguments;

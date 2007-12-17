@@ -1,11 +1,8 @@
 package org.firewaterframework.mappers.validation;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 8:30:46 AM
- * To change this template use File | Settings | File Templates.
+ * This PropertyEditor will validate all input, but will unconditionally wrap the output in single quotes.
+ * @author Tim Spurway
  */
 public class SQLString extends MapPropertyEditor
 {

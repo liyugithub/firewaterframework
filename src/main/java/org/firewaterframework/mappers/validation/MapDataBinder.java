@@ -1,12 +1,14 @@
 package org.firewaterframework.mappers.validation;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.AbstractPropertyBindingResult;
 import org.springframework.validation.DataBinder;
 
 import java.util.Map;
 
-
+/**
+ * This class extends Spring's {@link DataBinder} to allow for binding onto Maps, instead of just POJOs.
+ * @author tspurway
+ */
 public class MapDataBinder extends DataBinder
 {
     protected MapPropertyBindingResult myBindingResult;

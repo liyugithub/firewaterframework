@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 8:14:29 PM
- * To change this template use File | Settings | File Templates.
+ * This PropertyEditor will validate a comma-separated list (CSV) argument into SQL literal values.  Each individual
+ * value will be conditionally wrapped with single quotes depending on if the value is numeric or not.  Values
+ * containing only numbers will not be wrapped, whereas values containing non-numeric values will be wrapped.
+ * @author Tim Spurway
  */
 public class SQLLiteralList extends MapPropertyEditor
 {
