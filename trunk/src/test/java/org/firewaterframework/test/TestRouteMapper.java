@@ -46,6 +46,12 @@ public class TestRouteMapper extends Assert
                 "city varchar(255), state char(2), email varchar(255), password varchar(255), zip int)";
         template.execute( sql );
 
+        sql = "create table user_role( user_id int, role_id int )";
+        template.execute( sql );
+
+        sql = "create table role( id int, name varchar(64) )";
+        template.execute( sql );
+
         sql = "create table pet(id int auto_increment primary key, name varchar(255), species_id int, owner_id int)";
         template.execute( sql );
 
@@ -59,6 +65,14 @@ public class TestRouteMapper extends Assert
                 "( 3, 'jane', 'who', 'San Francisco', 'CA', 'jane@who.com', 'ziper', 28218 )," +
                 "( 4, 'jim', 'morrison', 'new york', 'NY', 'whoajee@who.com', 'nutz', 10012 )," +
                 "( 5, 'eddie', 'van halen', 'los angeles', 'CA', 'zorker@who.com', 'yahoo', 90210 )";
+        template.update( sql );
+
+        sql = "insert into user_role( user_id, role_id ) " +
+                "values( 0, 0 ), ( 1, 0 ), ( 2, 1 ), ( 3, 1 ), ( 4, 0 ), ( 5, 0 )";
+        template.update( sql );
+
+        sql = "insert into role( id, name ) values " +
+                "(0, 'User'),(1, 'Admin')";
         template.update( sql );
         
         sql = "insert into pet( id, name, species_id, owner_id ) " +
