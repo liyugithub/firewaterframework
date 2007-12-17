@@ -1,11 +1,8 @@
 package org.firewaterframework.rest;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Nov 29, 2007
- * Time: 4:43:14 PM
- * To change this template use File | Settings | File Templates.
+ * The HTTP STATUS response values.  Some common responses are included as static properties.
+ * @author Tim Spurway
  */
 public class Status
 {

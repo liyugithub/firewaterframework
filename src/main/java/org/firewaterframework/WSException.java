@@ -3,11 +3,10 @@ package org.firewaterframework;
 import org.firewaterframework.rest.Status;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Oct 30, 2007
- * Time: 3:08:40 PM
- * To change this template use File | Settings | File Templates.
+ * A generic runtime exception for use in processing REST Requests.  Note that this class wraps a Status code
+ * so that Response objects can be easily constructed.
+ * @author Tim Spurway
+ * 
  */
 public class WSException extends RuntimeException
 {

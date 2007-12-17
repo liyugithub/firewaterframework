@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 13, 2007
- * Time: 2:26:07 PM
- * To change this template use File | Settings | File Templates.
+ * This Response subclass implements it's payload as an XML document.  It is the default Response class for
+ * all of the JDBC based Mappers in Firewater.
+ * @see org.firewaterframework.mappers.jdbc.JDBCMapper
+ * @author Tim Spurway
  */
 public class DocumentResponse extends Response
 {
@@ -35,6 +34,10 @@ public class DocumentResponse extends Response
         return document;
     }
 
+    /**
+     *
+     * @param document The dom4j XML document that is the payload for this Response
+     */
     public void setDocument(Document document) {
         this.document = document;
     }

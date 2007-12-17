@@ -1,11 +1,9 @@
 package org.firewaterframework.rest;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 4, 2007
- * Time: 9:24:05 AM
- * To change this template use File | Settings | File Templates.
+ * This class represents the Media-type header field in an HTTP response.  The class provides an
+ * exhaustive set of static properties that contain most of the MIME types in common use.
+ * @author Tim Spurway
  */
 public class MIMEType
 {

@@ -1,8 +1,13 @@
 package org.firewaterframework.rest;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValues;
 
+import java.util.Map;
+
+/**
+ * This class is the Request object for the Firewater framework.  It contains the request URL, any arguments,
+ * and the METHOD of the underlying request.
+ */
 public class Request
 {
     protected String url;
@@ -10,6 +15,17 @@ public class Request
     protected MutablePropertyValues args;
     protected Method method;
 
+    /**
+     * Create a new REST request.  Note that incoming URLs are not complete URLs, but rather logical URLs
+     * stripped of protocol, host, port, application, and prefix.  For example, if our actual Firewater servlet
+     * for handling web request is rooted at <code>http://www.abc.com/myapp/webservices/</code> and our
+     * web API is configured to handle the <code>/pets</code> resource request.  Then the url attribute in
+     * this Request object will simply be <code>/pets</code>.
+     *
+     * @param url
+     * @param method
+     * @param args
+     */
     public Request( String url, Method method, MutablePropertyValues args )
     {
         this.method = method;
@@ -17,9 +33,14 @@ public class Request
         setUrl( url );
     }
 
+    public Request( String url, Method method, Map args )
+    {
+        this( url, method, new MutablePropertyValues( args ));
+    }
+
     public Request( String url, Method method )
     {
-        this( url, method, null );
+        this( url, method, (MutablePropertyValues)null );
     }
 
     public String getIdString()
@@ -35,6 +56,17 @@ public class Request
         return baseUrl;
     }
 
+    /**
+     * Setting the url of this request implies that any arguments passed in with the URL (eg /pets?age=9&region=4)
+     * will be parsed out and added to the args of this request.  Note that the Request will differentiate between
+     * the id URL and the baseURL.  The baseURL is the URL stripped of any arguments and is the URL to actually
+     * match against the configured list of patterns.  Note that downstream cacheing schemes must use the full url in order
+     * accurately cache appropriate Responses for the given Request.
+     * 
+     * @see org.firewaterframework.mappers.RouteMapper
+     * @param url the full logical url, including arguments for this request
+     *
+     */
     public void setUrl(String url) {
         this.url = url;
 
