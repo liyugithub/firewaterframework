@@ -1,6 +1,15 @@
+# Main Page
+
 = Firewater =
 
 The goal of this project is to provide a framework to create highly efficient and powerful Web Service APIs.
 
 Firewater embraces the [RestPage REST] web service architecture.  This approach fully leverages existing HTTP architecture and concepts to provide operations (create, replace, fetch, update, delete, for example) on application Resources.
 
+Firewater assumes that your data is stored in back-end relational databases, and returns REST Responses exclusively in a [FirewaterResponsePage proprietary XML format] (for the time being).  
+
+Firewater can be used either as a [FirewaterAPI Java API], as a [FirewaterServer stand-alone web server], or as a [FirewaterServlet plug-in] servlet in an existing Java web application.
+
+One of the main goals of the framework is to enable [ZeroCode zero code web services].  The framework leverages [http://www.springframework.org/ the Spring framework] as a configuration engine (IoC), and allows for the creation of non-trivial relationally backed web services without writing a single line of Java code.
+
+The framework maps the HTTP GET method to SQL queries supplied by the web service designer ( you !).  A tenet of Firewater is that it doesn't try to generate SQL or do any fancy introspection of the database meta-data.  It leaves query design up to the designer.  What it _does_ provide is access to [http://www.stringtemplate.org/ StringTemplate - a powerful template engine] as a core feature of it's SQL processing.
