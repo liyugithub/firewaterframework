@@ -30,14 +30,14 @@
     </listener>
 
     <servlet>
-        <servlet-name>RESTServlet</servlet-name>
-        <servlet-class>org.firewaterframework.http.RESTServlet</servlet-class>
+        <servlet-name>FirewaterServlet</servlet-name>
+        <servlet-class>org.firewaterframework.http.FirewaterServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <!-- Catch all requests -->
     <servlet-mapping>
-        <servlet-name>RESTServlet</servlet-name>
+        <servlet-name>FirewaterServlet</servlet-name>
         <url-pattern>/ws/*</url-pattern>
     </servlet-mapping>
 
