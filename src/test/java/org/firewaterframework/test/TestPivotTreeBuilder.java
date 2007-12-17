@@ -9,7 +9,7 @@ import org.dom4j.Document;
 import java.util.*;
 import java.io.StringWriter;
 
-import org.firewaterframework.mappers.jdbc.RowTreeBuilder;
+import org.firewaterframework.mappers.jdbc.PivotTreeBuilder;
 import org.firewaterframework.test.XMLUtil;
 
 /**
@@ -19,9 +19,9 @@ import org.firewaterframework.test.XMLUtil;
  * Time: 9:38:16 AM
  * To change this template use File | Settings | File Templates.
  */
-public class TestRowTreeBuilder extends Assert
+public class TestPivotTreeBuilder extends Assert
 {
-    protected static final Log log = LogFactory.getLog( TestRowTreeBuilder.class );
+    protected static final Log log = LogFactory.getLog( TestPivotTreeBuilder.class );
 
     @Test
     public void onePivotJustAttributes()
@@ -57,7 +57,7 @@ public class TestRowTreeBuilder extends Assert
         map.put( "body", "body.4" );
         rows.add( map );
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 null,
                 "messages",
                 "message",
@@ -114,13 +114,13 @@ public class TestRowTreeBuilder extends Assert
         map.put( "r_body", "body.2.40" );
         rows.add( map );
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 "message",
                 "messages",
                 "message",
                 new String[]{ "view_count", "subject", "body" },
                 new String[]{ "view_count", "subject", "body" },
-                new RowTreeBuilder[] { new RowTreeBuilder(
+                new PivotTreeBuilder[] { new PivotTreeBuilder(
                         "reply",
                         "replies",
                         "reply",
@@ -262,38 +262,38 @@ public class TestRowTreeBuilder extends Assert
         map.put( "r_zipcode", null);
         rows.add( map );
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 "message",
                 "messages",
                 "message",
                 new String[]{ "view_count", "subject", "body" },
                 new String[]{ "view_count", "subject", "body" },
-                new RowTreeBuilder[] { new RowTreeBuilder(
+                new PivotTreeBuilder[] { new PivotTreeBuilder(
                     "user",
                     null,
                     "user",
                     new String[]{ "name" },
                     new String[]{ "name" },
-                    new RowTreeBuilder[] { new RowTreeBuilder(
+                    new PivotTreeBuilder[] { new PivotTreeBuilder(
                         "region",
                         null,
                         "region",
                         new String[] { "zipcode" },
                         new String[] { "zipcode" },
                         null)}),
-                new RowTreeBuilder(
+                new PivotTreeBuilder(
                         "reply",
                         "replies",
                         "reply",
                         new String[] { "r_view_count", "r_subject", "r_body" },
                         new String[] { "view_count", "subject", "body" },
-                        new RowTreeBuilder[] { new RowTreeBuilder(
+                        new PivotTreeBuilder[] { new PivotTreeBuilder(
                             "user",
                             null,
                             "r_user",
                             new String[]{ "r_name" },
                             new String[]{ "name" },
-                            new RowTreeBuilder[] { new RowTreeBuilder(
+                            new PivotTreeBuilder[] { new PivotTreeBuilder(
                                 "region",
                                 null,
                                 "r_region",
@@ -343,13 +343,13 @@ public class TestRowTreeBuilder extends Assert
         rows.add( map );
 
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 "message",
                 "messages",
                 "message",
                 new String[]{ "view_count", "subject", "body" },
                 new String[]{ "view_count", "subject", "body" },
-                new RowTreeBuilder[] { new RowTreeBuilder( "user", null, "user", new String[]{ "name" }, new String[]{ "name" }, null) }
+                new PivotTreeBuilder[] { new PivotTreeBuilder( "user", null, "user", new String[]{ "name" }, new String[]{ "name" }, null) }
                 );
 
         Document doc = pn.process( rows );
@@ -406,14 +406,14 @@ public class TestRowTreeBuilder extends Assert
         map.put( "name", "name.4.40");
         rows.add( map );
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 "message",
                 "messages",
                 "message",
                 new String[]{ "view_count", "subject", "body" },
                 new String[]{ "view_count", "subject", "body" },
-                new RowTreeBuilder[] {
-                        new RowTreeBuilder( "user", null, "user", new String[]{ "name" }, new String[]{ "name" }, null )});
+                new PivotTreeBuilder[] {
+                        new PivotTreeBuilder( "user", null, "user", new String[]{ "name" }, new String[]{ "name" }, null )});
 
         Document doc = pn.process( rows );
         assertNotNull( doc );
@@ -478,19 +478,19 @@ public class TestRowTreeBuilder extends Assert
         rows.add( map );
 
 
-        RowTreeBuilder pn = new RowTreeBuilder(
+        PivotTreeBuilder pn = new PivotTreeBuilder(
                 "message",
                 "messages",
                 "message",
                 new String[]{ "view_count", "subject", "body" },
                 new String[]{ "view_count", "subject", "body" },
-                new RowTreeBuilder[] { new RowTreeBuilder(
+                new PivotTreeBuilder[] { new PivotTreeBuilder(
                     "user",
                     null,
                     "user",
                     new String[]{ "name" },
                     new String[]{ "name" },
-                    new RowTreeBuilder[] { new RowTreeBuilder(
+                    new PivotTreeBuilder[] { new PivotTreeBuilder(
                         "region",
                         null,
                         "region",
