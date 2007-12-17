@@ -1,7 +1,6 @@
-#opening page for the Firewater project wiki
-
 = Firewater =
 
 The goal of this project is to provide a framework to create highly efficient and powerful Web Service APIs.
 
-Firewater embraces the [http://en.wikipedia.org/wiki/Representational_State_Transfer REST] web service architecture.  
+Firewater embraces the [RestPage REST] web service architecture.  This approach fully leverages existing HTTP architecture and concepts to provide operations (create, replace, fetch, update, delete, for example) on application Resources.
+
