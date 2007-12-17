@@ -24,9 +24,9 @@ import java.util.Map;
 /**
  * Created By: tspurway
  */
-public class RESTServlet extends HttpServlet
+public class FirewaterServlet extends HttpServlet
 {
-    protected static final Log log = LogFactory.getLog( RESTServlet.class );
+    protected static final Log log = LogFactory.getLog( FirewaterServlet.class );
     public static final String METHOD_ARG = "_method";
     public static final String DISPATCHER_BEAN_NAME = "dispatcher";
     protected Mapper dispatcher;

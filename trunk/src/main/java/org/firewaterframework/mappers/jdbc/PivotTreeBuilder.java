@@ -16,9 +16,9 @@ import java.util.*;
  * Time: 10:32:11 AM
  * To change this template use File | Settings | File Templates.
  */
-public class RowTreeBuilder
+public class PivotTreeBuilder
 {
-    protected static final Log log = LogFactory.getLog( RowTreeBuilder.class );
+    protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
     // the pivotTag and pivotTagAttribute work together to create the XML element name for each
@@ -31,16 +31,16 @@ public class RowTreeBuilder
     protected String pivotURLSelector;
     protected String pivotColumn;
     protected Map<String,String> attributeColumns;
-    protected RowTreeBuilder[] subNodes;
+    protected PivotTreeBuilder[] subNodes;
 
-    public RowTreeBuilder(){}
+    public PivotTreeBuilder(){}
     
-    public RowTreeBuilder( String pivotTag,
+    public PivotTreeBuilder( String pivotTag,
                       String pivotURLSelector,
                       String pivotColumn,
                       String[] attributeColumnColumnNames,
                       String[] attributeColumnTagNames,
-                      RowTreeBuilder[] subNodes )
+                      PivotTreeBuilder[] subNodes )
     {
         this.pivotTag = pivotTag;
         this.pivotURLSelector = pivotURLSelector;
@@ -90,7 +90,7 @@ public class RowTreeBuilder
         // process each subnode, loop through the current range for this node and recurse on each unique subnode
         if( subNodes != null )
         {
-            for( RowTreeBuilder subNode: subNodes )
+            for( PivotTreeBuilder subNode: subNodes )
             {
                 String subNodeColumnName = subNode.getPivotColumn();
                 Set<Object> processedSubPivotValues = new HashSet<Object>();
@@ -171,11 +171,11 @@ public class RowTreeBuilder
         }
     }
 
-    public RowTreeBuilder[] getSubNodes() {
+    public PivotTreeBuilder[] getSubNodes() {
         return subNodes;
     }
 
-    public void setSubNodes(RowTreeBuilder[] subNodes)
+    public void setSubNodes(PivotTreeBuilder[] subNodes)
     {
         this.subNodes = subNodes;
     }

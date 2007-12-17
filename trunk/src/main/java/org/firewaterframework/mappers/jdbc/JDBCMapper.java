@@ -7,16 +7,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 12, 2007
- * Time: 2:37:55 PM
- * To change this template use File | Settings | File Templates.
+ * The superclass for all Mappers that handle JDBC database resources.  This class expects
+ * a {@link DataSource} object on configuration, which creates a Spring {@link JdbcTemplate}
+ * object.
+ *
+ * @author Tim Spurway
  */
 public abstract class JDBCMapper extends Mapper
 {
     protected JdbcTemplate template;
 
+    /**
+     * @param ds the DataSource that queries and executions will be executed against
+     * in response to REST Requests 
+     */
     @Required
     public void setDataSource( DataSource ds )
     {

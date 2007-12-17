@@ -11,11 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Dec 12, 2007
- * Time: 9:11:53 PM
- * To change this template use File | Settings | File Templates.
+ * This is an extension to Spring's {@link org.springframework.validation.BindingResult} to allow for binding into
+ * Maps instead of just POJOs.
+ *
+ * @author Tim Spurway
  */
 public class MapPropertyBindingResult extends AbstractPropertyBindingResult
 {
