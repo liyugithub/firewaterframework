@@ -1,0 +1,11 @@
+org.firewaterframework
+org.firewaterframework.flickrimport
+org.firewaterframework.http
+org.firewaterframework.http.security
+org.firewaterframework.mappers
+org.firewaterframework.mappers.jdbc
+org.firewaterframework.mappers.validation
+org.firewaterframework.mappers.xml
+org.firewaterframework.rest
+org.firewaterframework.test
+org.firewaterframework.util
