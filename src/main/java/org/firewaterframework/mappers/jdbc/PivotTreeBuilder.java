@@ -10,31 +10,133 @@ import org.springframework.beans.factory.annotation.Required;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: May 7, 2007
- * Time: 10:32:11 AM
- * To change this template use File | Settings | File Templates.
+ * This class maps flat SQL result sets into heirarchical XML documents.  It is used
+ * by the QueryMapper to resolve SQL 'select' queries into their equivalent REST XML.  It uses
+ * the central concept of a Pivot Tree as the basis of it's transformation.  A Pivot
+ * Tree is simply a table containing the cross-product of properties present in every
+ * resource.  The table must be ordered by 'pivot columns', which are typically the
+ * primary keys of the underlying joined tables.  The PivotTreeBuilder will iterate
+ * over the tabular result set, creating a single XML node for each unique value of
+ * it's pivot column.  If there are duplicate values for the pivot column in consecutive
+ * rows, the class will delegate the processing of these rows to it's 'subnodes', which are
+ * also PivotTreeBuilders, and will append the XML element results as children of the current
+ * XML node.
+ * <p>
+ * Assuming we have a tables Owner(id, name, address, city, state, zip) and
+ * Pet(id, name, owner), here's an example of configuring a PivotTreeBuilder
+ * using a Spring configuration to fetch all users and their pets (mapped to
+ * the <code>/users</code> URL:
+ * <p>
+ * <code><pre>
+ *   <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+ *      <property name="query">
+ *          <value>
+ *              select  u.id as user, p.id as pet, p.name as pet_name, u.name as name,
+ *              from user u
+ *              left outer join pet p on u.id = p.owner_id
+ *              order by u.id,
+ *          </value>
+ *      </property>
+ *      <property name="dataSource" ref="dataSource"/>
+ *      <property name="pivotTreeBuilder">
+ *          <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+ *              <property name="pivotColumn" value="user"/>
+ *              <property name="pivotURLSelector" value="users"/>
+ *              <property name="attributeColumnList">
+ *                  <list>
+ *                      <value>name</value>
+ *                     <value>city</value>
+ *                  </list>
+ *              </property>
+ *              <property name="subNodes">
+ *                  <list>
+ *                      <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+ *                          <property name="pivotColumn" value="pet"/>
+ *                          <property name="pivotURLSelector" value="pets"/>
+ *                          <property name="attributeColumns">
+ *                              <map>
+ *                                  <entry key="pet_name" value="name"/>
+ *                              </map>
+ *                          </property>
+ *                      </bean>
+ *                  </list>
+ *              </property>
+ *         </bean>
+ *     </property>
+ * </bean>
+ *</pre></code
+ * <p>
+ * After a sucessful call to the GET method on the <code>/users</code> resource.  We
+ * would get a Response with an XML payload like:
+ * <p>
+ * <code><pre>
+ * <result>
+ *     <user url="/users/4" id="4" name="jim morrison" city="new york">
+ *         <pet url="/users/4/pets/3" id="3" name="flopsy"/>
+ *     </user>
+ *     <user url="/users/5" id="5" name="eddie van halen" city="los angeles"/>
+ *     <user url="/users/0" id="0" name="joe who" city="new york"/>
+ *     <user url="/users/1" id="1" name="willie nelson" city="chatanooga">
+ *         <pet url="/users/1/pets/0" id="0" name="trixie"/>
+ *         <pet url="/users/1/pets/1" id="1" name="wixie"/>
+ *         <pet url="/users/1/pets/4" id="4" name="mixie"/>
+ *     </user>
+ *  </result>
+ *
  */
 public class PivotTreeBuilder
 {
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
-    // the pivotTag and pivotTagAttribute work together to create the XML element name for each
-    // 'row' in the result set.  To always create the same name (ie. a heterogeneous collection of rows) just
-    // statically set the pivotTag value.  If you want to determine the name of the element dynamically
-    // set the pivotTagAttribute to the name of the property in the row that contains the element name.
+    /**
+     * the pivotTag and pivotTagAttribute work together to create the XML element name for each
+     * 'row' in the result set.  To always create the same name (ie. a heterogeneous collection of rows) just
+     * statically set the pivotTag value.  If you want to determine the name of the element dynamically
+     * set the pivotTagAttribute to the name of the property in the row that contains the element name.
+     */
     protected String pivotTag;
     protected String pivotTagAttribute;
 
+    /**
+     * this property is used to select a name for the 'url' attribute for each node.  As
+     * the builder recursively descends the subnodes, URLs are built up by concatenating
+     * their id and pivotURLSelector values.
+     */
     protected String pivotURLSelector;
+
+    /**
+     * this identifies which column in the result set to 'pivot' on.  It is typically
+     * the primary key column of the underlying table/resource
+     */
     protected String pivotColumn;
+
+    /**
+     * this maps the name of the column in the result set (the key) with the name of
+     * the XML attribute in the result.  If the names are exactly the same, use the
+     * convenience method setAttributeColumnList()
+     */
     protected Map<String,String> attributeColumns;
+
+    /**
+     * these represent the PivotTreeBuilders that will create the subnodes in our
+     * response XML document.  When we find adjacent rows with duplicate values for
+     * the pivotColumn, delegate to the subNodes to process.
+     */
     protected PivotTreeBuilder[] subNodes;
 
     public PivotTreeBuilder(){}
-    
+
+    /**
+     * this constructor is typically only used by jUnit test cases.
+     *
+     * @param pivotTag
+     * @param pivotURLSelector
+     * @param pivotColumn
+     * @param attributeColumnColumnNames
+     * @param attributeColumnTagNames
+     * @param subNodes
+     */
     public PivotTreeBuilder( String pivotTag,
                       String pivotURLSelector,
                       String pivotColumn,
@@ -55,6 +157,11 @@ public class PivotTreeBuilder
         this.subNodes = subNodes;
     }
 
+    /**
+     * top level interface to process PivotTree result sets.
+     * @param rows the SQL result set, a list of maps
+     * @return the resultant XML document
+     */
     public Document process( List<Map<String,Object>> rows )
     {
         Document rval = df.createDocument( );
@@ -70,7 +177,14 @@ public class PivotTreeBuilder
         return rval;
     }
 
-    public Element processNextElement( List<Map<String,Object>> rows, int[] rowNum, String url )
+    /**
+     * the method to recursively parse and build a single element.
+     * @param rows the result set
+     * @param rowNum the current row number being processed
+     * @param url the current URL for the resource
+     * @return the Element to be added to the resulting XML Document
+     */
+    protected Element processNextElement( List<Map<String,Object>> rows, int[] rowNum, String url )
     {
         // stop if we are out of rows
         int startRowIndex = rowNum[0];
