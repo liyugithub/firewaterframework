@@ -40,8 +40,8 @@ import java.util.*;
  *      <property name="dataSource" ref="dataSource"/>
  *      <property name="pivotTreeBuilder">
  *          <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
- *              <property name="pivotColumn" value="user"/>
- *              <property name="pivotURLSelector" value="users"/>
+ *              <property name="idColumn" value="user"/>
+ *              <property name="urlPrefix" value="users"/>
  *              <property name="attributeColumnList">
  *                  <list>
  *                      <value>name</value>
@@ -51,8 +51,8 @@ import java.util.*;
  *              <property name="subNodes">
  *                  <list>
  *                      <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
- *                          <property name="pivotColumn" value="pet"/>
- *                          <property name="pivotURLSelector" value="pets"/>
+ *                          <property name="idColumn" value="pet"/>
+ *                          <property name="urlPrefix" value="pets"/>
  *                          <property name="attributeColumns">
  *                              <map>
  *                                  <entry key="pet_name" value="name"/>
@@ -89,27 +89,20 @@ public class PivotTreeBuilder
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
-    /**
-     * the pivotTag and pivotTagAttribute work together to create the XML element name for each
-     * 'row' in the result set.  To always create the same name (ie. a heterogeneous collection of rows) just
-     * statically set the pivotTag value.  If you want to determine the name of the element dynamically
-     * set the pivotTagAttribute to the name of the property in the row that contains the element name.
-     */
-    protected String pivotTag;
-    protected String pivotTagAttribute;
+    protected String tagname;
 
     /**
      * this property is used to select a name for the 'url' attribute for each node.  As
      * the builder recursively descends the subnodes, URLs are built up by concatenating
-     * their id and pivotURLSelector values.
+     * their id and urlPrefix values.
      */
-    protected String pivotURLSelector;
+    protected String urlPrefix;
 
     /**
      * this identifies which column in the result set to 'pivot' on.  It is typically
      * the primary key column of the underlying table/resource
      */
-    protected String pivotColumn;
+    protected String idColumn;
 
     /**
      * this maps the name of the column in the result set (the key) with the name of
@@ -121,41 +114,11 @@ public class PivotTreeBuilder
     /**
      * these represent the PivotTreeBuilders that will create the subnodes in our
      * response XML document.  When we find adjacent rows with duplicate values for
-     * the pivotColumn, delegate to the subNodes to process.
+     * the idColumn, delegate to the subNodes to process.
      */
     protected PivotTreeBuilder[] subNodes;
 
     public PivotTreeBuilder(){}
-
-    /**
-     * this constructor is typically only used by jUnit test cases.
-     *
-     * @param pivotTag
-     * @param pivotURLSelector
-     * @param pivotColumn
-     * @param attributeColumnColumnNames
-     * @param attributeColumnTagNames
-     * @param subNodes
-     */
-    public PivotTreeBuilder( String pivotTag,
-                      String pivotURLSelector,
-                      String pivotColumn,
-                      String[] attributeColumnColumnNames,
-                      String[] attributeColumnTagNames,
-                      PivotTreeBuilder[] subNodes )
-    {
-        this.pivotTag = pivotTag;
-        this.pivotURLSelector = pivotURLSelector;
-        this.pivotColumn = pivotColumn;
-
-        this.attributeColumns = new HashMap<String,String>();
-        for( int i = 0; i < attributeColumnColumnNames.length; i++ )
-        {
-            attributeColumns.put( attributeColumnColumnNames[i], attributeColumnTagNames[i] );
-        }
-
-        this.subNodes = subNodes;
-    }
 
     /**
      * top level interface to process PivotTree result sets.
@@ -189,12 +152,12 @@ public class PivotTreeBuilder
         // stop if we are out of rows
         int startRowIndex = rowNum[0];
         Map<String,Object> startRow = rows.get( startRowIndex );
-        Object topPivotValue = startRow.get( pivotColumn );
-        Element rval = df.createElement( getInternalPivotTag( startRow ));
+        Object topPivotValue = startRow.get(idColumn);
+        Element rval = df.createElement( getTagname() );
 
-        if( pivotURLSelector != null )
+        if( urlPrefix != null )
         {
-            url += '/' + pivotURLSelector + '/' + topPivotValue.toString();
+            url += '/' + urlPrefix + '/' + topPivotValue.toString();
             rval.addAttribute( "url", url );
         }
 
@@ -206,10 +169,10 @@ public class PivotTreeBuilder
         {
             for( PivotTreeBuilder subNode: subNodes )
             {
-                String subNodeColumnName = subNode.getPivotColumn();
+                String subNodeColumnName = subNode.getIdColumn();
                 Set<Object> processedSubPivotValues = new HashSet<Object>();
                 int rangeRowIndex = startRowIndex;
-                while( rangeRowIndex < rows.size() && topPivotValue.equals( rows.get( rangeRowIndex ).get( pivotColumn )))
+                while( rangeRowIndex < rows.size() && topPivotValue.equals( rows.get( rangeRowIndex ).get(idColumn)))
                 {
                     Object subPivotValue = rows.get( rangeRowIndex ).get( subNodeColumnName );
                     if( subPivotValue != null && !processedSubPivotValues.contains( subPivotValue ))
@@ -223,7 +186,7 @@ public class PivotTreeBuilder
         }
 
         // we're done processing the row range for this pivot value - skip over all of the rest of the rows in this range
-        while( rowNum[0] < rows.size() && topPivotValue.equals( rows.get( rowNum[0] ).get( pivotColumn )))
+        while( rowNum[0] < rows.size() && topPivotValue.equals( rows.get( rowNum[0] ).get(idColumn)))
         {
             rowNum[0]++;
         }
@@ -233,7 +196,7 @@ public class PivotTreeBuilder
 
     protected void processCurrentRow( Map<String,Object> row, Element element )
     {
-        Object pivotValue = row.get( pivotColumn );
+        Object pivotValue = row.get(idColumn);
 
         if( pivotValue != null )
         {
@@ -259,13 +222,13 @@ public class PivotTreeBuilder
         }
     }
 
-    public String getPivotColumn() {
-        return pivotColumn;
+    public String getIdColumn() {
+        return idColumn;
     }
 
     @Required
-    public void setPivotColumn(String pivotColumn) {
-        this.pivotColumn = pivotColumn;
+    public void setIdColumn(String idColumn) {
+        this.idColumn = idColumn;
     }
 
     public Map<String,String> getAttributeColumns() {
@@ -294,40 +257,26 @@ public class PivotTreeBuilder
         this.subNodes = subNodes;
     }
 
-    public String getPivotTag() {
-        return pivotTag;
-    }
-
-    public void setPivotTag(String pivotTag) {
-        this.pivotTag = pivotTag;
-    }
-
-    public String getPivotURLSelector() {
-        return pivotURLSelector;
-    }
-
-    public void setPivotURLSelector(String pivotURLSelector) {
-        this.pivotURLSelector = pivotURLSelector;
-    }
-
-    public String getPivotTagAttribute() {
-        return pivotTagAttribute;
-    }
-
-    public void setPivotTagAttribute(String pivotTagAttribute) {
-        this.pivotTagAttribute = pivotTagAttribute;
-    }
-
-    protected String getInternalPivotTag( Map<String,Object> row )
-    {
-        if( pivotTagAttribute != null && row.get( pivotTagAttribute ) != null )
+    public String getTagname() {
+        if( tagname == null )
         {
-            return row.get( pivotTagAttribute ).toString();
+            return idColumn;
         }
-        else if( pivotTag == null )
+        else
         {
-            return pivotColumn;
+            return tagname;
         }
-        return pivotTag;
+    }
+
+    public void setTagname(String tagname) {
+        this.tagname = tagname;
+    }
+
+    public String getUrlPrefix() {
+        return urlPrefix;
+    }
+
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
     }
 }
