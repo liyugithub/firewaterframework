@@ -1,5 +1,3 @@
-# Main Page
-
 = Firewater =
 
 The goal of this project is to provide a framework to create highly efficient and powerful Web Service APIs.
