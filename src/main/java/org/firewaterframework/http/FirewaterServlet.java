@@ -70,7 +70,7 @@ public class FirewaterServlet extends HttpServlet
         }
         catch( Exception e )
         {
-            log.error( "Error handling Restlet: ", e );
+            log.error( "Error handling REST Request: ", e );
             StringWriter writer = new StringWriter();
             PrintWriter pw = new PrintWriter( writer );
             e.printStackTrace( pw );
@@ -191,5 +191,4 @@ public class FirewaterServlet extends HttpServlet
         }
         response.getWriter().flush();
     }
-
 }
