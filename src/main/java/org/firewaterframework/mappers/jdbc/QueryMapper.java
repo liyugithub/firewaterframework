@@ -359,13 +359,13 @@ public class QueryMapper extends JDBCMapper
     /**
      *
      * @return the column in the result set to count the total number of pivot results.  Defaults
-     * to the pivotColumn in the top level PivotTreeBuilder of this mapper.
+     * to the idColumn in the top level PivotTreeBuilder of this mapper.
      */
     public String getPageCountPivot()
     {
         if( pageCountPivot == null )
         {
-            return pivotTreeBuilder.getPivotColumn();
+            return pivotTreeBuilder.getIdColumn();
         }
         return pageCountPivot;
     }
@@ -374,7 +374,7 @@ public class QueryMapper extends JDBCMapper
      * This is the column who's distinct elements will be counted to get the total number
      * of elements in the result set.  This is used by the pageCountQuery to calculate the
      * total number of results in the result set so that the <pages> structure can be built
-     * properly.  The default value for this property is the pivotColumn of the mapper's
+     * properly.  The default value for this property is the idColumn of the mapper's
      * pivotTreeBuilder - which is usually the correct setting for this.
      *
      * @param pageCountPivot the column name in the query result set used for counting the number of

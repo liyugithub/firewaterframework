@@ -49,8 +49,8 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="dataSource" ref="dataSource"/>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="pivotColumn" value="photo"/>
-                <property name="pivotURLSelector" value="photos"/>
+                <property name="idColumn" value="photo"/>
+                <property name="urlPrefix" value="photos"/>
                 <property name="attributeColumnList">
                     <list>
                         <value>thumbnail</value>
@@ -61,8 +61,8 @@ create table photo_tag(photo_id int, tag varchar(255));
                 <property name="subNodes">
                     <list>
                         <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="pivotColumn" value="owner"/>
-                            <property name="pivotURLSelector" value="owners"/>
+                            <property name="idColumn" value="owner"/>
+                            <property name="urlPrefix" value="owners"/>
                             <property name="attributeColumnList">
                                 <list>
                                     <value>owner_name</value>
@@ -70,7 +70,7 @@ create table photo_tag(photo_id int, tag varchar(255));
                             </property>
                         </bean>
                         <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="pivotColumn" value="tag"/>
+                            <property name="idColumn" value="tag"/>
                         </bean>
                     </list>
                 </property>

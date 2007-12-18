@@ -74,8 +74,8 @@
         </property>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="pivotColumn" value="user"/>
-                <property name="pivotURLSelector" value="users"/>
+                <property name="idColumn" value="user"/>
+                <property name="urlPrefix" value="users"/>
                 <property name="attributeColumnList">
                     <list>
                         <value>first_name</value>
@@ -88,8 +88,8 @@
                 <property name="subNodes">
                     <list>
                         <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="pivotColumn" value="pet"/>
-                            <property name="pivotURLSelector" value="pets"/>
+                            <property name="idColumn" value="pet"/>
+                            <property name="urlPrefix" value="pets"/>
                             <property name="attributeColumns">
                                 <map>
                                     <entry key="pet_name" value="name"/>
@@ -161,8 +161,8 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="pivotColumn" value="user"/>
-                <property name="pivotURLSelector" value="users"/>
+                <property name="idColumn" value="user"/>
+                <property name="urlPrefix" value="users"/>
                 <property name="attributeColumnList">
                     <list>
                         <value>first_name</value>

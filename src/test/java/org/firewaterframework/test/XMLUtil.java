@@ -9,11 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Writer;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: May 9, 2007
- * Time: 11:31:47 AM
- * To change this template use File | Settings | File Templates.
+ * Pretty print the XML
  */
 public class XMLUtil
 {
@@ -24,13 +20,14 @@ public class XMLUtil
         try
         {
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter writer = new XMLWriter( outWriter , format );
+            XMLWriter writer = new XMLWriter(outWriter , format );
+
             writer.write( doc );
             writer.close();
         }
         catch( Exception e )
         {
-            log.error( "Error pretty printing XML document: ", e );
+            log.error( "Error printing XML document: ", e );
         }
     }
 }
