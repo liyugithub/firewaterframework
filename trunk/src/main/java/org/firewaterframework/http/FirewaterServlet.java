@@ -100,7 +100,7 @@ public class FirewaterServlet extends HttpServlet
             log.error( "Error handling Firewater Request: ", e );
             try
             {
-                response.sendError( 500, "Error handling POST for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
+                response.sendError( 500, "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
             }
             catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
         }
