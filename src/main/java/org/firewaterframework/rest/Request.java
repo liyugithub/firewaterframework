@@ -37,6 +37,12 @@ public class Request
         if( argsAlreadyProcessed )
         {
             this.url = url;
+            this.baseUrl = url;
+            int questionIndex = url.indexOf( '?' );
+            if( questionIndex > -1 )
+            {
+                this.baseUrl = url.substring( 0, questionIndex );
+            }
         }
         else
         {
