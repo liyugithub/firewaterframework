@@ -57,7 +57,7 @@ public class FirewaterServlet extends HttpServlet
         try
         {
             String url = request.getPathInfo();
-            String methodString = (String)request.getParameter( METHOD_ARG );
+            String methodString = request.getParameter( METHOD_ARG );
             Method method = Method.GET;
             if( methodString == null )
             {
@@ -68,7 +68,7 @@ public class FirewaterServlet extends HttpServlet
             }
             else
             {
-                method = new Method( methodString.toUpperCase() );
+                method = Method.getMethod( methodString.toUpperCase() );
             }
 
             Map<String,Object[]> requestArgs = request.getParameterMap();
@@ -84,7 +84,7 @@ public class FirewaterServlet extends HttpServlet
                     args.put( entry.getKey(), entry.getValue()[0] );
                 }
             }
-            Request restRequest = new Request( url, method, args );
+            Request restRequest = new Request( url, method, args, true );
             Response restResponse = dispatcher.handle( restRequest );
 
             response.setStatus( restResponse.getStatus().getCode() );
