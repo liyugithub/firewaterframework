@@ -16,7 +16,18 @@ public class Method
     public static Method HEAD = new Method( "HEAD" );
     public static Method OPTIONS = new Method( "OPTIONS" );
 
-    public Method( String method )
+    public static Method getMethod( String method )
+    {
+        if( method.equalsIgnoreCase( "get") ) return GET;
+        if( method.equalsIgnoreCase( "put") ) return PUT;
+        if( method.equalsIgnoreCase( "post") ) return POST;
+        if( method.equalsIgnoreCase( "delete") ) return DELETE;
+        if( method.equalsIgnoreCase( "head") ) return HEAD;
+        if( method.equalsIgnoreCase( "options") ) return OPTIONS;
+        return new Method( method );
+    }
+
+    protected Method( String method )
     {
         this.method = method;
     }

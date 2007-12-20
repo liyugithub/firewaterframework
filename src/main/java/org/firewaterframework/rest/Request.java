@@ -2,6 +2,7 @@ package org.firewaterframework.rest;
 
 import org.springframework.beans.MutablePropertyValues;
 
+import java.net.URLDecoder;
 import java.util.Map;
 
 /**
@@ -22,25 +23,47 @@ public class Request
      * web API is configured to handle the <code>/pets</code> resource request.  Then the url attribute in
      * this Request object will simply be <code>/pets</code>.
      *
-     * @param url
-     * @param method
-     * @param args
+     * @param url the URL of the Requested resource
+     * @param method GET, PUT, POST, DELETE, HEAD or OPTIONS
+     * @param args the arguments
+     * @param argsAlreadyProcessed this is true for those callers that have already URLdecoded tthe query string
+     *  into the args (ie. Servlets).  If you want the Request object
+     *  to decode and parse the query string, set this to false (default behaviour of the other constructors).
      */
-    public Request( String url, Method method, MutablePropertyValues args )
+    public Request( String url, Method method, MutablePropertyValues args, boolean argsAlreadyProcessed )
     {
         this.method = method;
         this.args = args;
-        setUrl( url );
+        if( argsAlreadyProcessed )
+        {
+            this.url = url;
+        }
+        else
+        {
+            // Parse the query string.
+            setInternalUrl( url );
+        }
     }
+
+    public Request( String url, Method method, MutablePropertyValues args )
+    {
+        this( url, method, args, false );
+    }
+
+    public Request( String url, Method method, Map args, boolean argsAlreadyProcessed )
+    {
+        this( url, method, new MutablePropertyValues(args), argsAlreadyProcessed );
+    }
+
 
     public Request( String url, Method method, Map args )
     {
-        this( url, method, new MutablePropertyValues( args ));
+        this( url, method, new MutablePropertyValues( args ), false );
     }
 
     public Request( String url, Method method )
     {
-        this( url, method, (MutablePropertyValues)null );
+        this( url, method, (MutablePropertyValues)null, false );
     }
 
     public String getIdString()
@@ -52,22 +75,31 @@ public class Request
         return url;
     }
 
+    public void setUrl( String url )
+    {
+        this.url = url;
+    }
+
     public String getBaseUrl(){
         return baseUrl;
     }
 
     /**
-     * Setting the url of this request implies that any arguments passed in with the URL (eg /pets?age=9&region=4)
+     * Setting the internal url of this request implies that any arguments passed in with the URL (eg /pets?age=9&region=4)
      * will be parsed out and added to the args of this request.  Note that the Request will differentiate between
      * the id URL and the baseURL.  The baseURL is the URL stripped of any arguments and is the URL to actually
      * match against the configured list of patterns.  Note that downstream cacheing schemes must use the full url in order
      * accurately cache appropriate Responses for the given Request.
+     * <p>
+     * Servlet containers will have already parsed the query string and added those values to the args.  This method
+     * will typically only be used by the constructors that don't include the query string, which will be called from
+     * non-servlet front ends (like APIs or testcases).
      * 
      * @see org.firewaterframework.mappers.RouteMapper
      * @param url the full logical url, including arguments for this request
      *
      */
-    public void setUrl(String url) {
+    public void setInternalUrl(String url) {
         this.url = url;
 
         if( url != null )
@@ -92,6 +124,14 @@ public class Request
                     {
                         key = argPair.substring( 0, equalsIndex );
                         value = argPair.substring( equalsIndex + 1, argPair.length() );
+
+                        // remove any leading or trailing quotes, decode the value
+                        if( (value.startsWith( "'" ) || value.startsWith( "\"")) &&
+                            (value.endsWith("'") || value.endsWith( "\"") ))
+                        {
+                            value = value.substring( 1, value.length() - 1 );
+                        }
+                        value = URLDecoder.decode( value );
                     }
                     this.getArgs().addPropertyValue( key, value );
                 }
