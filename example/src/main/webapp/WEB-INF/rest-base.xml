@@ -22,14 +22,10 @@
             </map>
         </constructor-arg>
     </bean>
-    <!--
-create table photo(id int primary key, link varchar(128), thumbnail varchar(128),
-    owner_id varchar(32), title varchar(255));
-create table owner(id varchar(32) primary key, name varchar(64));
-create table photo_tag(photo_id int, tag varchar(255));
-    -->
+
     <bean id="photosMapper" class="org.firewaterframework.mappers.MethodMapper">
         <property name="getMapper" ref="photosGetMapper"/>
+        <property name="putMapper" ref="photosPutMapper"/>
     </bean>
 
     <bean id="photosGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
@@ -75,6 +71,54 @@ create table photo_tag(photo_id int, tag varchar(255));
                     </list>
                 </property>
             </bean>
+        </property>
+    </bean>
+
+    <bean id="photosPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="queries">
+            <list>
+                <value>
+                    insert into photo(link, thumbnail, owner_id, title)
+                        values( $link$, $thumbnail$, $owner_id$,
+                            $if(title)$
+                                $title$
+                            $else$
+                                null
+                            $endif$ )
+                </value>
+                <value>
+                    $if(tags)$
+                        insert into photo_tag( photo_id, tag ) values
+                            $tags:{( $_keys.key_0$, $it$ ) };separator = ","$
+                    $endif$
+                </value>
+            </list>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="fields">
+            <map>
+                <entry key="link">
+                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                        <property name="required" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="thumbnail">
+                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                        <property name="required" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="owner_id">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber">
+                        <property name="required" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="title">
+                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
+                </entry>
+                <entry key="tags">
+                    <bean class="org.firewaterframework.mappers.validation.SQLStringList"/>
+                </entry>
+            </map>
         </property>
     </bean>
 

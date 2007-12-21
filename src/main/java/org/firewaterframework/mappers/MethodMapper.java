@@ -1,10 +1,12 @@
 package org.firewaterframework.mappers;
 
-import com.opensymphony.oscache.general.GeneralCacheAdministrator;
 import com.opensymphony.oscache.base.EntryRefreshPolicy;
 import com.opensymphony.oscache.base.NeedsRefreshException;
-import org.firewaterframework.rest.*;
+import com.opensymphony.oscache.general.GeneralCacheAdministrator;
+import org.dom4j.Document;
+import org.dom4j.Element;
 import org.firewaterframework.WSException;
+import org.firewaterframework.rest.*;
 
 /**
  * Responsible for parsing out the REST Method (GET, PUT, POST, etc.) and dispatching to
@@ -32,7 +34,6 @@ public class MethodMapper extends Mapper
     protected Mapper putMapper;
     protected Mapper postMapper;
     protected Mapper deleteMapper;
-    protected Mapper optionsMapper;
 
     /**
      * Process the REST Request by delegating to downstream Mappers based on the Request.method
@@ -65,10 +66,6 @@ public class MethodMapper extends Mapper
             rval = processGet( request );
             // head doesn't include the actual content, create a new response excluding it
             return new Response( rval.getStatus(), rval.getMimeType() );
-        }
-        else if( request.getMethod() == Method.OPTIONS )
-        {
-            return doOptions( request );
         }
         else
         {
@@ -183,18 +180,39 @@ public class MethodMapper extends Mapper
     }
 
     /**
-     * Perform the actual delegation to the optionsMapper
+     * Process the OPTIONS method.  This will delegate to all of it's method
+     * mappers to build the options response.
      *
-     * @param request the incoming OPTIONS Request
-     * @return the handled Response
+     * @param request
+     * @return
      */
-    protected Response doOptions( Request request )
+    @Override
+    public Element getOptions( Request request )
     {
-        if( optionsMapper != null )
+        Element rval = documentFactory.createElement( "methods" );
+        if( getMapper != null )
         {
-            return optionsMapper.handle( request );
+            rval.add( getMapper.getOptions( request ));
         }
-        throw new WSException( "Method: " + request.getMethod() + " not allowed.", Status.STATUS_METHOD_NOT_ALLOWED );
+        if( putMapper != null )
+        {
+            Element element = putMapper.getOptions( request );
+            element.setName( "put" );
+            rval.add( element );
+        }
+        if( postMapper != null )
+        {
+            Element element = postMapper.getOptions( request );
+            element.setName( "post" );
+            rval.add( element );
+        }
+        if( deleteMapper != null )
+        {
+            Element element = deleteMapper.getOptions( request );
+            element.setName( "delete" );
+            rval.add( element );
+        }
+        return rval;
     }
 
     /**

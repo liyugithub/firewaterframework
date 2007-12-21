@@ -1,7 +1,9 @@
 package org.firewaterframework.mappers;
 
-import org.firewaterframework.rest.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
 import org.firewaterframework.WSException;
+import org.firewaterframework.rest.*;
 import org.springframework.beans.factory.annotation.Required;
 
 import java.util.HashMap;
@@ -50,19 +52,33 @@ public class RouteMapper extends Mapper
 
     /**
      * All URL patterns are combined together into a cached tree structure for efficient
-     * lookup.  Note that the process of resolving
+     * lookup.
      */
     protected ParseNode parseTree;
 
     /**
      * Process incoming URLs, and delegate them to downstream Mappers based on pattern
      * matching the URL against the stored urlMap.
+     * <p>
+     * In addition, all OPTIONS requests are handled by this mapper.  A special
+     * OPTIONS request on the root '/' of the web service heirarchy indicates to
+     * get all of the meta-data for the entire dictionary.
      *
      * @param request the REST Request
      * @return the Response
      */
     public Response handle( Request request )
     {
+        // handle OPTIONS on the root RouteMapper (me)
+        if( request.getUrl() == null || request.getUrl().equals( "/" ) )
+        {
+            if( request.getMethod() == Method.OPTIONS )
+            {
+                return doOptions( request, this );
+            }
+            throw new WSException( "Can't access root web service", Status.STATUS_NOT_FOUND );
+        }
+        
         // match the incoming URL against the parseTree
         ParseResult result = parseTree.find( request.getBaseUrl() );
         if( result == null )
@@ -74,8 +90,49 @@ public class RouteMapper extends Mapper
         {
             request.getArgs().addPropertyValues( result.getRestArguments() );
         }
-        Response restResponse = result.getMapper().handle( request );
+
+        // we need to handle a request for OPTIONS as a special case
+        Response restResponse;
+        if( request.getMethod() == Method.OPTIONS )
+        {
+            restResponse = doOptions( request, result.getMapper() );
+        }
+        else
+        {
+            restResponse = result.getMapper().handle( request );
+        }
         return restResponse;
+    }
+
+    /**
+     * Handle the special case for an OPTIONS request.
+     *
+     * @param request the incoming OPTIONS Request
+     * @param mapper
+     * @return the handled Response
+     */
+    protected Response doOptions( Request request, Mapper mapper )
+    {
+        //TODO: these can be cached as well
+        Document doc = documentFactory.createDocument();
+        Element root = doc.addElement( "options" );
+        root.add( mapper.getOptions( request ));
+        DocumentResponse rval = new DocumentResponse( MIMEType.application_xml );
+        rval.setDocument( doc );
+        return rval;
+    }
+
+    @Override
+    public Element getOptions( Request request )
+    {
+        Element rval = documentFactory.createElement( "routes" );
+        for( Map.Entry<String,Mapper> entry: urlMap.entrySet() )
+        {
+            Element route = entry.getValue().getOptions( request );
+            route.addAttribute( "url", entry.getKey() );
+            rval.add( route );
+        }
+        return rval;
     }
 
     /**

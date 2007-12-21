@@ -1,8 +1,10 @@
 package org.firewaterframework.mappers.jdbc;
 
 import org.firewaterframework.mappers.Mapper;
+import org.firewaterframework.rest.Request;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.dom4j.Element;
 
 import javax.sql.DataSource;
 
@@ -26,4 +28,5 @@ public abstract class JDBCMapper extends Mapper
     {
         template = new JdbcTemplate( ds );
     }
+
 }

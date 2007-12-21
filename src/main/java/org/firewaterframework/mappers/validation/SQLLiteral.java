@@ -20,4 +20,5 @@ public class SQLLiteral extends MapPropertyEditor
             this.setValue( '\'' + text + '\'' );
         }
     }
+
 }

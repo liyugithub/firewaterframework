@@ -44,6 +44,12 @@ public class Pattern extends MapPropertyEditor
         rval.setQuote( quote );
         return rval;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Pattern: " + pattern + " quoted: " + quote;
+    }
     
     public String getPattern() {
         return pattern;

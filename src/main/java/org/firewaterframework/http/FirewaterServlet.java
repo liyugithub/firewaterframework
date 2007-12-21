@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 /**
  */
@@ -95,9 +97,23 @@ public class FirewaterServlet extends HttpServlet
             restResponse.write( response.getWriter() );
             response.getWriter().flush();
         }
+        catch( WSException e )
+        {
+            try
+            {
+                response.sendError( e.getStatus().getCode(), e.getMessage() );
+            }
+            catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
+        }
         catch( Exception e )
         {
             log.error( "Error handling Firewater Request: ", e );
+            StringWriter writer = new StringWriter();
+            PrintWriter pw = new PrintWriter( writer );
+            e.printStackTrace( pw );
+            pw.flush();
+            pw.close();
+            log.error( writer.getBuffer().toString() );
             try
             {
                 response.sendError( 500, "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
