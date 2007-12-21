@@ -38,10 +38,13 @@ public class Request
         {
             this.url = url;
             this.baseUrl = url;
-            int questionIndex = url.indexOf( '?' );
-            if( questionIndex > -1 )
+            if( url != null )
             {
-                this.baseUrl = url.substring( 0, questionIndex );
+                int questionIndex = url.indexOf( '?' );
+                if( questionIndex > -1 )
+                {
+                    this.baseUrl = url.substring( 0, questionIndex );
+                }
             }
         }
         else

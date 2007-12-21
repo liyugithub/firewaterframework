@@ -1,14 +1,16 @@
 package org.firewaterframework.mappers;
 
+import org.dom4j.DocumentFactory;
+import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.mappers.validation.MapDataBinder;
+import org.firewaterframework.mappers.validation.MapPropertyEditor;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.ObjectError;
 
-import java.beans.PropertyEditor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +29,11 @@ import java.util.Map;
  */
 public abstract class Mapper
 {
+    protected static DocumentFactory documentFactory = DocumentFactory.getInstance();
     /**
      * Allows for 'declaring' of Request parameters, and for their validation
      */
-    protected Map<String, PropertyEditor> fields;
+    protected Map<String, MapPropertyEditor> fields;
 
     /**
      * Process a REST Request.  In subclasses this method will typically delegate to
@@ -41,6 +44,23 @@ public abstract class Mapper
      */
     public abstract Response handle( Request request );
 
+    public Element getOptions( Request request )
+    {
+        Element rval = null;
+        if( fields != null )
+        {
+            rval = documentFactory.createElement( "fields" );
+            for( Map.Entry<String,MapPropertyEditor> entry: fields.entrySet() )
+            {
+                Element field = rval.addElement( "field" );
+                field.addAttribute( "name", entry.getKey() );
+                field.addAttribute( "propertyEditor", entry.getValue().toString() );
+                Boolean required = entry.getValue().isRequired();
+                field.addAttribute( "required", required.toString() );
+            }
+        }
+        return rval;
+    }
     /**
      * Set validation fields for the Request.  By default, Request arguments are simply
      * passed, unchecked, into the handle method for he Mapper.  A subclass may explicity
@@ -51,7 +71,7 @@ public abstract class Mapper
      *
      * @see org.firewaterframework.mappers.validation.MapPropertyEditor
      */
-    public void setFields( Map<String, PropertyEditor> fields )
+    public void setFields( Map<String, MapPropertyEditor> fields )
     {
         this.fields = fields;
     }
@@ -68,11 +88,12 @@ public abstract class Mapper
         MapDataBinder dataBinder = new MapDataBinder( new HashMap<String,Object>() );
         if( fields != null )
         {
-            for( Map.Entry<String,PropertyEditor> entry: fields.entrySet() )
+            for( Map.Entry<String,MapPropertyEditor> entry: fields.entrySet() )
             {
                 dataBinder.registerCustomEditor( String.class, entry.getKey(), entry.getValue() );
             }
         }
+        
         return dataBinder;
     }
 

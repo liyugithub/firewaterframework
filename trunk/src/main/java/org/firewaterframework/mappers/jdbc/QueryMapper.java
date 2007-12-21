@@ -31,8 +31,8 @@ public class QueryMapper extends JDBCMapper
 
     protected String query;
     protected PivotTreeBuilder pivotTreeBuilder;
-    protected int defaultPageSize = 0; // paging is off by default
-    protected int pageWindowSize = -1;
+    protected Integer defaultPageSize = 0; // paging is off by default
+    protected Integer pageWindowSize = -1;
     protected String pageCountPivot;
     protected String pageTokenFragment = "limit $page_size$ offset $low_row$";
 
@@ -383,4 +383,19 @@ public class QueryMapper extends JDBCMapper
     public void setPageCountPivot(String pageCountPivot) {
         this.pageCountPivot = pageCountPivot;
     }
+
+    @Override
+    public Element getOptions( Request request )
+    {
+        Element rval = documentFactory.createElement( "get" );
+        Element fieldOptions = super.getOptions( request );
+        if( fieldOptions != null )
+        {
+            rval.add( fieldOptions );
+        }
+        rval.addAttribute( "defaultPageSize", defaultPageSize.toString() );
+        rval.addAttribute( "pageWindowSize", pageWindowSize.toString() );
+        return rval;
+    }
+    
 }

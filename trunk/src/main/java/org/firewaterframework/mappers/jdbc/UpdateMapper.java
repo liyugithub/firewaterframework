@@ -146,4 +146,17 @@ public class UpdateMapper extends JDBCMapper
     public void setQueries(String[] queries) {
         this.queries = queries;
     }
+
+    @Override
+    public Element getOptions( Request request )
+    {
+        Element rval = documentFactory.createElement( "update" );
+        Element fieldOptions = super.getOptions( request );
+        if( fieldOptions != null )
+        {
+            rval.add( fieldOptions );
+        }
+        return rval;
+    }
+
 }

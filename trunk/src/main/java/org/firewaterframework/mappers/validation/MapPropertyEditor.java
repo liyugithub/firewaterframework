@@ -16,9 +16,25 @@ import java.beans.PropertyEditorSupport;
  */
 public abstract class MapPropertyEditor extends PropertyEditorSupport
 {
+    protected boolean required = false;
+
     public MapPropertyEditor copy()
     {
         MapPropertyEditor newCopy = (MapPropertyEditor)BeanUtils.instantiateClass( this.getClass() );
         return newCopy;
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName();
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }

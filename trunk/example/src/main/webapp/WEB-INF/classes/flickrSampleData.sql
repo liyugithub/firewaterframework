@@ -1,8 +1,8 @@
-create table photo(id int primary key, link varchar(128), thumbnail varchar(128),
+create table temp_photo(id int primary key, link varchar(128), thumbnail varchar(128),
     owner_id varchar(32), title varchar(255));
-create table owner(id varchar(32) primary key, name varchar(64));
-create table photo_tag(photo_id int, tag varchar(255));
-insert into photo(id, link, thumbnail, owner_id, title) values
+create table temp_owner(id varchar(32) primary key, name varchar(64));
+create table temp_photo_tag(photo_id int, tag varchar(255));
+insert into temp_photo(id, link, thumbnail, owner_id, title) values
 (2108530283,'http://farm3.static.flickr.com/2211/2108530283_3dcc7531da.jpg','http://farm3.static.flickr.com/2211/2108530283_3dcc7531da_t.jpg','7542864@N03','The human body has two ends on it: one to create with and one to sit on. Sometimes people get their ends reversed. When this happens they need a kick in the seat of the pants.'),
 (2108353266,'http://farm3.static.flickr.com/2307/2108353266_ea8f8fd669.jpg','http://farm3.static.flickr.com/2307/2108353266_ea8f8fd669_t.jpg','20952812@N00','Connie''s In-N-Out Cheeseburger'),
 (2108014555,'http://farm3.static.flickr.com/2378/2108014555_83d362f3a4.jpg','http://farm3.static.flickr.com/2378/2108014555_83d362f3a4_t.jpg','40228506@N00','8/25'),
@@ -504,7 +504,7 @@ insert into photo(id, link, thumbnail, owner_id, title) values
 (2108578647,'http://farm3.static.flickr.com/2087/2108578647_0c36f4d292.jpg','http://farm3.static.flickr.com/2087/2108578647_0c36f4d292_t.jpg','73215718@N00','Rose'),
 (2108107647,'http://farm3.static.flickr.com/2167/2108107647_88b599c694.jpg','http://farm3.static.flickr.com/2167/2108107647_88b599c694_t.jpg','99008687@N00','befafter');
 
-insert into owner(id, name) values 
+insert into temp_owner(id, name) values
 ('90865307@N00', 'More Altitude'),
 ('67712036@N00', 'RijkV'),
 ('23964209@N00', 'bella lago'),
@@ -1005,7 +1005,7 @@ insert into owner(id, name) values
 ('13626063@N06', 'zoom in tight'),
 ('13692404@N05', '? Nina Larsen - ninazdesign');
 
-insert into photo_tag(photo_id, tag) values 
+insert into temp_photo_tag(photo_id, tag) values
 (2108049179,'chile'),
 (2108049179,'santiago'),
 (2108049179,'window'),
@@ -5334,3 +5334,18 @@ insert into photo_tag(photo_id, tag) values
 (2110196070,'woman'),
 (2110196070,'december'),
 (2110196070,'brunette');
+create table photo(id int auto_increment primary key, flickr_id int, link varchar(128), thumbnail varchar(128),
+    owner_id int, title varchar(255));
+create table owner(id int auto_increment primary key , flickr_id varchar(32), name varchar(64));
+create table photo_tag(photo_id int, tag varchar(255));
+insert into owner(flickr_id, name)
+    select to.id, to.name
+    from temp_owner to;
+insert into photo( flickr_id, link, thumbnail, owner_id, title)
+    select tp.id, tp.link, tp.thumbnail, o.id, tp.title
+    from temp_photo tp
+    join owner o on tp.owner_id = o.flickr_id;
+insert into photo_tag( photo_id, tag)
+    select p.id, tpt.tag
+    from photo p
+    join temp_photo_tag tpt on tpt.photo_id = p.flickr_id;

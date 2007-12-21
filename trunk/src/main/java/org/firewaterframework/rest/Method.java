@@ -43,4 +43,8 @@ public class Method
     {
         return method.hashCode();
     }
+
+    public String getMethod() {
+        return method;
+    }
 }
