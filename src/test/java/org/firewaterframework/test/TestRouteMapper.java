@@ -22,13 +22,11 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
- * Created by IntelliJ IDEA.
- * User: tspurway
- * Date: Sep 6, 2007
- * Time: 10:13:05 AM
- * To change this template use File | Settings | File Templates.
+ * Tests Against RouteMapper
+ * 
+ * @author tspurway
+ * @see RouteMapper
  */
 public class TestRouteMapper extends Assert
 {
@@ -206,7 +204,7 @@ public class TestRouteMapper extends Assert
     @Test
     public void testSimplePut()
     {
-        Map<String,String> args = new HashMap<String,String>();
+        Map<String,Object> args = new HashMap<String,Object>();
         args.put( "first_name","hanky" );
         args.put( "last_name","winters" );
         args.put( "email","mesuthela@hell.com" );
@@ -217,9 +215,9 @@ public class TestRouteMapper extends Assert
 
         // write the user to the database
         Response response = put( "/users", args );
-        Document res = response.toDocument();
-        assertEquals( response.getStatus(), Status.STATUS_OK );
+        //Document res = response.toDocument();
         //print( res );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
 
         // fetch it back and ensure it's there
         response = get( "/users/6" );
@@ -235,7 +233,7 @@ public class TestRouteMapper extends Assert
     @Test
     public void testSimplePost()
     {
-        Map<String,String> args = new HashMap<String,String>();
+        Map<String,Object> args = new HashMap<String,Object>();
         args.put( "first_name","newby" );
         args.put( "last_name","summers" );
         args.put( "email","crap@shoot.com" );
@@ -264,12 +262,12 @@ public class TestRouteMapper extends Assert
         return handle( Method.GET, url, null );
     }
 
-    private Response put( String url, Map args )
+    private Response put( String url, Map<String, Object> args )
     {
         return handle( Method.PUT, url, args );
     }
 
-    private Response post( String url, Map args )
+    private Response post( String url, Map<String, Object> args )
     {
         return handle( Method.POST, url, args );
     }
