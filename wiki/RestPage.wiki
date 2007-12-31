@@ -10,7 +10,7 @@ Central to the REST architecture is that all Resources are uniquely accessible u
     http://someserver.com/myapp/pets/3434/owner
 }}}
 
-The numbers in the above URLs indicate a unique id for that resource.  Notice how traversal of the resource tree is possible - the URL !http://someserver.com/myapp/pets/3434/owner refers to the Owner resource of Pet with id=3434.
+The numbers in the above URLs indicate a unique id for that resource.  Notice how traversal of the resource tree is possible - the URL `http://someserver.com/myapp/pets/3434/owner` refers to the Owner resource of Pet with id=3434.
 
 When making a Request for a Resource (using the URL), you specify one HTTP Method operation to specify what you want to do to that Resource:
   * GET - fetches an existing resource
@@ -19,6 +19,8 @@ When making a Request for a Resource (using the URL), you specify one HTTP Metho
   * DELETE - deletes an existing resource
   * HEAD - performs a GET without including actual content in the response
   * OPTIONS - retrieve meta-data about a resource
+
+Because most web application servers and network infrastructure has traditionally supported only the GET and POST methods, a simple convention for specifying the HTTP Method to the Firewater is to use the `_method` parameter on the incoming URL specifiying the _actual_ method that is requested.  See FirewaterExamples for more information.
 
 Additional arguments can be specified in the Request - these can be used for property fields  (for PUT and POST), or for filters, sorting and pagination (for GET).
 
