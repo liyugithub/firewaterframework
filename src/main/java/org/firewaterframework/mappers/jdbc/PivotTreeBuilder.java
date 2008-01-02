@@ -89,7 +89,16 @@ public class PivotTreeBuilder
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
+    /**
+     * The name of the XML tag to generate for this resource.  If unset, the tag will default to the idColumn value.
+     */
     protected String tagname;
+
+    /**
+     * This flag sets wheter or not to include the parent PivotTreeBuilder's URL as a prefix in this nodes generated
+     * URL.
+     */
+    protected boolean subResource = true;
 
     /**
      * this property is used to select a name for the 'url' attribute for each node.  As
@@ -157,6 +166,10 @@ public class PivotTreeBuilder
 
         if( urlPrefix != null )
         {
+            if( !subResource )
+            {
+                url = "";
+            }
             url += '/' + urlPrefix + '/' + topPivotValue.toString();
             rval.addAttribute( "url", url );
         }
@@ -278,5 +291,13 @@ public class PivotTreeBuilder
 
     public void setUrlPrefix(String urlPrefix) {
         this.urlPrefix = urlPrefix;
+    }
+
+    public boolean isSubResource() {
+        return subResource;
+    }
+
+    public void setSubResource(boolean subResource) {
+        this.subResource = subResource;
     }
 }
