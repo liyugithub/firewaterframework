@@ -7,6 +7,7 @@ import org.firewaterframework.mappers.Mapper;
 import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
+import org.firewaterframework.rest.Status;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -15,10 +16,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.StringWriter;
-import java.io.PrintWriter;
 
 /**
  */
@@ -99,26 +100,37 @@ public class FirewaterServlet extends HttpServlet
         }
         catch( WSException e )
         {
+            log.error( "Error handling Firewater Request: ", e );
+
+            if( e.getStatus() == Status.STATUS_SERVER_ERROR )
+            {
+                printStackTrace( e );
+            }
             try
             {
-                response.sendError( e.getStatus().getCode(), e.getMessage() );
+                response.sendError( e.getStatus().getCode(), "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
             }
             catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
         }
         catch( Exception e )
         {
             log.error( "Error handling Firewater Request: ", e );
-            StringWriter writer = new StringWriter();
-            PrintWriter pw = new PrintWriter( writer );
-            e.printStackTrace( pw );
-            pw.flush();
-            pw.close();
-            log.error( writer.getBuffer().toString() );
+            printStackTrace( e );
             try
             {
                 response.sendError( 500, "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
             }
             catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
         }
+    }
+
+    protected void printStackTrace( Exception e )
+    {
+        StringWriter writer = new StringWriter();
+        PrintWriter pw = new PrintWriter( writer );
+        e.printStackTrace( pw );
+        pw.flush();
+        pw.close();
+        log.error( writer.getBuffer().toString() );
     }
 }

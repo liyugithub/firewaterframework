@@ -70,7 +70,7 @@ public class QueryMapper extends JDBCMapper
         if( defaultPageSize > 0 )
         {
             StringTemplate pageTokenFragmentTemplate = new StringTemplate( pageTokenFragment );
-            int low_row = (pageNum - 1) * pageSize + 1;
+            int low_row = (pageNum - 1) * pageSize;
 
             pageTokenFragmentTemplate.setAttribute( "low_row", low_row );
             pageTokenFragmentTemplate.setAttribute( "page_size", pageSize );
@@ -145,7 +145,16 @@ public class QueryMapper extends JDBCMapper
             {
                 totalRows = template.queryForInt( pageCountQueryString );
                 Integer pageCount = (totalRows / pageSize) + ((totalRows % pageSize > 0) ? 1 : 0);
+
+                // don't bother adding the pages tag if the pageCount isn't > 1
+                if( pageCount <= 1 )
+                {
+                    resultDOM.getRootElement().remove( pages );
+                    return;
+                }
+                
                 pages.addAttribute( "num_pages", pageCount.toString() );
+                pages.addAttribute( "num_rows", totalRows.toString() );
 
                 // now, add a <page> tag for REST links for each of the page that exist.
                 int pageWindowStart = 1;

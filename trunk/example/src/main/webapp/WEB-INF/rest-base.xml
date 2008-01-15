@@ -16,10 +16,10 @@
         <constructor-arg index="0">
             <map>
                 <entry key="/photos" value-ref="photosMapper"/>
+                <entry key="/owners/{ownerID}/photos" value-ref="photosMapper"/>
                 <entry key="/photos/{photoID}" value-ref="photoMapper"/>
-                <!--<entry key="/photos/{photoID}/owner" value-ref="photoOwnerMapper"/>
                 <entry key="/owners" value-ref="ownersMapper"/>
-                <entry key="/owner/{ownerID}" value-ref="ownerMapper"/>-->
+                <entry key="/owners/{ownerID}" value-ref="ownerMapper"/>
             </map>
         </constructor-arg>
     </bean>
@@ -48,6 +48,9 @@ create table photo_tag(photo_id int, tag varchar(255));
                         join photo_tag inner_pt on inner_p.id = inner_pt.photo_id and
                             ($tags:{ inner_pt.tag = $it$ }; separator=" or "$)
                     $endif$
+                    $if(ownerID)$
+                        where inner_p.owner_id = $ownerID$
+                    $endif$
                     $page_token$) as p
                 left outer join owner o on o.id = p.owner_id
                 left outer join photo_tag pt on pt.photo_id = p.id
@@ -62,6 +65,9 @@ create table photo_tag(photo_id int, tag varchar(255));
             <map>
                 <entry key="tags">
                     <bean class="org.firewaterframework.mappers.validation.SQLStringList"/>
+                </entry>
+                <entry key="ownerID">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
                 </entry>
             </map>
         </property>
@@ -101,7 +107,7 @@ create table photo_tag(photo_id int, tag varchar(255));
             <list>
                 <value>
                     insert into photo(link, thumbnail, owner_id, title)
-                        values( $link$, $thumbnail$, $owner_id$,
+                        values( $link$, $thumbnail$, $ownerID$,
                             $if(title)$
                                 $title$
                             $else$
@@ -129,7 +135,7 @@ create table photo_tag(photo_id int, tag varchar(255));
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
-                <entry key="owner_id">
+                <entry key="ownerID">
                     <bean class="org.firewaterframework.mappers.validation.SQLNumber">
                         <property name="required" value="true"/>
                     </bean>
@@ -147,7 +153,7 @@ create table photo_tag(photo_id int, tag varchar(255));
     <bean id="photoMapper" class="org.firewaterframework.mappers.MethodMapper">
         <property name="getMapper" ref="photoGetMapper"/>
         <property name="postMapper" ref="photoPostMapper"/>
-        <!--<property name="deleteMapper" ref="photoDeleteMapper"/>-->
+        <property name="deleteMapper" ref="photoDeleteMapper"/>
     </bean>
 
     <bean id="photoGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
@@ -228,6 +234,162 @@ create table photo_tag(photo_id int, tag varchar(255));
                     <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
                 </entry>
                 <entry key="photoID">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="photoDeleteMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <value>
+                    delete from photo where id = $photoID$
+                </value>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="photoID">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="ownersMapper" class="org.firewaterframework.mappers.MethodMapper">
+        <property name="getMapper" ref="ownersGetMapper"/>
+        <property name="putMapper" ref="ownersPutMapper"/>
+    </bean>
+
+    <bean id="ownersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="defaultPageSize" value="20"/>
+        <property name="pageWindowSize" value="10"/>
+        <property name="query" value="select id as owner, name from owner $page_token$"/>
+        <property name="pivotTreeBuilder">
+            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+                <property name="idColumn" value="owner"/>
+                <property name="attributeColumnList">
+                    <list>
+                        <value>name</value>
+                    </list>
+                </property>
+                <property name="tagname" value="owners"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="ownersPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <value>
+                    insert into owner( flickr_id, name ) values
+                    (
+                        $if(flickr_id)$
+                            $flickr_id$
+                        $else$
+                            null
+                        $endif$, $name$ )
+                </value>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="flickr_id">
+                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
+                </entry>
+                <entry key="name">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="ownerMapper" class="org.firewaterframework.mappers.MethodMapper">
+        <property name="getMapper" ref="ownerGetMapper"/>
+        <property name="postMapper" ref="ownerPostMapper"/>
+        <property name="deleteMapper" ref="ownerDeleteMapper"/>
+    </bean>
+
+    <bean id="ownerGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="query">
+            <value>
+                select id as owner, name, flickr_id from owner where id = $ownerID$
+            </value>
+        </property>
+        <property name="pivotTreeBuilder">
+            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+                <property name="idColumn" value="owner"/>
+                <property name="attributeColumnList">
+                    <list>
+                        <value>name</value>
+                        <value>flickr_id</value>
+                    </list>
+                </property>
+            </bean>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="ownerID">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="ownerPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <value>
+                    update owner set id = $ownerID$
+                        $if(flickr_id)$
+                            , flickr_id = $flickr_id$
+                        $endif$
+                        $if(name)$
+                            , name = $name$
+                        $endif$
+                    where id = $ownerID$
+                </value>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="ownerID">
+                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                </entry>
+                <entry key="flickr_id">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+                <entry key="name">
+                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="ownerDeleteMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <value>
+                    delete from owner where id = $ownerID$
+                </value>
+                <value>
+                    delete from photo_tag where photo_id = (select id from photo where owner_id = $ownerID$)
+                </value>
+                <value>
+                    delete from photo where owner_id = $ownerID$
+                </value>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="ownerID">
                     <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
                 </entry>
             </map>
