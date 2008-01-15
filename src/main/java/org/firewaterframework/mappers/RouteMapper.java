@@ -81,7 +81,7 @@ public class RouteMapper extends Mapper
         
         // match the incoming URL against the parseTree
         ParseResult result = parseTree.find( request.getBaseUrl() );
-        if( result == null )
+        if( result == null || result.getMapper() == null )
         {
             throw new WSException( "URL: " + request.getBaseUrl() + " not found.", Status.STATUS_NOT_FOUND );
         }
