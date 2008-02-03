@@ -1,4 +1,3 @@
-
 To Do:
   * integrate new Spring 2.5 security stuff (nee Acegi Security)
   * handle multi-part POSTs to temporary files
@@ -14,3 +13,5 @@ To Do:
   * Example - we need a better example application - Pet Clinic?
   * integrate the XMLVerbatim XSL transformation for all document output
   * relationships in result documents are currently ad-hoc - is there a Resource abstraction that could represent link URLs in results documents?
+  * logos, homepage - one page landing HTML for project
+  * user guide / FAQ 
