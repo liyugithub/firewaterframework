@@ -15,3 +15,4 @@ To Do:
   * relationships in result documents are currently ad-hoc - is there a Resource abstraction that could represent link URLs in results documents?
   * logos, homepage - one page landing HTML for project
   * user guide / FAQ 
+  * add Firewater to main Maven repo
