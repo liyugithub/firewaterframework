@@ -16,3 +16,4 @@ To Do:
   * logos, homepage - one page landing HTML for project
   * user guide / FAQ 
   * add Firewater to main Maven repo
+  * clean up ST reserved template variables in JDBC classes and generalize pagination in the QueryMapper
