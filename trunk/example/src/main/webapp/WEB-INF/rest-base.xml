@@ -2,27 +2,21 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:fw="http://www.firewaterframework.org/schema/firewater"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+       http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd">
 
-    <bean id="dispatcher" class="org.firewaterframework.mappers.RouteMapper">
-        <property name="urlMap" ref="urlMap"/>
-    </bean>
-
-    <bean id="urlMap" class="java.util.HashMap">
-        <constructor-arg index="0">
-            <map>
-                <entry key="/photos" value-ref="photosMapper"/>
-                <entry key="/owners/{ownerID}/photos" value-ref="photosMapper"/>
-                <entry key="/photos/{photoID}" value-ref="photoMapper"/>
-                <entry key="/owners" value-ref="ownersMapper"/>
-                <entry key="/owners/{ownerID}" value-ref="ownerMapper"/>
-            </map>
-        </constructor-arg>
-    </bean>
+    <fw:dispatcher id="dispatcher">
+        <fw:route pattern="/photos" mapper="photosMapper"/>
+        <fw:route pattern="/owners/{ownerID}/photos" mapper="photosMapper"/>
+        <fw:route pattern="/photos/{photoID}" mapper="photoMapper"/>
+        <fw:route pattern="/owners" mapper="ownersMapper"/>
+        <fw:route pattern="/owners/{ownerID}" mapper="ownerMapper"/>
+    </fw:dispatcher>
 
 <!--
 create table photo(id int auto_increment primary key, flickr_id int, link varchar(128), thumbnail varchar(128),
@@ -31,11 +25,12 @@ create table owner(id int auto_increment primary key , flickr_id varchar(32), na
 create table photo_tag(photo_id int, tag varchar(255));
 -->
 
-    <bean id="photosMapper" class="org.firewaterframework.mappers.MethodMapper">
-        <property name="getMapper" ref="photosGetMapper"/>
-        <property name="putMapper" ref="photosPutMapper"/>
-    </bean>
+    <fw:method-mapper id="photosMapper">
+        <fw:get mapper="photosGetMapper"/>
+        <fw:put mapper="photosPutMapper"/>
+    </fw:method-mapper>
 
+    <!--
     <bean id="photosGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
         <property name="query">
             <value>
@@ -59,15 +54,15 @@ create table photo_tag(photo_id int, tag varchar(255));
         </property>
         <property name="defaultPageSize" value="5"/>
         <property name="pageWindowSize" value="10"/>
-        <property name="pageCountPivot" value="photo"/> 
+        <property name="pageCountPivot" value="photo"/>
         <property name="dataSource" ref="dataSource"/>
         <property name="fields">
             <map>
                 <entry key="tags">
-                    <bean class="org.firewaterframework.mappers.validation.SQLStringList"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlStringList"/>
                 </entry>
                 <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
             </map>
         </property>
@@ -101,6 +96,42 @@ create table photo_tag(photo_id int, tag varchar(255));
             </bean>
         </property>
     </bean>
+    -->
+    <fw:query-mapper id="photosGetMapper"
+            default-page-size="5"
+            page-window-size="10"
+            page-count-pivot="photo"
+            data-source="dataSource">
+        <fw:query>
+            select p.id as photo, p.thumbnail as thumbnail, p.title as title,
+                p.owner_id as owner, o.name as owner_name, pt.tag as tag, p.row_num
+            from (
+                select id, thumbnail, title, owner_id, rownum() as row_num
+                from photo inner_p
+                $if(tags)$
+                    join photo_tag inner_pt on inner_p.id = inner_pt.photo_id and
+                        ($tags:{ inner_pt.tag = $it$ }; separator=" or "$)
+                $endif$
+                $if(ownerID)$
+                    where inner_p.owner_id = $ownerID$
+                $endif$
+                $page_token$) as p
+            left outer join owner o on o.id = p.owner_id
+            left outer join photo_tag pt on pt.photo_id = p.id
+            order by p.row_num, p.owner_id
+        </fw:query>
+        <fw:fields>
+            <fw:sql-string-list name="tags"/>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+        <fw:pivot-tree id-column="photo" url-prefix="photos">
+            <fw:attribute-columns>thumbnail,title</fw:attribute-columns>
+            <fw:pivot-tree id-column="owner" url-prefix="owners" sub-resource="false">
+                <fw:attribute-columns>owner_name:name</fw:attribute-columns>
+            </fw:pivot-tree>
+            <fw:pivot-tree id-column="tag"/>
+        </fw:pivot-tree>
+    </fw:query-mapper>
 
     <bean id="photosPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
         <property name="queries">
@@ -126,25 +157,25 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="link">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
                 <entry key="thumbnail">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
                 <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber">
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
                 <entry key="title">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
                 </entry>
                 <entry key="tags">
-                    <bean class="org.firewaterframework.mappers.validation.SQLStringList"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlStringList"/>
                 </entry>
             </map>
         </property>
@@ -221,20 +252,20 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="link">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
                 <entry key="thumbnail">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral">
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
                         <property name="required" value="true"/>
                     </bean>
                 </entry>
                 <entry key="title">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
                 </entry>
                 <entry key="photoID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
             </map>
         </property>
@@ -252,7 +283,7 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="photoID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
             </map>
         </property>
@@ -299,10 +330,10 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="flickr_id">
-                    <bean class="org.firewaterframework.mappers.validation.SQLLiteral"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
                 </entry>
                 <entry key="name">
-                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
                 </entry>
             </map>
         </property>
@@ -335,7 +366,7 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
             </map>
         </property>
@@ -360,13 +391,13 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
                 <entry key="flickr_id">
-                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
                 </entry>
                 <entry key="name">
-                    <bean class="org.firewaterframework.mappers.validation.SQLString"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
                 </entry>
             </map>
         </property>
@@ -390,7 +421,7 @@ create table photo_tag(photo_id int, tag varchar(255));
         <property name="fields">
             <map>
                 <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SQLNumber"/>
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
                 </entry>
             </map>
         </property>

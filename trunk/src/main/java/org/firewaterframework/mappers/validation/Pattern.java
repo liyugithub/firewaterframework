@@ -37,6 +37,7 @@ public class Pattern extends MapPropertyEditor
     {
         if( quote )
         {
+            text = text.replaceAll( "\'", "''" );
             return '\'' + text + '\'';
         }
         else

@@ -23,6 +23,16 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>etc/META-INF</directory>
+                <targetPath>META-INF</targetPath>
+            </resource>
+            <resource>
+                <directory>schema</directory>
+                <targetPath>org/firewaterframework</targetPath>
+            </resource>
+        </resources>
     </build>
 
     <dependencies>

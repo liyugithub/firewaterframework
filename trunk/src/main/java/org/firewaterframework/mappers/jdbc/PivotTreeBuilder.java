@@ -270,6 +270,33 @@ public class PivotTreeBuilder
         }
     }
 
+    /**
+     * Parse a list of comma-separated attributes.  Each attribute is
+     * optionally a colon-separated key value pair.  In this case the result set
+     * column should be before the colon and the name of the attribute for
+     * the resulting XML should be after.
+     *
+     * eg.  setAttributeColumnString( "name,creation-date:date,age" )
+     * @param attributeColumns
+     */
+    public void setAttributeColumnString( String attributeColumns )
+    {
+        this.attributeColumns = new HashMap<String,String>();
+        String[] keyValues = attributeColumns.split( "," );
+        for( String keyValue: keyValues )
+        {
+            String[] entry = keyValue.split( ":" );
+            if( entry.length > 1 )
+            {
+                this.attributeColumns.put( entry[0], entry[1] );
+            }
+            else
+            {
+                this.attributeColumns.put( entry[0], null );
+            }
+        }
+    }
+
     public PivotTreeBuilder[] getSubNodes() {
         return subNodes;
     }
