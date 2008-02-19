@@ -3,28 +3,29 @@ package org.firewaterframework.spring.beans;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
-import org.firewaterframework.mappers.jdbc.QueryMapper;
+import org.w3c.dom.Attr;
 import org.firewaterframework.mappers.jdbc.PivotTreeBuilder;
+import org.firewaterframework.mappers.jdbc.UpdateMapper;
+import org.firewaterframework.mappers.jdbc.QueryHolder;
 
 /**
  * Created by IntelliJ IDEA.
  * User: tspurway
- * Date: Feb 18, 2008
- * Time: 9:23:16 PM
+ * Date: Feb 19, 2008
+ * Time: 12:05:09 AM
  * To change this template use File | Settings | File Templates.
  */
-public class QueryMapperBDParser extends AbstractMapperBDParser
+public class UpdateMapperBDParser extends AbstractMapperBDParser
 {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext)
     {
-        BeanDefinitionBuilder queryMapper = BeanDefinitionBuilder.rootBeanDefinition( QueryMapper.class);
+        BeanDefinitionBuilder queryMapper = BeanDefinitionBuilder.rootBeanDefinition( UpdateMapper.class );
         NodeList childElements = element.getChildNodes();
 
         if ( childElements != null && childElements.getLength() > 0)
@@ -38,13 +39,9 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
                     {
                         queryMapper.addPropertyValue( "fields", parseFields( child ));
                     }
-                    else if( "query".equals( child.getLocalName() ))
+                    else if( "queries".equals( child.getLocalName() ))
                     {
-                        queryMapper.addPropertyValue( "query", child.getTextContent() );
-                    }
-                    else if( "pivot-tree".equals( child.getLocalName() ))
-                    {
-                        queryMapper.addPropertyValue( "pivotTreeBuilder", parsePivotTree( child ));
+                        queryMapper.addPropertyValue( "queries", parseQueries( child ));
                     }
                 }
             }
@@ -71,11 +68,10 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
         return queryMapper.getBeanDefinition();
     }
 
-    private AbstractBeanDefinition parsePivotTree( Element element )
+    protected ManagedList parseQueries( Element element )
     {
-        BeanDefinitionBuilder pivotTable = BeanDefinitionBuilder.rootBeanDefinition( PivotTreeBuilder.class);
+        ManagedList rval = new ManagedList();
         NodeList childElements = element.getChildNodes();
-        ManagedList subNodes = new ManagedList();
 
         if ( childElements != null && childElements.getLength() > 0)
         {
@@ -84,33 +80,20 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
                 if( childElements.item(i) instanceof Element )
                 {
                     Element child = (Element)childElements.item(i);
-                    if( "attribute-columns".equals( child.getLocalName() ))
+                    if( "query".equals( child.getLocalName() ))
                     {
-                        pivotTable.addPropertyValue( "attributeColumnString", child.getTextContent() );
-                    }
-                    else if( "pivot-tree".equals( child.getLocalName() ))
-                    {
-                        subNodes.add( parsePivotTree( child ));
+                        BeanDefinitionBuilder query = BeanDefinitionBuilder.rootBeanDefinition( QueryHolder.class );
+                        query.addPropertyValue( "query", child.getTextContent() );
+                        String keyName = child.getAttribute( "keyName" );
+                        if( keyName != null )
+                        {
+                            query.addPropertyValue( "keyName", keyName );
+                        }
+                        rval.add( query.getBeanDefinition() );
                     }
                 }
             }
-            if( subNodes.size() > 0 )
-            {
-                pivotTable.addPropertyValue( "subNodes", subNodes );
-            }
         }
-
-        NamedNodeMap attributes = element.getAttributes();
-        if( attributes != null )
-        {
-            for( int i = 0; i < attributes.getLength(); ++i )
-            {
-                Attr child = (Attr) attributes.item(i);
-                pivotTable.addPropertyValue( xmlStringToBeanName( child.getLocalName() ), child.getValue() );
-            }
-        }
-
-        return pivotTable.getBeanDefinition();
+        return rval;
     }
-
 }

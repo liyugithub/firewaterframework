@@ -107,14 +107,23 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="queries">
             <list>
-                <value>
-                    insert into user (first_name, last_name, email, city, state, password, zip)
-                    values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
-                </value>
-                <value>
-                    insert into user_role ( user_id, role_id )
-                    values($_keys.key_0$, 0)
-                </value>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="keyName" value="userID"/>
+                    <property name="query">
+                        <value>
+                            insert into user (first_name, last_name, email, city, state, password, zip)
+                            values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
+                        </value>
+                    </property>
+                </bean>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="query">
+                        <value>
+                            insert into user_role ( user_id, role_id )
+                            values($userID$, 0)
+                        </value>
+                    </property>
+                </bean>
             </list>
         </property>
         <property name="fields">
@@ -181,11 +190,15 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="queries">
             <list>
-                <value>
-                    update user set (first_name, last_name, city, state, email, zip) =
-                        ('$first_name$', '$last_name$', '$city$','$state$', '$email$', $zip$)
-                    where id = $userID$
-                </value>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="query">
+                        <value>
+                            update user set (first_name, last_name, city, state, email, zip) =
+                                ('$first_name$', '$last_name$', '$city$','$state$', '$email$', $zip$)
+                            where id = $userID$
+                        </value>
+                    </property>
+                </bean>
             </list>
         </property>
     </bean>
