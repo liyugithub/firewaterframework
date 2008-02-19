@@ -30,73 +30,6 @@ create table photo_tag(photo_id int, tag varchar(255));
         <fw:put mapper="photosPutMapper"/>
     </fw:method-mapper>
 
-    <!--
-    <bean id="photosGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
-        <property name="query">
-            <value>
-                select p.id as photo, p.thumbnail as thumbnail, p.title as title,
-                    p.owner_id as owner, o.name as owner_name, pt.tag as tag, p.row_num
-                from (
-                    select id, thumbnail, title, owner_id, rownum() as row_num
-                    from photo inner_p
-                    $if(tags)$
-                        join photo_tag inner_pt on inner_p.id = inner_pt.photo_id and
-                            ($tags:{ inner_pt.tag = $it$ }; separator=" or "$)
-                    $endif$
-                    $if(ownerID)$
-                        where inner_p.owner_id = $ownerID$
-                    $endif$
-                    $page_token$) as p
-                left outer join owner o on o.id = p.owner_id
-                left outer join photo_tag pt on pt.photo_id = p.id
-                order by p.row_num, p.owner_id
-            </value>
-        </property>
-        <property name="defaultPageSize" value="5"/>
-        <property name="pageWindowSize" value="10"/>
-        <property name="pageCountPivot" value="photo"/>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="fields">
-            <map>
-                <entry key="tags">
-                    <bean class="org.firewaterframework.mappers.validation.SqlStringList"/>
-                </entry>
-                <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-            </map>
-        </property>
-        <property name="pivotTreeBuilder">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="photo"/>
-                <property name="urlPrefix" value="photos"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>thumbnail</value>
-                        <value>title</value>
-                    </list>
-                </property>
-                <property name="subNodes">
-                    <list>
-                        <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="idColumn" value="owner"/>
-                            <property name="urlPrefix" value="owners"/>
-                            <property name="subResource" value="false"/>
-                            <property name="attributeColumnList">
-                                <list>
-                                    <value>owner_name</value>
-                                </list>
-                            </property>
-                        </bean>
-                        <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="idColumn" value="tag"/>
-                        </bean>
-                    </list>
-                </property>
-            </bean>
-        </property>
-    </bean>
-    -->
     <fw:query-mapper id="photosGetMapper"
             default-page-size="5"
             page-window-size="10"
@@ -133,102 +66,61 @@ create table photo_tag(photo_id int, tag varchar(255));
         </fw:pivot-tree>
     </fw:query-mapper>
 
-    <bean id="photosPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="queries">
-            <list>
-                <value>
-                    insert into photo(link, thumbnail, owner_id, title)
-                        values( $link$, $thumbnail$, $ownerID$,
-                            $if(title)$
-                                $title$
-                            $else$
-                                null
-                            $endif$ )
-                </value>
-                <value>
-                    $if(tags)$
-                        insert into photo_tag( photo_id, tag ) values
-                            $tags:{( $_keys.key_0$, $it$ ) };separator = ","$
-                    $endif$
-                </value>
-            </list>
-        </property>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="fields">
-            <map>
-                <entry key="link">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
-                        <property name="required" value="true"/>
-                    </bean>
-                </entry>
-                <entry key="thumbnail">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
-                        <property name="required" value="true"/>
-                    </bean>
-                </entry>
-                <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber">
-                        <property name="required" value="true"/>
-                    </bean>
-                </entry>
-                <entry key="title">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
-                </entry>
-                <entry key="tags">
-                    <bean class="org.firewaterframework.mappers.validation.SqlStringList"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:update-mapper id="photosPutMapper"
+            data-source="dataSource">
+        <fw:queries>
+            <fw:query key-name="new_photo_id">
+                insert into photo(link, thumbnail, owner_id, title)
+                    values( $link$, $thumbnail$, $ownerID$,
+                        $if(title)$
+                            $title$
+                        $else$
+                            null
+                        $endif$ )
+            </fw:query>
+            <fw:query>
+                $if(tags)$
+                    insert into photo_tag( photo_id, tag ) values
+                        $tags:{( $new_photo_id$, $it$ ) };separator = ","$
+                $endif$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal required="true" name="link"/>
+            <fw:sql-literal required="true" name="thumbnail"/>
+            <fw:sql-number required="true" name="ownerID"/>
+            <fw:sql-literal name="title"/>
+            <fw:sql-string-list name="tags"/>
+        </fw:fields>
+    </fw:update-mapper>
 
-    <bean id="photoMapper" class="org.firewaterframework.mappers.MethodMapper">
-        <property name="getMapper" ref="photoGetMapper"/>
-        <property name="postMapper" ref="photoPostMapper"/>
-        <property name="deleteMapper" ref="photoDeleteMapper"/>
-    </bean>
+    <fw:method-mapper id="photoMapper">
+        <fw:get mapper="photoGetMapper"/>
+        <fw:post mapper="photoPostMapper"/>
+        <fw:delete mapper="photoDeleteMapper"/>
+    </fw:method-mapper>
 
-    <bean id="photoGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
-        <property name="query">
-            <value>
+    <fw:query-mapper id="photoGetMapper"
+            data-source="dataSource">
+        <fw:query>
                 select p.id as photo, p.thumbnail as thumbnail, p.link as link, p.title as title,
                     p.owner_id as owner, o.name as owner_name, pt.tag as tag
                 from photo as p
                 left outer join owner o on o.id = p.owner_id
                 left outer join photo_tag pt on pt.photo_id = p.id
                 where p.id = $photoID$
-            </value>
-        </property>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="pivotTreeBuilder">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="photo"/>
-                <property name="urlPrefix" value="photos"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>thumbnail</value>
-                        <value>title</value>
-                        <value>link</value>
-                    </list>
-                </property>
-                <property name="subNodes">
-                    <list>
-                        <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="idColumn" value="owner"/>
-                            <property name="urlPrefix" value="owners"/>
-                            <property name="attributeColumnList">
-                                <list>
-                                    <value>owner_name</value>
-                                </list>
-                            </property>
-                        </bean>
-                        <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="idColumn" value="tag"/>
-                        </bean>
-                    </list>
-                </property>
-            </bean>
-        </property>
-    </bean>
+        </fw:query>
+        <fw:fields>
+            <fw:sql-number name="photoID"/>
+        </fw:fields>
+        <fw:pivot-tree id-column="photo" url-prefix="photos">
+            <fw:attribute-columns>thumbnail,title,link</fw:attribute-columns>
+            <fw:pivot-tree id-column="owner" url-prefix="owners">
+                <fw:attribute-columns>owner_name:name</fw:attribute-columns>
+            </fw:pivot-tree>
+            <fw:pivot-tree id-column="tag"/>
+        </fw:pivot-tree>
+    </fw:query-mapper>
 
     <bean id="photoPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
         <property name="queries">

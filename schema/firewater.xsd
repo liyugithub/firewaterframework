@@ -58,6 +58,36 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="update-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="fields" type="fieldType"/>
+                            <xsd:element name="queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                    <xsd:attribute name="data-source" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="method-mapper">
         <xsd:complexType>
             <xsd:complexContent>
@@ -127,11 +157,13 @@
     <xsd:complexType name="patternType">
         <xsd:attribute name="pattern" type="xsd:string"/>
         <xsd:attribute name="quote" type="xsd:boolean"/>
-        <xsd:attribute name="name" type="xsd:ID" use="required"/>
+        <xsd:attribute name="required" type="xsd:boolean"/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
     </xsd:complexType>
 
     <xsd:complexType name="namedType">
-        <xsd:attribute name="name" type="xsd:ID" use="required"/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="required" type="xsd:boolean"/>
     </xsd:complexType>
 
     <xsd:complexType name="pivotTreeType">

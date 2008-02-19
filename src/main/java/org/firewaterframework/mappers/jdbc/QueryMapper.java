@@ -234,7 +234,7 @@ public class QueryMapper extends JDBCMapper
      * access the argument using a StringTemplate variable:
      * <p>
      * <code><pre>
-     *        SELECT u.id as user, u.name, u.city, u.state, u.zip
+     *        SELECT u.id as user, u.city, u.state, u.zip
      *        FROM user u
      *        WHERE u.region_id = $region$
      *        ORDER BY $sort$
@@ -247,7 +247,7 @@ public class QueryMapper extends JDBCMapper
      *
      * <p>
      * <code><pre>
-     *        SELECT u.id as user, u.name, u.city, u.state, u.zip
+     *        SELECT u.id as user, u.city, u.state, u.zip
      *        FROM user u
      *        $if(region)$
      *          WHERE u.region_id = $region$
@@ -257,6 +257,7 @@ public class QueryMapper extends JDBCMapper
      *              u.$sort$
      *          $else$
      *              u.id
+     *          $endif$
      * </pre></code>
      *
      * @param query the source for the StringTemplate query for fetching result sets for this mapper
@@ -310,7 +311,7 @@ public class QueryMapper extends JDBCMapper
      * SELECT o.id as owner, o.name as owner_name, o.city, o.state, o.zip, p.id as pet, p.name as pet_name
      * FROM owner o
      * LEFT OUTER JOIN pet p on o.id = p.owner_id
-     * ORDER BY o.id
+     * ORDER BY o.name
      * </pre></code>
      *
      * <p>
@@ -395,7 +396,7 @@ public class QueryMapper extends JDBCMapper
      * properly.  The default value for this property is the idColumn of the mapper's
      * pivotTreeBuilder - which is usually the correct setting for this.
      *
-     * @param pageCountPivot the column name in the query result set used for counting the number of
+     * @param pageCountPivot the column id in the query result set used for counting the number of
      * pivot objects in the result set.
      */
     public void setPageCountPivot(String pageCountPivot) {

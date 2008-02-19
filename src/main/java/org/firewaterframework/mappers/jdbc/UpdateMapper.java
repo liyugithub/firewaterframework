@@ -41,7 +41,7 @@ public class UpdateMapper extends JDBCMapper
 {
     public static DocumentFactory factory = DocumentFactory.getInstance();
 
-    protected String[] queries;
+    protected QueryHolder[] queries;
 
     /**
      * Handle a REST Request by 'executing' a sequence of SQL statements.  Bind the Request
@@ -49,10 +49,10 @@ public class UpdateMapper extends JDBCMapper
      * and data conversions before execution of the actual SQL against the database.
      * <p>
      * This method keeps track of all generated keys from the execution of each SQL
-     * statement.  These keys can be accessed in the StringTemplate query using <code>$_keys.key_0$, $_keys.key_1$, ... </code>
-     * where the number refers to the index of the query in the queryTemplates variable.  Obviously, you can only
-     * access keys 0 through n - 1 where n is the currently executing query.
-     * 
+     * statement.  These keys can be accessed in the StringTemplate query using the <code>keyName</code> assigned
+     * to each query (optionally) in the configuration.  Only keys generated in previously excuted statements
+     * will be available for processing in subsequent statements.
+     *
      * @param request the incoming REST Request, typically indicating a PUT, POST, or DELETE operation
      * @return a DocumentResponse object containg a simple XML document describing the sucessful execution
      * @throws WSException on error conditions, typically a 500 if, for some reason, the executions fail
@@ -60,12 +60,6 @@ public class UpdateMapper extends JDBCMapper
     @Transactional( readOnly=false,isolation=Isolation.READ_COMMITTED )
     public Response handle( Request request )
     {
-        StringTemplate[] queryTemplates = new StringTemplate[queries.length];
-        for( int i = 0; i < queries.length; i++ )
-        {
-            queryTemplates[i] = new StringTemplate( queries[i] );
-        }
-
         Document rval = factory.createDocument();
         Element root = rval.addElement( "result" );
         Map<String,Object> keys = new HashMap<String,Object>();
@@ -74,9 +68,11 @@ public class UpdateMapper extends JDBCMapper
 
         try
         {
-            Integer i = 0;
-            for( StringTemplate queryTemplate: queryTemplates )
+            for( QueryHolder query: queries )
             {
+                StringTemplate queryTemplate = new StringTemplate( query.query );
+                String queryID = query.keyName;
+
                 KeyHolder keyHolder = new GeneratedKeyHolder();
 
                 Integer rowsAffected = template.update(
@@ -85,15 +81,17 @@ public class UpdateMapper extends JDBCMapper
 
                 Element element = root.addElement( "update" );
                 element.addAttribute( "rowsAffected", rowsAffected.toString() );
-                element.addAttribute( "updateNumber", i.toString() );
+                if( queryID != null )
+                {
+                    element.addAttribute( "updateID", queryID );
+                }
 
                 if( keyHolder.getKey() != null )
                 {
                     Object key = keyHolder.getKeys().values().toArray()[0];
-                    keys.put( "key_" + i, key );
+                    keys.put( queryID, key );
                     element.addAttribute( "key", key.toString() );
                 }
-                i++;
             }
             DocumentResponse response = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
             response.setDocument( rval );
@@ -127,8 +125,6 @@ public class UpdateMapper extends JDBCMapper
 
         public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
         {
-            // substitute stringTemplate values
-
             // apply template
             for( Map.Entry<String, Object> entry: args.entrySet() )
             {
@@ -136,13 +132,16 @@ public class UpdateMapper extends JDBCMapper
             }
 
             // also substitute all keys that have been generated thusfar
-            queryTemplate.setAttribute( "_keys", keys );
+            for( Map.Entry<String,Object> key: keys.entrySet() )
+            {
+                queryTemplate.setAttribute( key.getKey(), key.getValue() );
+            }
 
             return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
         }
     }
 
-    public String[] getQueries() {
+    public QueryHolder[] getQueries() {
         return queries;
     }
 
@@ -152,7 +151,7 @@ public class UpdateMapper extends JDBCMapper
      *
      * @param queries an array of StringTemplate query strings
      */
-    public void setQueries(String[] queries) {
+    public void setQueries(QueryHolder[] queries) {
         this.queries = queries;
     }
 
