@@ -12,6 +12,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.firewaterframework.mappers.RouteMapper;
+import org.firewaterframework.mappers.MethodMapper;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.List;
  * Time: 2:18:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DispatcherBDParser extends AbstractBeanDefinitionParser
+public class DispatcherBDParser extends AbstractMapperBDParser
 {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext)
     {
@@ -36,8 +37,26 @@ public class DispatcherBDParser extends AbstractBeanDefinitionParser
             {
                 String key = child.getAttribute( "pattern" );
                 String mapperRefID = child.getAttribute( "mapper" );
-                RuntimeBeanReference ref = new RuntimeBeanReference( mapperRefID );
-                urlMap.put( key, ref );
+                RuntimeBeanReference ref;
+                if( mapperRefID != null && mapperRefID.length() > 0 )
+                {
+                    ref = new RuntimeBeanReference( mapperRefID );
+                    urlMap.put( key, ref );
+                }
+                else
+                {
+                    BeanDefinitionBuilder methodMapper = BeanDefinitionBuilder.rootBeanDefinition( MethodMapper.class );
+
+                    for( String mapper: new String[]{"get-mapper","put-mapper","post-mapper","delete-mapper"})
+                    {
+                        mapperRefID = child.getAttribute( mapper );
+                        if( mapperRefID != null  && mapperRefID.length() > 0 )
+                        {
+                            methodMapper.addPropertyReference( xmlStringToBeanName( mapper ), mapperRefID );
+                        }
+                    }
+                    urlMap.put( key, methodMapper.getBeanDefinition() );
+                }
             }
             dispatcher.addPropertyValue( "urlMap", urlMap );
         }

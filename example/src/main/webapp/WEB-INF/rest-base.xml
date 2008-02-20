@@ -3,32 +3,20 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:fw="http://www.firewaterframework.org/schema/firewater"
-       xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
        http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd">
 
     <fw:dispatcher id="dispatcher">
-        <fw:route pattern="/photos" mapper="photosMapper"/>
-        <fw:route pattern="/owners/{ownerID}/photos" mapper="photosMapper"/>
-        <fw:route pattern="/photos/{photoID}" mapper="photoMapper"/>
-        <fw:route pattern="/owners" mapper="ownersMapper"/>
-        <fw:route pattern="/owners/{ownerID}" mapper="ownerMapper"/>
+        <fw:route pattern="/photos" get-mapper="photosGetMapper" put-mapper="photosPutMapper"/>
+        <fw:route pattern="/owners/{ownerID}/photos" get-mapper="photosGetMapper" put-mapper="photosPutMapper"/>
+        <fw:route pattern="/photos/{photoID}" get-mapper="photoGetMapper"
+                    delete-mapper="photoDeleteMapper" post-mapper="photoPostMapper"/>
+        <fw:route pattern="/owners" get-mapper="ownersGetMapper" put-mapper="ownersPutMapper"/>
+        <fw:route pattern="/owners/{ownerID}" get-mapper="ownerGetMapper"
+                    delete-mapper="ownerDeleteMapper" post-mapper="ownerPostMapper"/>
     </fw:dispatcher>
-
-<!--
-create table photo(id int auto_increment primary key, flickr_id int, link varchar(128), thumbnail varchar(128),
-    owner_id int, title varchar(255));
-create table owner(id int auto_increment primary key , flickr_id varchar(32), name varchar(64));
-create table photo_tag(photo_id int, tag varchar(255));
--->
-
-    <fw:method-mapper id="photosMapper">
-        <fw:get mapper="photosGetMapper"/>
-        <fw:put mapper="photosPutMapper"/>
-    </fw:method-mapper>
 
     <fw:query-mapper id="photosGetMapper"
             default-page-size="5"
@@ -94,12 +82,6 @@ create table photo_tag(photo_id int, tag varchar(255));
         </fw:fields>
     </fw:update-mapper>
 
-    <fw:method-mapper id="photoMapper">
-        <fw:get mapper="photoGetMapper"/>
-        <fw:post mapper="photoPostMapper"/>
-        <fw:delete mapper="photoDeleteMapper"/>
-    </fw:method-mapper>
-
     <fw:query-mapper id="photoGetMapper"
             data-source="dataSource">
         <fw:query>
@@ -157,11 +139,6 @@ create table photo_tag(photo_id int, tag varchar(255));
         </fw:fields>
     </fw:update-mapper>
 
-    <fw:method-mapper id="ownersMapper">
-        <fw:get mapper="ownersGetMapper"/>
-        <fw:put mapper="ownersPutMapper"/>
-    </fw:method-mapper>
-
     <fw:query-mapper id="ownersGetMapper"
             data-source="dataSource"
             default-page-size="20"
@@ -190,12 +167,6 @@ create table photo_tag(photo_id int, tag varchar(255));
             <fw:sql-string name="name"/>
         </fw:fields>
     </fw:update-mapper>
-
-    <fw:method-mapper id="ownerMapper">
-        <fw:get mapper="ownerGetMapper"/>
-        <fw:post mapper="ownerPostMapper"/>
-        <fw:delete mapper="ownerDeleteMapper"/>
-    </fw:method-mapper>
 
     <fw:query-mapper id="ownerGetMapper" data-source="dataSource">
         <fw:query>
@@ -226,7 +197,6 @@ create table photo_tag(photo_id int, tag varchar(255));
             <fw:sql-number name="ownerID"/>
             <fw:sql-string name="flickr_id"/>
             <fw:sql-string name="name"/>
-
         </fw:fields>
     </fw:update-mapper>
 
