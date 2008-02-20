@@ -175,7 +175,7 @@
         </xsd:sequence>
         <xsd:attribute name="id-column" use="required" type="xsd:string"/>
         <xsd:attribute name="sub-resource" type="xsd:string"/>
-        <xsd:attribute name="tag-name" type="xsd:string"/>
+        <xsd:attribute name="tagname" type="xsd:string"/>
         <xsd:attribute name="url-prefix" type="xsd:string"/>
     </xsd:complexType>
 

@@ -122,202 +122,124 @@ create table photo_tag(photo_id int, tag varchar(255));
         </fw:pivot-tree>
     </fw:query-mapper>
 
-    <bean id="photoPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="queries">
-            <list>
-                <value>
-                    update photo set id = $photoID$
-                        $if(thumbnail)$
-                            , thumbnail = $thumbnail$
-                        $endif$
-                        $if(link)$
-                            , link = $link$
-                        $endif$
-                        $if(title)$
-                            , title = $title$
-                        $endif$
-                        where id = $photoID$
-                </value>
-            </list>
-        </property>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="fields">
-            <map>
-                <entry key="link">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
-                        <property name="required" value="true"/>
-                    </bean>
-                </entry>
-                <entry key="thumbnail">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral">
-                        <property name="required" value="true"/>
-                    </bean>
-                </entry>
-                <entry key="title">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
-                </entry>
-                <entry key="photoID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:update-mapper id="photoPostMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                update photo set id = $photoID$
+                    $if(thumbnail)$
+                        , thumbnail = $thumbnail$
+                    $endif$
+                    $if(link)$
+                        , link = $link$
+                    $endif$
+                    $if(title)$
+                        , title = $title$
+                    $endif$
+                    where id = $photoID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal name="link"/>
+            <fw:sql-literal name="thumbnail"/>
+            <fw:sql-literal name="title"/>
+            <fw:sql-number name="photoID" required="true"/>
+        </fw:fields>
+    </fw:update-mapper>
 
-    <bean id="photoDeleteMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="queries">
-            <list>
-                <value>
-                    delete from photo where id = $photoID$
-                </value>
-            </list>
-        </property>
-        <property name="fields">
-            <map>
-                <entry key="photoID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:update-mapper id="photoDeleteMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                delete from photo where id = $photoID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="photoID" required="true"/>
+        </fw:fields>
+    </fw:update-mapper>
 
-    <bean id="ownersMapper" class="org.firewaterframework.mappers.MethodMapper">
-        <property name="getMapper" ref="ownersGetMapper"/>
-        <property name="putMapper" ref="ownersPutMapper"/>
-    </bean>
+    <fw:method-mapper id="ownersMapper">
+        <fw:get mapper="ownersGetMapper"/>
+        <fw:put mapper="ownersPutMapper"/>
+    </fw:method-mapper>
 
-    <bean id="ownersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="defaultPageSize" value="20"/>
-        <property name="pageWindowSize" value="10"/>
-        <property name="query" value="select id as owner, name from owner $page_token$"/>
-        <property name="pivotTreeBuilder">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="owner"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>name</value>
-                    </list>
-                </property>
-                <property name="tagname" value="owners"/>
-            </bean>
-        </property>
-    </bean>
+    <fw:query-mapper id="ownersGetMapper"
+            data-source="dataSource"
+            default-page-size="20"
+            page-window-size="10">
+        <fw:query>select id as owner, name from owner $page_token$</fw:query>
+        <fw:pivot-tree id-column="owner">
+            <fw:attribute-columns>name</fw:attribute-columns>
+        </fw:pivot-tree>
+    </fw:query-mapper>
 
-    <bean id="ownersPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="queries">
-            <list>
-                <value>
-                    insert into owner( flickr_id, name ) values
-                    (
-                        $if(flickr_id)$
-                            $flickr_id$
-                        $else$
-                            null
-                        $endif$, $name$ )
-                </value>
-            </list>
-        </property>
-        <property name="fields">
-            <map>
-                <entry key="flickr_id">
-                    <bean class="org.firewaterframework.mappers.validation.SqlLiteral"/>
-                </entry>
-                <entry key="name">
-                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
-    
-    <bean id="ownerMapper" class="org.firewaterframework.mappers.MethodMapper">
-        <property name="getMapper" ref="ownerGetMapper"/>
-        <property name="postMapper" ref="ownerPostMapper"/>
-        <property name="deleteMapper" ref="ownerDeleteMapper"/>
-    </bean>
+    <fw:update-mapper id="ownersPutMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                insert into owner( flickr_id, name ) values
+                (
+                    $if(flickr_id)$
+                        $flickr_id$
+                    $else$
+                        null
+                    $endif$, $name$
+                )
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal name="flickr_id"/>
+            <fw:sql-string name="name"/>
+        </fw:fields>
+    </fw:update-mapper>
 
-    <bean id="ownerGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="query">
-            <value>
-                select id as owner, name, flickr_id from owner where id = $ownerID$
-            </value>
-        </property>
-        <property name="pivotTreeBuilder">
-            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="owner"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>name</value>
-                        <value>flickr_id</value>
-                    </list>
-                </property>
-            </bean>
-        </property>
-        <property name="fields">
-            <map>
-                <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:method-mapper id="ownerMapper">
+        <fw:get mapper="ownerGetMapper"/>
+        <fw:post mapper="ownerPostMapper"/>
+        <fw:delete mapper="ownerDeleteMapper"/>
+    </fw:method-mapper>
 
-    <bean id="ownerPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="queries">
-            <list>
-                <value>
-                    update owner set id = $ownerID$
-                        $if(flickr_id)$
-                            , flickr_id = $flickr_id$
-                        $endif$
-                        $if(name)$
-                            , name = $name$
-                        $endif$
-                    where id = $ownerID$
-                </value>
-            </list>
-        </property>
-        <property name="fields">
-            <map>
-                <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-                <entry key="flickr_id">
-                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
-                </entry>
-                <entry key="name">
-                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:query-mapper id="ownerGetMapper" data-source="dataSource">
+        <fw:query>
+            select id as owner, name, flickr_id from owner where id = $ownerID$
+        </fw:query>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+        <fw:pivot-tree id-column="owner">
+            <fw:attribute-columns>name,flickr_id</fw:attribute-columns>
+        </fw:pivot-tree>
+    </fw:query-mapper>
 
-    <bean id="ownerDeleteMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="queries">
-            <list>
-                <value>
-                    delete from owner where id = $ownerID$
-                </value>
-                <value>
-                    delete from photo_tag where photo_id = (select id from photo where owner_id = $ownerID$)
-                </value>
-                <value>
-                    delete from photo where owner_id = $ownerID$
-                </value>
-            </list>
-        </property>
-        <property name="fields">
-            <map>
-                <entry key="ownerID">
-                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+    <fw:update-mapper id="ownerPostMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                update owner set id = $ownerID$
+                    $if(flickr_id)$
+                        , flickr_id = $flickr_id$
+                    $endif$
+                    $if(name)$
+                        , name = $name$
+                    $endif$
+                where id = $ownerID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+            <fw:sql-string name="flickr_id"/>
+            <fw:sql-string name="name"/>
+
+        </fw:fields>
+    </fw:update-mapper>
+
+    <fw:update-mapper id="ownerDeleteMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>delete from owner where id = $ownerID$</fw:query>
+            <fw:query>delete from photo_tag where photo_id = (select id from photo where owner_id = $ownerID$)</fw:query>
+            <fw:query>delete from photo where owner_id = $ownerID$</fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+    </fw:update-mapper>
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
