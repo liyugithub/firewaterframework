@@ -20,7 +20,11 @@
                                     <xsd:complexContent>
                                         <xsd:extension base="beans:identifiedType">
                                             <xsd:attribute name="pattern" type="xsd:string" use="required"/>
-                                            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+                                            <xsd:attribute name="mapper" type="xsd:string"/>
+                                            <xsd:attribute name="get-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="put-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="post-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="delete-mapper" type="xsd:string"/>
                                         </xsd:extension>
                                     </xsd:complexContent>
                                 </xsd:complexType>
