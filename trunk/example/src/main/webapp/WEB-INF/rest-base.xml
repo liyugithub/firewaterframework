@@ -14,8 +14,7 @@
         <fw:route pattern="/photos/{photoID}" get-mapper="photoGetMapper"
                     delete-mapper="photoDeleteMapper" post-mapper="photoPostMapper"/>
         <fw:route pattern="/owners" get-mapper="ownersGetMapper" put-mapper="ownersPutMapper"/>
-        <fw:route pattern="/owners/{ownerID}" get-mapper="ownerGetMapper"
-                    delete-mapper="ownerDeleteMapper" post-mapper="ownerPostMapper"/>
+        <fw:route pattern="/owners/{ownerID}" mapper="ownerMethodMapper"/>
     </fw:dispatcher>
 
     <fw:query-mapper id="photosGetMapper"
@@ -167,6 +166,14 @@
             <fw:sql-string name="name"/>
         </fw:fields>
     </fw:update-mapper>
+
+    <!-- just an example of the fw:method-mapper - this is optional - all the method declarations
+        can be put in the fw:dispatcher bean -->
+    <fw:method-mapper id="ownerMethodMapper">
+        <fw:get mapper="ownerGetMapper"/>
+        <fw:post mapper="ownerPostMapper"/>
+        <fw:delete mapper="ownerDelteMapper"/>
+    </fw:method-mapper>
 
     <fw:query-mapper id="ownerGetMapper" data-source="dataSource">
         <fw:query>
