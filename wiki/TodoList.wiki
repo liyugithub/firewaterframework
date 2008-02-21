@@ -10,9 +10,11 @@ To Do:
   * ThreadPoolMapper - a mapper that manages a fixed set of sub-Mappers for memory intensive web service operations (eg. mixing down an MP3 or resizing an image)
   * ImageMapper - a mapper that can perform a number of image processing operations
   * MailMergeMapper - a mapper that merges a StringTemplate mail template and sends it out with JavaMail
+  * DelegatingMapper - an abstract mapper that can be used as an extension point for building mappers that call out to other mappers as part of their logic.  Contains convenience methods for calling the Firewater RouteMapper, Jython scripting hooks, and processing XML results.
   * Example - we need a better example application - Pet Clinic?
   * integrate the XMLVerbatim XSL transformation for all document output
   * relationships in result documents are currently ad-hoc - is there a Resource abstraction that could represent link URLs in results documents?
+  * master / detail support.  the difference between master(list summary) and detail(individual resource detail) style REST URLs is currently ad-hoc - should the framework have explicit support for these common patterns?
   * logos, homepage - one page landing HTML for project
   * user guide / FAQ 
   * add Firewater to main Maven repo
