@@ -2,7 +2,7 @@ To Do:
   * integrate new Spring 2.5 security stuff (nee Acegi Security)
   * handle multi-part POSTs to temporary files
   * JythonMapper - allow web services to be scripted in Jython (or Ruby?)
-  * custom Spring 2.5 Firewater XML schema
+  * DONE!   -   custom Spring 2.5 Firewater XML schema
   * start on intellij plug-in
   * FirewaterMVC - why not use Firewater + StringTemplate + Jython for MVC stuff?
   * PivotTreeBuilder improvements - better collections
