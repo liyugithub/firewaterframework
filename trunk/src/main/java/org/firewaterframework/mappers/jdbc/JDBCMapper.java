@@ -9,13 +9,11 @@ package org.firewaterframework.mappers.jdbc;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
+import javax.sql.DataSource;
+
 import org.firewaterframework.mappers.Mapper;
-import org.firewaterframework.rest.Request;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.dom4j.Element;
-
-import javax.sql.DataSource;
 
 /**
  * The superclass for all Mappers that handle JDBC database resources.  This class expects

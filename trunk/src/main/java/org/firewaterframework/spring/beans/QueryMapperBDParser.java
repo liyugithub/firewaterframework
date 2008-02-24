@@ -1,17 +1,16 @@
 package org.firewaterframework.spring.beans;
 
-import org.springframework.beans.factory.xml.ParserContext;
+import org.firewaterframework.mappers.jdbc.PivotTreeBuilder;
+import org.firewaterframework.mappers.jdbc.QueryMapper;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-import org.firewaterframework.mappers.jdbc.QueryMapper;
-import org.firewaterframework.mappers.jdbc.PivotTreeBuilder;
+import org.w3c.dom.NodeList;
 
 /**
  * Created by IntelliJ IDEA.
