@@ -1,18 +1,13 @@
 package org.firewaterframework.spring.beans;
 
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
+import org.firewaterframework.mappers.MethodMapper;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.util.xml.DomUtils;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.firewaterframework.mappers.RouteMapper;
-import org.firewaterframework.mappers.MethodMapper;
-
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.

@@ -149,7 +149,11 @@ public class Request
                         {
                             value = value.substring( 1, value.length() - 1 );
                         }
-                        value = URLDecoder.decode( value );
+                        try{
+                        	value = URLDecoder.decode( value, "ISO-8859-1" );
+                        }catch(Exception e){
+                        	throw new RuntimeException( "ISO-8859-1 Character encoding not supported." );
+                        }
                     }
                     this.getArgs().addPropertyValue( key, value );
                 }
