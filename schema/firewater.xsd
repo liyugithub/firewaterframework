@@ -36,6 +36,20 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="resource">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="pivot-attribute" type="xsd:string" use="required"/>
+                    <xsd:attribute name="url-prefix" type="xsd:string"/>
+                    <xsd:attribute name="sub-resource" type="xsd:boolean"/>
+                    <xsd:attribute name="tagname" type="xsd:string"/>
+                    <xsd:attribute name="attributes" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="query-mapper">
         <xsd:complexType>
             <xsd:complexContent>
@@ -172,15 +186,12 @@
 
     <xsd:complexType name="pivotTreeType">
         <xsd:sequence>
-            <xsd:element name="attribute-columns" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="column-mappings" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:choice maxOccurs="unbounded" minOccurs="0">
                 <xsd:element name="pivot-tree" type="pivotTreeType"/>
             </xsd:choice>
         </xsd:sequence>
-        <xsd:attribute name="id-column" use="required" type="xsd:string"/>
-        <xsd:attribute name="sub-resource" type="xsd:string"/>
-        <xsd:attribute name="tagname" type="xsd:string"/>
-        <xsd:attribute name="url-prefix" type="xsd:string"/>
+        <xsd:attribute name="resource" type="xsd:string" use="required"/>
     </xsd:complexType>
 
 </xsd:schema>

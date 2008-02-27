@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
-import org.springframework.beans.factory.annotation.Required;
 
 import java.util.*;
 
@@ -62,7 +61,7 @@ import java.util.*;
  *                      <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
  *                          <property name="idColumn" value="pet"/>
  *                          <property name="urlPrefix" value="pets"/>
- *                          <property name="attributeColumns">
+ *                          <property name="columnMappings">
  *                              <map>
  *                                  <entry key="pet_name" value="name"/>
  *                              </map>
@@ -98,36 +97,9 @@ public class PivotTreeBuilder
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected static DocumentFactory df = DocumentFactory.getInstance();
 
-    /**
-     * The name of the XML tag to generate for this resource.  If unset, the tag will default to the idColumn value.
-     */
-    protected String tagname;
+    protected ResourceDescriptor resourceDescriptor;
 
-    /**
-     * This flag sets wheter or not to include the parent PivotTreeBuilder's URL as a prefix in this nodes generated
-     * URL.
-     */
-    protected boolean subResource = true;
-
-    /**
-     * this property is used to select a name for the 'url' attribute for each node.  As
-     * the builder recursively descends the subnodes, URLs are built up by concatenating
-     * their id and urlPrefix values.
-     */
-    protected String urlPrefix;
-
-    /**
-     * this identifies which column in the result set to 'pivot' on.  It is typically
-     * the primary key column of the underlying table/resource
-     */
-    protected String idColumn;
-
-    /**
-     * this maps the name of the column in the result set (the key) with the name of
-     * the XML attribute in the result.  If the names are exactly the same, use the
-     * convenience method setAttributeColumnList()
-     */
-    protected Map<String,String> attributeColumns;
+    protected Map<String,String> columnMappings;
 
     /**
      * these represent the PivotTreeBuilders that will create the subnodes in our
@@ -167,19 +139,18 @@ public class PivotTreeBuilder
      */
     protected Element processNextElement( List<Map<String,Object>> rows, int[] rowNum, String url )
     {
-        // stop if we are out of rows
         int startRowIndex = rowNum[0];
         Map<String,Object> startRow = rows.get( startRowIndex );
-        Object topPivotValue = startRow.get(idColumn);
-        Element rval = df.createElement( getTagname() );
+        Object topPivotValue = startRow.get( resourceDescriptor.pivotAttribute);
+        Element rval = df.createElement( resourceDescriptor.getTagname() );
 
-        if( urlPrefix != null )
+        if( resourceDescriptor.urlPrefix != null )
         {
-            if( !subResource )
+            if( !resourceDescriptor.subResource )
             {
                 url = "";
             }
-            url += '/' + urlPrefix + '/' + topPivotValue.toString();
+            url += '/' + resourceDescriptor.urlPrefix + '/' + topPivotValue.toString();
             rval.addAttribute( "url", url );
         }
 
@@ -191,10 +162,10 @@ public class PivotTreeBuilder
         {
             for( PivotTreeBuilder subNode: subNodes )
             {
-                String subNodeColumnName = subNode.getIdColumn();
+                String subNodeColumnName = subNode.resourceDescriptor.getPivotAttribute();
                 Set<Object> processedSubPivotValues = new HashSet<Object>();
                 int rangeRowIndex = startRowIndex;
-                while( rangeRowIndex < rows.size() && topPivotValue.equals( rows.get( rangeRowIndex ).get(idColumn)))
+                while( rangeRowIndex < rows.size() && topPivotValue.equals( rows.get( rangeRowIndex ).get(resourceDescriptor.pivotAttribute)))
                 {
                     Object subPivotValue = rows.get( rangeRowIndex ).get( subNodeColumnName );
                     if( subPivotValue != null && !processedSubPivotValues.contains( subPivotValue ))
@@ -208,7 +179,7 @@ public class PivotTreeBuilder
         }
 
         // we're done processing the row range for this pivot value - skip over all of the rest of the rows in this range
-        while( rowNum[0] < rows.size() && topPivotValue.equals( rows.get( rowNum[0] ).get(idColumn)))
+        while( rowNum[0] < rows.size() && topPivotValue.equals( rows.get( rowNum[0] ).get(resourceDescriptor.pivotAttribute)))
         {
             rowNum[0]++;
         }
@@ -218,7 +189,7 @@ public class PivotTreeBuilder
 
     protected void processCurrentRow( Map<String,Object> row, Element element )
     {
-        Object pivotValue = row.get(idColumn);
+        Object pivotValue = row.get(resourceDescriptor.pivotAttribute);
 
         if( pivotValue != null )
         {
@@ -226,73 +197,54 @@ public class PivotTreeBuilder
             element.addAttribute( "id", pivotValue.toString() );
 
             // now process the attributes
-            if( attributeColumns != null )
+            if( resourceDescriptor.attributes != null )
             {
-                for( Map.Entry<String,String> attributeEntry: attributeColumns.entrySet() )
+                for( String attribute: resourceDescriptor.attributes )
                 {
-                    String attributeColumnName = attributeEntry.getKey();
-                    String attributeTagName = attributeEntry.getValue();
-                    if( attributeTagName == null ) attributeTagName = attributeColumnName;
-                    Object attributeValue = row.get( attributeColumnName );
+                    // check if there is a column mapping
+                    String columnName = attribute;
+                    if( columnMappings != null && columnMappings.containsKey( attribute ))
+                    {
+                        columnName = columnMappings.get( attribute );
+                    }
 
+                    // check if there is a value in the row for this attribute
+                    Object attributeValue = row.get( columnName );
                     if( attributeValue != null )
                     {
-                        element.addAttribute( attributeTagName, attributeValue.toString() );
+                        element.addAttribute( attribute, attributeValue.toString() );
                     }
                 }
             }
         }
     }
 
-    public String getIdColumn() {
-        return idColumn;
+    public Map<String,String> getColumnMappings() {
+        return columnMappings;
     }
 
-    @Required
-    public void setIdColumn(String idColumn) {
-        this.idColumn = idColumn;
-    }
-
-    public Map<String,String> getAttributeColumns() {
-        return attributeColumns;
-    }
-
-    public void setAttributeColumns(Map<String,String> attributeColumns) {
-        this.attributeColumns = attributeColumns;
-    }
-
-    public void setAttributeColumnList(List<String> attributeColumns)
-    {
-        this.attributeColumns = new HashMap<String,String>();
-        for( String attr: attributeColumns )
-        {
-            this.attributeColumns.put( attr, null );
-        }
+    public void setColumnMappings(Map<String,String> columnMappings) {
+        this.columnMappings = columnMappings;
     }
 
     /**
-     * Parse a list of comma-separated attributes.  Each attribute is
-     * optionally a colon-separated key value pair.  In this case the result set
-     * column should be before the colon and the name of the attribute for
+     * Parse a list of comma-separated key:value pairs.  The result set
+     * column should be before the colon and the name of the resource attribute for
      * the resulting XML should be after.
      *
-     * eg.  setAttributeColumnString( "name,creation-date:date,age" )
-     * @param attributeColumns
+     * eg.  setAttributeColumnString( "owner-name:name,creation-date:date,owner-age:age" )
+     * @param columnMappingsCsv
      */
-    public void setAttributeColumnString( String attributeColumns )
+    public void setColumnMappingsString( String columnMappingsCsv )
     {
-        this.attributeColumns = new HashMap<String,String>();
-        String[] keyValues = attributeColumns.split( "," );
+        this.columnMappings = new HashMap<String,String>();
+        String[] keyValues = columnMappingsCsv.split( "," );
         for( String keyValue: keyValues )
         {
             String[] entry = keyValue.split( ":" );
             if( entry.length > 1 )
             {
-                this.attributeColumns.put( entry[0], entry[1] );
-            }
-            else
-            {
-                this.attributeColumns.put( entry[0], null );
+                this.columnMappings.put( entry[1], entry[0] );
             }
         }
     }
@@ -306,34 +258,11 @@ public class PivotTreeBuilder
         this.subNodes = subNodes;
     }
 
-    public String getTagname() {
-        if( tagname == null )
-        {
-            return idColumn;
-        }
-        else
-        {
-            return tagname;
-        }
+    public ResourceDescriptor getResourceDescriptor() {
+        return resourceDescriptor;
     }
 
-    public void setTagname(String tagname) {
-        this.tagname = tagname;
-    }
-
-    public String getUrlPrefix() {
-        return urlPrefix;
-    }
-
-    public void setUrlPrefix(String urlPrefix) {
-        this.urlPrefix = urlPrefix;
-    }
-
-    public boolean isSubResource() {
-        return subResource;
-    }
-
-    public void setSubResource(boolean subResource) {
-        this.subResource = subResource;
+    public void setResourceDescriptor(ResourceDescriptor resourceDescriptor) {
+        this.resourceDescriptor = resourceDescriptor;
     }
 }

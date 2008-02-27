@@ -21,6 +21,18 @@
         </constructor-arg>
     </bean>
 
+    <bean id="userResource" class="org.firewaterframework.mappers.jdbc.ResourceDescriptor">
+        <property name="pivotAttribute" value="user"/>
+        <property name="urlPrefix" value="users"/>
+        <property name="attributesString" value="first_name,last_name,email,city,state,zip"/>
+    </bean>
+
+    <bean id="petResource" class="org.firewaterframework.mappers.jdbc.ResourceDescriptor">
+        <property name="pivotAttribute" value="pet"/>
+        <property name="urlPrefix" value="pets"/>
+        <property name="attributesString" value="name,type"/>
+    </bean>
+
     <bean id="usersMapper" class="org.firewaterframework.mappers.MethodMapper">
         <property name="getMapper" ref="usersGetMapper"/>
         <property name="putMapper" ref="usersPutMapper"/>
@@ -74,28 +86,12 @@
         </property>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="user"/>
-                <property name="urlPrefix" value="users"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>first_name</value>
-                        <value>last_name</value>
-                        <value>email</value>
-                        <value>city</value>
-                        <value>role</value>
-                    </list>
-                </property>
+                <property name="resourceDescriptor" ref="userResource"/>
                 <property name="subNodes">
                     <list>
                         <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                            <property name="idColumn" value="pet"/>
-                            <property name="urlPrefix" value="pets"/>
-                            <property name="attributeColumns">
-                                <map>
-                                    <entry key="pet_name" value="name"/>
-                                    <entry key="pet_type" value="type"/>
-                                </map>
-                            </property>
+                            <property name="resourceDescriptor" ref="petResource"/>
+                            <property name="columnMappingsString" value="pet_name:name,pet_type:type"/>
                         </bean>
                     </list>
                 </property>
@@ -170,18 +166,7 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
-                <property name="idColumn" value="user"/>
-                <property name="urlPrefix" value="users"/>
-                <property name="attributeColumnList">
-                    <list>
-                        <value>first_name</value>
-                        <value>last_name</value>
-                        <value>email</value>
-                        <value>city</value>
-                        <value>state</value>
-                        <value>zip</value>
-                    </list>
-                </property>
+                <property name="resourceDescriptor" ref="userResource"/>
             </bean>
         </property>
     </bean>

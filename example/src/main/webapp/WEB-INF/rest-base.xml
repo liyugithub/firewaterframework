@@ -17,6 +17,12 @@
         <fw:route pattern="/owners/{ownerID}" mapper="ownerMethodMapper"/>
     </fw:dispatcher>
 
+    <fw:resource id="photoResource" pivot-attribute="photo" url-prefix="photos" attributes="thumbnail,title,link"/>
+
+    <fw:resource id="ownerResource" pivot-attribute="owner" attributes="name,flickr_id"/>
+
+    <fw:resource id="tagResource" pivot-attribute="tag"/>
+
     <fw:query-mapper id="photosGetMapper"
             default-page-size="5"
             page-window-size="10"
@@ -44,12 +50,11 @@
             <fw:sql-string-list name="tags"/>
             <fw:sql-number name="ownerID"/>
         </fw:fields>
-        <fw:pivot-tree id-column="photo" url-prefix="photos">
-            <fw:attribute-columns>thumbnail,title</fw:attribute-columns>
-            <fw:pivot-tree id-column="owner" url-prefix="owners" sub-resource="false">
-                <fw:attribute-columns>owner_name:name</fw:attribute-columns>
+        <fw:pivot-tree resource="photoResource">
+            <fw:pivot-tree resource="ownerResource">
+                <fw:column-mappings>owner_name:name</fw:column-mappings>
             </fw:pivot-tree>
-            <fw:pivot-tree id-column="tag"/>
+            <fw:pivot-tree resource="tagResource"/>
         </fw:pivot-tree>
     </fw:query-mapper>
 
@@ -94,12 +99,11 @@
         <fw:fields>
             <fw:sql-number name="photoID"/>
         </fw:fields>
-        <fw:pivot-tree id-column="photo" url-prefix="photos">
-            <fw:attribute-columns>thumbnail,title,link</fw:attribute-columns>
-            <fw:pivot-tree id-column="owner" url-prefix="owners">
-                <fw:attribute-columns>owner_name:name</fw:attribute-columns>
+        <fw:pivot-tree resource="photoResource">
+            <fw:pivot-tree resource="ownerResource">
+                <fw:column-mappings>owner_name:name</fw:column-mappings>
             </fw:pivot-tree>
-            <fw:pivot-tree id-column="tag"/>
+            <fw:pivot-tree resource="tagResource"/>
         </fw:pivot-tree>
     </fw:query-mapper>
 
@@ -143,9 +147,7 @@
             default-page-size="20"
             page-window-size="10">
         <fw:query>select id as owner, name from owner $page_token$</fw:query>
-        <fw:pivot-tree id-column="owner">
-            <fw:attribute-columns>name</fw:attribute-columns>
-        </fw:pivot-tree>
+        <fw:pivot-tree resource="ownerResource"/>
     </fw:query-mapper>
 
     <fw:update-mapper id="ownersPutMapper" data-source="dataSource">
@@ -172,7 +174,7 @@
     <fw:method-mapper id="ownerMethodMapper">
         <fw:get mapper="ownerGetMapper"/>
         <fw:post mapper="ownerPostMapper"/>
-        <fw:delete mapper="ownerDelteMapper"/>
+        <fw:delete mapper="ownerDeleteMapper"/>
     </fw:method-mapper>
 
     <fw:query-mapper id="ownerGetMapper" data-source="dataSource">
@@ -182,9 +184,7 @@
         <fw:fields>
             <fw:sql-number name="ownerID"/>
         </fw:fields>
-        <fw:pivot-tree id-column="owner">
-            <fw:attribute-columns>name,flickr_id</fw:attribute-columns>
-        </fw:pivot-tree>
+        <fw:pivot-tree resource="ownerResource"/>
     </fw:query-mapper>
 
     <fw:update-mapper id="ownerPostMapper" data-source="dataSource">

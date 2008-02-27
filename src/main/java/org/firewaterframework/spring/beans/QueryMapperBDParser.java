@@ -83,9 +83,9 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
                 if( childElements.item(i) instanceof Element )
                 {
                     Element child = (Element)childElements.item(i);
-                    if( "attribute-columns".equals( child.getLocalName() ))
+                    if( "column-mappings".equals( child.getLocalName() ))
                     {
-                        pivotTable.addPropertyValue( "attributeColumnString", child.getTextContent() );
+                        pivotTable.addPropertyValue( "columnMappingsString", child.getTextContent() );
                     }
                     else if( "pivot-tree".equals( child.getLocalName() ))
                     {
@@ -99,16 +99,9 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
             }
         }
 
-        NamedNodeMap attributes = element.getAttributes();
-        if( attributes != null )
-        {
-            for( int i = 0; i < attributes.getLength(); ++i )
-            {
-                Attr child = (Attr) attributes.item(i);
-                pivotTable.addPropertyValue( xmlStringToBeanName( child.getLocalName() ), child.getValue() );
-            }
-        }
-
+        String resource = element.getAttribute( "resource" );
+        RuntimeBeanReference ref = new RuntimeBeanReference( resource );
+        pivotTable.addPropertyValue( "resourceDescriptor", ref );
         return pivotTable.getBeanDefinition();
     }
 
