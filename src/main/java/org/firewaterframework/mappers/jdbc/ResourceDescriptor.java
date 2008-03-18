@@ -1,8 +1,6 @@
 package org.firewaterframework.mappers.jdbc;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,8 +35,17 @@ public class ResourceDescriptor
      */
     String pivotAttribute;
 
+    /**
+     * The references are links to other resources and come in two forms: absolute and relative.  An absolute
+     * reference will point to the base URL of the resource, while the relative reference URL will be build
+     * by adding a suffix to the current resource's URL.
+     */
+    Map<String,ResourceDescriptor> absoluteReferences;
+    Map<String,String> relativeReferences;
+
     List<String> attributes;
 
+    //TODO: we need to trim the whitespace off of the attributeString
     public void setAttributesString( String csvString )
     {
         attributes = new ArrayList<String>();
@@ -51,6 +58,39 @@ public class ResourceDescriptor
 
     public void setAttributes(List<String> attributes) {
         this.attributes = attributes;
+    }
+
+    public Map<String, ResourceDescriptor> getAbsoluteReferences() {
+        return absoluteReferences;
+    }
+
+    public void setAbsoluteReferences(Map<String, ResourceDescriptor> absoluteReferences) {
+        this.absoluteReferences = absoluteReferences;
+    }
+
+    public void setRelativeReferencesString( String csvString )
+    {
+        relativeReferences = new HashMap<String,String>();
+        for( String ref: Arrays.asList(csvString.split(",")) )
+        {
+            String[] mapElements = ref.split( ":" );
+            if( mapElements.length > 1 )
+            {
+                relativeReferences.put( mapElements[0].trim(), mapElements[1].trim() );
+            }
+            else
+            {
+                relativeReferences.put( mapElements[0].trim(), mapElements[0].trim() );
+            }
+        }
+    }
+
+    public Map<String, String> getRelativeReferences() {
+        return relativeReferences;
+    }
+
+    public void setRelativeReferences(Map<String, String> relativeReferences) {
+        this.relativeReferences = relativeReferences;
     }
 
     public String getTagname()

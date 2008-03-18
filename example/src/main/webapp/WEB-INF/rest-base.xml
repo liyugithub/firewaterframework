@@ -18,9 +18,7 @@
     </fw:dispatcher>
 
     <fw:resource id="photoResource" pivot-attribute="photo" url-prefix="photos" attributes="thumbnail,title,link"/>
-
     <fw:resource id="ownerResource" pivot-attribute="owner" attributes="name,flickr_id"/>
-
     <fw:resource id="tagResource" pivot-attribute="tag"/>
 
     <fw:query-mapper id="photosGetMapper"
