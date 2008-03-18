@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
+import org.firewaterframework.util.PrettyDocumentFactory;
 
 import java.util.*;
 
@@ -95,11 +96,9 @@ import java.util.*;
 public class PivotTreeBuilder
 {
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
-    protected static DocumentFactory df = DocumentFactory.getInstance();
-
     protected ResourceDescriptor resourceDescriptor;
-
     protected Map<String,String> columnMappings;
+    protected static final PrettyDocumentFactory df = PrettyDocumentFactory.getInstance();
 
     /**
      * these represent the PivotTreeBuilders that will create the subnodes in our
@@ -155,7 +154,7 @@ public class PivotTreeBuilder
         }
 
         // first, populate the current node with the properties and attributes pertaining to it
-        processCurrentRow( startRow, rval );
+        processCurrentRow( startRow, rval, url );
 
         // process each subnode, loop through the current range for this node and recurse on each unique subnode
         if( subNodes != null )
@@ -187,7 +186,7 @@ public class PivotTreeBuilder
         return rval;
     }
 
-    protected void processCurrentRow( Map<String,Object> row, Element element )
+    protected void processCurrentRow( Map<String,Object> row, Element element, String url )
     {
         Object pivotValue = row.get(resourceDescriptor.pivotAttribute);
 
@@ -214,6 +213,15 @@ public class PivotTreeBuilder
                     {
                         element.addAttribute( attribute, attributeValue.toString() );
                     }
+                }
+            }
+
+            if( resourceDescriptor.relativeReferences != null )
+            {
+                // process relative references
+                for( Map.Entry<String,String> relativeRef: resourceDescriptor.relativeReferences.entrySet() )
+                {
+                    element.addAttribute( relativeRef.getKey() + "URL", url + '/' + relativeRef.getValue() );
                 }
             }
         }

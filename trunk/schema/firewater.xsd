@@ -45,6 +45,7 @@
                     <xsd:attribute name="sub-resource" type="xsd:boolean"/>
                     <xsd:attribute name="tagname" type="xsd:string"/>
                     <xsd:attribute name="attributes" type="xsd:string"/>
+                    <xsd:attribute name="relativeReferences" type="xsd:string"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

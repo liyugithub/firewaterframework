@@ -53,6 +53,12 @@ public class ResourceBDParser extends AbstractMapperBDParser
             resource.addPropertyValue( "attributesString", value );
         }
 
+        value = element.getAttribute( "relativeReferences" );
+        if( value != null && value.length() > 0 )
+        {
+            resource.addPropertyValue( "relativeReferencesString", value );
+        }
+
         return resource.getBeanDefinition();
     }
 }

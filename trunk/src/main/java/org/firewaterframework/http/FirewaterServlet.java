@@ -14,23 +14,30 @@ package org.firewaterframework.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.firewaterframework.WSException;
+import org.firewaterframework.util.PrettyDocumentFactory;
 import org.firewaterframework.mappers.Mapper;
+import org.firewaterframework.mappers.jdbc.ResourceDescriptor;
 import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.antlr.stringtemplate.StringTemplateGroup;
+import org.antlr.stringtemplate.StringTemplate;
+import org.dom4j.DocumentFactory;
+import org.dom4j.ProcessingInstruction;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  */
@@ -39,20 +46,22 @@ public class FirewaterServlet extends HttpServlet
     protected static final Log log = LogFactory.getLog( FirewaterServlet.class );
     public static final String METHOD_ARG = "_method";
     public static final String DISPATCHER_BEAN_NAME = "dispatcher";
+    public static final String XML_VERBATIM_URL = "/__prettyprint__";
     protected Mapper dispatcher;
+    protected String verbatimXsl;
 
     @Override
     public void init( ServletConfig config ) throws ServletException
     {
         super.init( config );
 
+        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext( config.getServletContext() );
         String dispatcherBeanName = config.getInitParameter( DISPATCHER_BEAN_NAME );
         if( dispatcherBeanName == null )
         {
             dispatcherBeanName = DISPATCHER_BEAN_NAME;
         }
 
-        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext( config.getServletContext() );
         dispatcher = (Mapper)ctx.getBean( dispatcherBeanName );
         if( dispatcher == null )
         {
@@ -71,14 +80,24 @@ public class FirewaterServlet extends HttpServlet
         try
         {
             String url = request.getPathInfo();
+
+            if( verbatimXsl == null ) createPrettyPrintXsl( request );
+
+            // handle the case where we are fetching the XML_VERBATIM_URL
+            if( XML_VERBATIM_URL.equalsIgnoreCase( url ))
+            {
+                response.setContentType( "text/xsl" );
+                response.getWriter().write( verbatimXsl );
+                response.getWriter().flush();
+                return;
+            }
+
+            // process the REST/HTTP method
             String methodString = request.getParameter( METHOD_ARG );
-            Method method = Method.GET;
+            Method method;
             if( methodString == null )
             {
-                if( request.getMethod().equalsIgnoreCase( "POST" ))
-                {
-                    method = Method.POST;
-                }
+                method = Method.getMethod( request.getMethod() );
             }
             else
             {
@@ -144,4 +163,46 @@ public class FirewaterServlet extends HttpServlet
         pw.close();
         log.error( writer.getBuffer().toString() );
     }
+
+    protected void createPrettyPrintXsl( HttpServletRequest req )
+    {
+        WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext( this.getServletContext() );
+        String contextServletPath = req.getContextPath() + req.getServletPath();
+
+        // add the pretty print processing instruction for XML output
+        Map<String,String> instructions = new HashMap<String,String>();
+        instructions.put( "type", "text/xsl" );
+        instructions.put( "href", contextServletPath + XML_VERBATIM_URL );
+        ProcessingInstruction processingInstruction =
+                DocumentFactory.getInstance().createProcessingInstruction( "xml-stylesheet", instructions );
+        PrettyDocumentFactory.getInstance().setProcessingInstruction( processingInstruction );
+
+        // load the xmlverbatim.xsl file as a template
+        StringTemplateGroup group = new StringTemplateGroup("xslgroup");
+        StringTemplate st = group.getInstanceOf("META-INF/xmlverbatim");
+
+        // find all of the resources in our Spring config - these need to be merged with the XSL file
+        String[] resources = ctx.getBeanNamesForType( ResourceDescriptor.class );
+        Set<String> resourceUrlPatterns = new HashSet<String>();
+        resourceUrlPatterns.add( "url" );
+        for( String resourceName: resources )
+        {
+            ResourceDescriptor resource = (ResourceDescriptor)ctx.getBean( resourceName );
+            if( resource != null && resource.getRelativeReferences() != null )
+            {
+                for( String entry: resource.getRelativeReferences().keySet() )
+                {
+                    resourceUrlPatterns.add( entry + "URL" );
+                }
+            }
+        }
+
+        // set the servlet context name in the XSL
+        st.setAttribute( "context", contextServletPath );
+
+        // merge the template
+        st.setAttribute( "resources", resourceUrlPatterns );
+        verbatimXsl = st.toString();
+    }
+
 }

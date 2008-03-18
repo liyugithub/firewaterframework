@@ -41,7 +41,7 @@ public class QueryMapper extends JDBCMapper
     protected String query;
     protected PivotTreeBuilder pivotTreeBuilder;
     protected Integer defaultPageSize = 0; // paging is off by default
-    protected Integer pageWindowSize = -1;
+    protected Integer pageWindowSize = 10;
     protected String pageCountPivot;
     protected String pageTokenFragment = "limit $page_size$ offset $low_row$";
 
