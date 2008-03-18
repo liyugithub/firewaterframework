@@ -1,18 +1,18 @@
 #How to build Firewater from sources.
 
-= Download Maven2 =
+=== Download Maven2 ===
 From http://maven.apache.org/download.html
 
-= Install Maven2 =
+=== Install Maven2 ===
 Follow the instructions in the Maven install guide.
 
-= Edit your PATH variable to include the 'mvn' program =
+=== Edit your PATH variable to include the 'mvn' program ===
 On Windows, you will right click on 'My Computer' and hit the 'Advanced' button where you should find a way of finding and editing the 'PATH' Environment Variable.  
 
-= Check Firewater out of source control =
+=== Check Firewater out of source control ===
 see http://code.google.com/p/firewaterframework/source
 
-= Build it! =
+=== Build it! ===
   * go to the firewaterframework directory in a command tool (Xterm, cygwin, dos prompt)
   * type `mvn clean install`
 
@@ -20,7 +20,7 @@ The first time you build the framework, it will take a while - maven is download
 
 You should find a JAR file in the 'target' directory.
 
-= Build the Example =
+=== Build the Example ===
 {{{
   cd example
   mvn clean package jetty:run
