@@ -12,6 +12,11 @@ On Windows, you will right click on 'My Computer' and hit the 'Advanced' button 
 === Check Firewater out of source control ===
 see http://code.google.com/p/firewaterframework/source
 
+or just type:
+{{{
+svn checkout http://firewaterframework.googlecode.com/svn/trunk/ firewaterframework-read-only
+}}}
+
 === Build it! ===
   * go to the firewaterframework directory in a command tool (Xterm, cygwin, dos prompt)
   * type `mvn clean install`
