@@ -5,7 +5,7 @@
     <groupId>org.firewaterframework</groupId>
     <artifactId>firewater</artifactId>
     <packaging>jar</packaging>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <name>Firewater</name>
 
     <scm>
