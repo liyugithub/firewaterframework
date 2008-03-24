@@ -20,13 +20,16 @@ public class SqlLiteral extends MapPropertyEditor
 {
     public void setAsText(String text) throws IllegalArgumentException
     {
-        if( text.matches( "[0-9][0-9]*" ))
+        if( checkRequired( text ))
         {
-            this.setValue( text );
-        }
-        else
-        {
-            this.setValue( '\'' + text.replaceAll( "\'", "''" ) + '\'' );
+            if( text.matches( "[0-9][0-9]*" ))
+            {
+                this.setValue( text );
+            }
+            else
+            {
+                this.setValue( '\'' + text.replaceAll( "\'", "''" ) + '\'' );
+            }
         }
     }
 

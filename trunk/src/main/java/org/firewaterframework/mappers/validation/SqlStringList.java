@@ -21,13 +21,16 @@ public class SqlStringList extends MapPropertyEditor
 {
     public void setAsText(String text) throws IllegalArgumentException
     {
-        List<String> newValue = new ArrayList<String>();
-        String[] segments = text.split( "," );
-        for( String segment: segments )
+        if( checkRequired( text ))
         {
-            String stripSegment = segment.trim();
-            newValue.add( '\'' + stripSegment.replaceAll( "\'", "''" )+ '\'' );
+            List<String> newValue = new ArrayList<String>();
+            String[] segments = text.split( "," );
+            for( String segment: segments )
+            {
+                String stripSegment = segment.trim();
+                newValue.add( '\'' + stripSegment.replaceAll( "\'", "''" )+ '\'' );
+            }
+            setValue( newValue );
         }
-        setValue( newValue );
     }
 }

@@ -39,6 +39,15 @@ public abstract class MapPropertyEditor extends PropertyEditorSupport
         return this.getClass().getName();
     }
 
+    protected boolean checkRequired( Object value )
+    {
+        if( required && value == null )
+        {
+            throw new IllegalArgumentException( "Value required for field" );
+        }
+        return value != null;
+    }
+
     public boolean isRequired() {
         return required;
     }

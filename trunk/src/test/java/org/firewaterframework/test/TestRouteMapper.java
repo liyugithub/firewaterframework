@@ -266,6 +266,27 @@ public class TestRouteMapper extends Assert
         assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@city" ).getStringValue(), "miami" );
     }
 
+    @Test
+    public void testSimplePostWithOptionalArgs()
+    {
+        Map<String,Object> args = new HashMap<String,Object>();
+        args.put( "first_name","timby" );
+
+        // write the user to the database
+        Response response = post( "/users/2", args );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+
+        // fetch it back and ensure it's there
+        response = get( "/users/2" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        Document rval = response.toDocument();
+        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "timby" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@last_name" ).getStringValue(), "summers" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@email" ).getStringValue(), "crap@shoot.com" );
+        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@city" ).getStringValue(), "miami" );
+    }
+
     private Response get( String url )
     {
         return handle( Method.GET, url, null );

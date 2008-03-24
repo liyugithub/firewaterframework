@@ -22,20 +22,23 @@ public class SqlLiteralList extends MapPropertyEditor
 {
     public void setAsText(String text) throws IllegalArgumentException
     {
-        List<String> newValue = new ArrayList<String>();
-        String[] segments = text.split( "," );
-        for( String segment: segments )
+        if( checkRequired( text ))
         {
-            String stripSegment = segment.trim();
-            if( stripSegment.matches( "[0-9][0-9]*" ))
+            List<String> newValue = new ArrayList<String>();
+            String[] segments = text.split( "," );
+            for( String segment: segments )
             {
-                newValue.add( stripSegment );
+                String stripSegment = segment.trim();
+                if( stripSegment.matches( "[0-9][0-9]*" ))
+                {
+                    newValue.add( stripSegment );
+                }
+                else
+                {
+                    newValue.add( '\'' + stripSegment.replaceAll( "\'", "''" ) + '\'' );
+                }
             }
-            else
-            {
-                newValue.add( '\'' + stripSegment.replaceAll( "\'", "''" ) + '\'' );
-            }
+            setValue( newValue );
         }
-        setValue( newValue );
     }
 }

@@ -128,7 +128,15 @@ public class UpdateMapper extends JDBCMapper
             // apply template
             for( Map.Entry<String, Object> entry: args.entrySet() )
             {
-                queryTemplate.setAttribute( entry.getKey(), entry.getValue() );
+                if( entry.getValue() == null )
+                {
+                    // try to set the null value in the sql
+                    queryTemplate.setAttribute( entry.getKey(), "null" );
+                }
+                else
+                {
+                    queryTemplate.setAttribute( entry.getKey(), entry.getValue() );
+                }
             }
 
             // also substitute all keys that have been generated thusfar

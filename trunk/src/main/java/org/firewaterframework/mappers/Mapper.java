@@ -19,6 +19,8 @@ import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.ObjectError;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -116,8 +118,25 @@ public abstract class Mapper
      */
     protected Map<String,Object> bind( Request request ) throws WSException
     {
+
+        // all declared fields should be bound - so create a new Map with the values of the incoming args.  This will
+        // also ensure that any undeclared args in the request are ignored by the handling mapper.
+        /*MutablePropertyValues args = new MutablePropertyValues();
+        for( String field: fields.keySet() )
+        {
+            PropertyValue value = request.getArgs().getPropertyValue( field );
+            if( value == null )
+            {
+                args.addPropertyValue( field, null );
+            }
+            else
+            {
+                args.addPropertyValue( value );
+            }
+        }*/
+        
         DataBinder dataBinder = getDataBinder();
-        dataBinder.bind( request.getArgs() );
+        dataBinder.bind( new MutablePropertyValues( request.getArgs() ));
         if( dataBinder.getBindingResult().getErrorCount() > 0 )
         {
             StringBuffer errors = new StringBuffer( "Request Parameter error: " );
