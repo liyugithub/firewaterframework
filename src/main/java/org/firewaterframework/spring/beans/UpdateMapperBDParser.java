@@ -82,7 +82,7 @@ public class UpdateMapperBDParser extends AbstractMapperBDParser
                     {
                         BeanDefinitionBuilder query = BeanDefinitionBuilder.rootBeanDefinition( QueryHolder.class );
                         query.addPropertyValue( "query", child.getTextContent() );
-                        String keyName = child.getAttribute( "keyName" );
+                        String keyName = child.getAttribute( "key-name" );
                         if( keyName != null )
                         {
                             query.addPropertyValue( "keyName", keyName );

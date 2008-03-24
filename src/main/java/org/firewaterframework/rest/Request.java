@@ -35,7 +35,7 @@ public class Request
      * @param url the URL of the Requested resource
      * @param method GET, PUT, POST, DELETE, HEAD or OPTIONS
      * @param args the arguments
-     * @param argsAlreadyProcessed this is true for those callers that have already URLdecoded tthe query string
+     * @param argsAlreadyProcessed this is true for those callers that have already URLdecoded the query string
      *  into the args (ie. Servlets).  If you want the Request object
      *  to decode and parse the query string, set this to false (default behaviour of the other constructors).
      */

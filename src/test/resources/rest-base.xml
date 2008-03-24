@@ -164,6 +164,13 @@
             from user u
             where u.id = $userID$"/>
         <property name="dataSource" ref="dataSource"/>
+        <property name="fields">
+            <map>
+                <entry key="userID">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+            </map>
+        </property>
         <property name="pivotTreeBuilder">
             <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
                 <property name="resourceDescriptor" ref="userResource"/>
@@ -178,13 +185,49 @@
                 <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
                     <property name="query">
                         <value>
-                            update user set (first_name, last_name, city, state, email, zip) =
-                                ('$first_name$', '$last_name$', '$city$','$state$', '$email$', $zip$)
+                            update user set
+                                id = id
+                                $if(first_name)$, first_name = $first_name$ $endif$
+                                $if(last_name)$, last_name = $last_name$ $endif$
+                                $if(city)$, city = $city$ $endif$
+                                $if(state)$, state = $state$ $endif$
+                                $if(email)$, email = $email$ $endif$
+                                $if(zip)$, zip = $zip$ $endif$
                             where id = $userID$
                         </value>
                     </property>
                 </bean>
             </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="first_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="last_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="city">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="state">
+                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                        <property name="pattern" value="[A-Z][A-Z]"/>
+                        <property name="quote" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="email">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="zip">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+                <entry key="userID">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber">
+                        <property name="required" value="true"/>
+                    </bean>
+                </entry>
+            </map>
         </property>
     </bean>
 

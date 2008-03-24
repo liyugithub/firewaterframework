@@ -17,6 +17,9 @@ public class SqlString extends MapPropertyEditor
 {
     public void setAsText(String text) throws IllegalArgumentException
     {
-        this.setValue( '\'' + text.replaceAll( "\'", "''" ) + '\'' );
+        if( checkRequired( text ))
+        {
+            this.setValue( '\'' + text.replaceAll( "\'", "''" ) + '\'' );
+        }
     }
 }

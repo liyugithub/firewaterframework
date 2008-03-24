@@ -23,13 +23,16 @@ public class Pattern extends MapPropertyEditor
 
     public void setAsText(String text) throws IllegalArgumentException
     {
-        if( text.matches( pattern ))
+        if( checkRequired( text ))
         {
-            this.setValue( quoteText( text ));
-        }
-        else
-        {
-            throw new IllegalArgumentException( "Text: " + text + " does not match specified pattern: " + pattern );
+            if( text.matches( pattern ))
+            {
+                this.setValue( quoteText( text ));
+            }
+            else
+            {
+                throw new IllegalArgumentException( "Text: " + text + " does not match specified pattern: " + pattern );
+            }
         }
     }
 
