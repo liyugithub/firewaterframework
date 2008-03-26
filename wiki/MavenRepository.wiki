@@ -1,7 +1,6 @@
-
 = Including Firewater as a Maven dependency =
 
-The latest Firewater SNAPSHOT build is easily accessed using [http://maven.apache.org/download.html Maven2].  You will need to include a <repository> tag in your pom.xml file as well as a <dependency> tag for including Firewater:
+The latest Firewater SNAPSHOT build is easily accessed using [http://maven.apache.org/download.html Maven2].  You will need to include a <repository> tag in your pom.xml file (or your ~/.m2/settings.xml file) as well as a <dependency> tag for including Firewater:
 {{{
 <project ....>
   <build>
