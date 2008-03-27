@@ -22,6 +22,8 @@ import java.io.Writer;
  */
 public class DocumentResponse extends Response
 {
+    public static final String BASE_URL = "base-url";
+
     protected Document document;
 
     public DocumentResponse( Status status, MIMEType mimeType )
@@ -61,5 +63,15 @@ public class DocumentResponse extends Response
     public void write( Writer out ) throws IOException
     {
         document.write( out );
+    }
+
+    @Override
+    public void setBaseURL( String baseURL )
+    {
+        super.setBaseURL( baseURL );
+        if( document != null )
+        {
+            document.getRootElement().addAttribute( BASE_URL, baseURL );
+        }
     }
 }

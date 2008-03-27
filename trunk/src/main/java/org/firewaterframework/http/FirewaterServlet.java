@@ -79,12 +79,12 @@ public class FirewaterServlet extends HttpServlet
     {
         try
         {
-            String url = request.getPathInfo();
+            String path = request.getPathInfo();
 
             if( verbatimXsl == null ) createPrettyPrintXsl( request );
 
             // handle the case where we are fetching the XML_VERBATIM_URL
-            if( XML_VERBATIM_URL.equalsIgnoreCase( url ))
+            if( XML_VERBATIM_URL.equalsIgnoreCase( path ))
             {
                 response.setContentType( "text/xsl" );
                 response.getWriter().write( verbatimXsl );
@@ -117,9 +117,14 @@ public class FirewaterServlet extends HttpServlet
                     args.put( entry.getKey(), entry.getValue()[0] );
                 }
             }
-            Request restRequest = new Request( url, method, args, true );
+            Request restRequest = new Request( path, method, args, true );
             Response restResponse = dispatcher.handle( restRequest );
 
+            // encode the baseUrl into the response - it is the requestURI - path
+            String uri = request.getRequestURI();
+            String baseURL = uri.substring( 0, uri.indexOf( path ));
+            restResponse.setBaseURL( baseURL );
+            
             response.setStatus( restResponse.getStatus().getCode() );
             response.setHeader( "Cache-Control", "no-cache" );
             response.setHeader( "Pragma", "no-cache" );

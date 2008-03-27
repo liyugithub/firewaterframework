@@ -25,6 +25,7 @@ public class Response
 
     protected MIMEType mimeType;
     protected Status status;
+    protected String baseURL;
 
     public Response( Status status, MIMEType mimeType )
     {
@@ -56,6 +57,14 @@ public class Response
 
     public void setMimeType(MIMEType mimeType) {
         this.mimeType = mimeType;
+    }
+
+    public String getBaseURL() {
+        return baseURL;
+    }
+
+    public void setBaseURL(String baseURL) {
+        this.baseURL = baseURL;
     }
 
     public Document toDocument()
