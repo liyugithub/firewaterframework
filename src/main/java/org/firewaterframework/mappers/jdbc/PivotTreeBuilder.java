@@ -34,10 +34,10 @@ import java.util.*;
  * Assuming we have a tables Owner(id, name, address, city, state, zip) and
  * Pet(id, name, owner), here's an example of configuring a PivotTreeBuilder
  * using a Spring configuration to fetch all users and their pets (mapped to
- * the <code>/users</code> URL:
+ * the <code>/users</code> URL):
  * <p>
  * <code><pre>
- *   <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+ * <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
  *      <property name="query">
  *          <value>
  *              select  u.id as user, p.id as pet, p.name as pet_name, u.name as name,
@@ -73,12 +73,12 @@ import java.util.*;
  *         </bean>
  *     </property>
  * </bean>
- *</pre></code
+ * </pre></code>
  * <p>
  * After a sucessful call to the GET method on the <code>/users</code> resource.  We
  * would get a Response with an XML payload like:
  * <p>
- * <code><pre>
+ * <code>
  * <result>
  *     <user url="/users/4" id="4" name="jim morrison" city="new york">
  *         <pet url="/users/4/pets/3" id="3" name="flopsy"/>
@@ -90,8 +90,8 @@ import java.util.*;
  *         <pet url="/users/1/pets/1" id="1" name="wixie"/>
  *         <pet url="/users/1/pets/4" id="4" name="mixie"/>
  *     </user>
- *  </result>
- *
+ * </result>
+ * </code>
  */
 public class PivotTreeBuilder
 {
