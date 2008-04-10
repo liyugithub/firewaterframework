@@ -119,19 +119,21 @@ public class FirewaterServlet extends HttpServlet
             }
             Request restRequest = new Request( path, method, args, true );
             Response restResponse = dispatcher.handle( restRequest );
-
-            // encode the baseUrl into the response - it is the requestURI - path
-            String uri = request.getRequestURI();
-            String baseURL = uri.substring( 0, uri.indexOf( path ));
-            restResponse.setBaseURL( baseURL );
             
-            response.setStatus( restResponse.getStatus().getCode() );
-            response.setHeader( "Cache-Control", "no-cache" );
-            response.setHeader( "Pragma", "no-cache" );
-            response.setDateHeader( "Expires", 0 );
-            response.setContentType( restResponse.getMimeType().getType() );
-            restResponse.write( response.getWriter() );
-            response.getWriter().flush();
+            if( restResponse != null ){
+	            // encode the baseUrl into the response - it is the requestURI - path
+	            String uri = request.getRequestURI();
+	            String baseURL = uri.substring( 0, uri.indexOf( path ));
+	            restResponse.setBaseURL( baseURL );
+	            
+	            response.setStatus( restResponse.getStatus().getCode() );
+	            response.setHeader( "Cache-Control", "no-cache" );
+	            response.setHeader( "Pragma", "no-cache" );
+	            response.setDateHeader( "Expires", 0 );
+	            response.setContentType( restResponse.getMimeType().getType() );
+	            restResponse.write( response.getWriter() );
+	            response.getWriter().flush();
+            }
         }
         catch( WSException e )
         {
