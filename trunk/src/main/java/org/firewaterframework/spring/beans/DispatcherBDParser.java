@@ -21,6 +21,9 @@ import org.w3c.dom.Element;
  */
 public class DispatcherBDParser extends AbstractMapperBDParser
 {
+
+    protected static final String[] METHOD_MAPPER_REFS = new String[]{"get-mapper","put-mapper","post-mapper","delete-mapper","cache"};
+
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext)
     {
         BeanDefinitionBuilder dispatcher = BeanDefinitionBuilder.rootBeanDefinition(RouteMapper.class);
@@ -42,13 +45,19 @@ public class DispatcherBDParser extends AbstractMapperBDParser
                 {
                     BeanDefinitionBuilder methodMapper = BeanDefinitionBuilder.rootBeanDefinition( MethodMapper.class );
 
-                    for( String mapper: new String[]{"get-mapper","put-mapper","post-mapper","delete-mapper"})
+                    for( String mapper: METHOD_MAPPER_REFS )
                     {
                         mapperRefID = child.getAttribute( mapper );
                         if( mapperRefID != null  && mapperRefID.length() > 0 )
                         {
                             methodMapper.addPropertyReference( xmlStringToBeanName( mapper ), mapperRefID );
                         }
+                    }
+
+                    String cacheGroups = child.getAttribute( "cache-groups" );
+                    if( cacheGroups != null && cacheGroups.length() > 0 )
+                    {
+                        methodMapper.addPropertyValue( "cacheGroups", cacheGroups );
                     }
                     urlMap.put( key, methodMapper.getBeanDefinition() );
                 }

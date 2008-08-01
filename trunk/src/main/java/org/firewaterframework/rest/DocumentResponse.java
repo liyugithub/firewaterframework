@@ -25,6 +25,7 @@ public class DocumentResponse extends Response
     public static final String BASE_URL = "base-url";
 
     protected Document document;
+    private String contentCache = null;
 
     public DocumentResponse( Status status, MIMEType mimeType )
     {
@@ -62,7 +63,21 @@ public class DocumentResponse extends Response
     @Override
     public void write( Writer out ) throws IOException
     {
-        document.write( out );
+        if( contentCache == null )
+        {
+            contentCache = document.asXML();
+        }
+        out.write( contentCache );
+    }
+
+    @Override
+    public int getContentLength()
+    {
+        if( contentCache == null )
+        {
+            contentCache = document.asXML();
+        }
+        return contentCache.length();
     }
 
     @Override

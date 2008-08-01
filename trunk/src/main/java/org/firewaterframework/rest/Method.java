@@ -56,4 +56,10 @@ public class Method
     public String getMethod() {
         return method;
     }
+
+    @Override
+    public String toString()
+    {
+        return method;
+    }
 }

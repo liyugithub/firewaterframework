@@ -21,8 +21,6 @@ import java.io.Writer;
  */
 public class Response
 {
-    protected static DocumentFactory df = DocumentFactory.getInstance();
-
     protected MIMEType mimeType;
     protected Status status;
     protected String baseURL;
@@ -70,6 +68,11 @@ public class Response
     public Document toDocument()
     {
         return null;
+    }
+
+    public int getContentLength()
+    {
+        return 0;
     }
 
     public void write( Writer out ) throws IOException

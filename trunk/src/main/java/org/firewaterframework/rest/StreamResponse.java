@@ -10,6 +10,7 @@ package org.firewaterframework.rest;
     and limitations under the License.
 */
 import org.dom4j.Document;
+import org.dom4j.DocumentFactory;
 
 import java.io.*;
 
@@ -20,6 +21,8 @@ import java.io.*;
  */
 public class StreamResponse extends Response
 {
+    protected static DocumentFactory df = DocumentFactory.getInstance();
+    
     protected PrintWriter writer;
     protected ByteArrayOutputStream stream;
 

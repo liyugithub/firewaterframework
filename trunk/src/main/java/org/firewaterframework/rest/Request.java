@@ -13,6 +13,7 @@ import org.springframework.beans.MutablePropertyValues;
 
 import java.net.URLDecoder;
 import java.util.Map;
+import java.util.List;
 
 /**
  * This class is the Request object for the Firewater framework.  It contains the request URL, any arguments,
@@ -20,10 +21,43 @@ import java.util.Map;
  */
 public class Request
 {
+    public enum Header
+    {
+        Accept(),
+        AcceptEncoding("Accept-Encoding"),
+        Authorization(),
+        CacheControl("Cache-Control"),
+        Date(),
+        Host(),
+        IfMatch("If-Match"),
+        IfModifiedSince("If-Modified-Since"),
+        IfNoneMatch("If-None-Match"),
+        IfUnmodifiedSince("If-Unmodified-Since"),
+        UserAgent("User-Agent");
+
+        private final String attributeName;
+
+        Header()
+        {
+            attributeName = this.name();
+        }
+
+        Header( String attributeName )
+        {
+            this.attributeName = attributeName;
+        }
+
+        public String getAttributeName()
+        {
+            return attributeName;
+        }
+    }
+
     protected String url;
     protected String baseUrl;
     protected MutablePropertyValues args;
     protected Method method;
+    protected String idString;
 
     /**
      * Create a new REST request.  Note that incoming URLs are not complete URLs, but rather logical URLs
@@ -82,11 +116,6 @@ public class Request
     public Request( String url, Method method )
     {
         this( url, method, (MutablePropertyValues)null, false );
-    }
-
-    public String getIdString()
-    {
-        return url;
     }
 
     public String getUrl() {
@@ -182,4 +211,12 @@ public class Request
     public void setMethod( Method method ) {
         this.method = method;
     }
+
+    public String getParameter( String parameterName )
+    {
+        if( args.getPropertyValue( parameterName ) != null )
+            return args.getPropertyValue( parameterName ).getValue().toString();
+        return null;
+    }
+
 }
