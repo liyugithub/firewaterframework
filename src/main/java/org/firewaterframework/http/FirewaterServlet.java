@@ -117,10 +117,20 @@ public class FirewaterServlet extends HttpServlet
                     args.put( entry.getKey(), entry.getValue()[0] );
                 }
             }
-            Request restRequest = new Request( path, method, args, true );
+
+            String idURL = path;
+            if( request.getQueryString() != null )
+            {
+                idURL += '?' + request.getQueryString();
+            }
+
+            Request restRequest = new Request( idURL, method, args, true );
+            log.info( "handling REST request: " + restRequest.getMethod() + " " + restRequest.getUrl() );
             Response restResponse = dispatcher.handle( restRequest );
-            
-            if( restResponse != null ){
+
+            if( restResponse != null )
+            {
+                log.info( "Response for: " + restRequest.getMethod() + " " + restRequest.getUrl() + " " + restResponse.getStatus().getCode() );
 	            // encode the baseUrl into the response - it is the requestURI - path
 	            String uri = request.getRequestURI();
 	            String baseURL = uri.substring( 0, uri.indexOf( path ));
@@ -131,8 +141,13 @@ public class FirewaterServlet extends HttpServlet
 	            response.setHeader( "Pragma", "no-cache" );
 	            response.setDateHeader( "Expires", 0 );
 	            response.setContentType( restResponse.getMimeType().getType() );
-	            restResponse.write( response.getWriter() );
-	            response.getWriter().flush();
+                response.setContentLength( restResponse.getContentLength() );
+                restResponse.write( response.getWriter() );
+                response.getWriter().flush();
+            }
+            else
+            {
+                throw new WSException( "Empty response", Status.STATUS_SERVER_ERROR );
             }
         }
         catch( WSException e )
@@ -195,11 +210,25 @@ public class FirewaterServlet extends HttpServlet
         for( String resourceName: resources )
         {
             ResourceDescriptor resource = (ResourceDescriptor)ctx.getBean( resourceName );
+
+            // add all the relative resources - these are links
             if( resource != null && resource.getRelativeReferences() != null )
             {
                 for( String entry: resource.getRelativeReferences().keySet() )
                 {
                     resourceUrlPatterns.add( entry + "URL" );
+                }
+            }
+
+            // also add any property that ends in 'URL'
+            if( resource != null && resource.getAttributes() != null )
+            {
+                for( String entry: resource.getAttributes() )
+                {
+                    if( entry.endsWith( "URL" ))
+                    {
+                        resourceUrlPatterns.add( entry );
+                    }
                 }
             }
         }

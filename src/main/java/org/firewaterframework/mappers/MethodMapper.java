@@ -15,6 +15,8 @@ import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.opensymphony.oscache.base.EntryRefreshPolicy;
 import com.opensymphony.oscache.base.NeedsRefreshException;
@@ -37,6 +39,8 @@ import com.opensymphony.oscache.general.GeneralCacheAdministrator;
  */
 public class MethodMapper extends Mapper
 {
+    protected static final Log log = LogFactory.getLog( RouteMapper.class );
+
     protected GeneralCacheAdministrator cache;
     protected String[] cacheGroups;
     protected EntryRefreshPolicy entryRefreshPolicy;
@@ -260,6 +264,10 @@ public class MethodMapper extends Mapper
      */
     public void setCacheGroups(String[] cacheGroups) {
         this.cacheGroups = cacheGroups;
+    }
+
+    public void setCacheGroups(String cacheGroups) {
+        this.cacheGroups = cacheGroups.split( "," );
     }
 
     public EntryRefreshPolicy getEntryRefreshPolicy() {

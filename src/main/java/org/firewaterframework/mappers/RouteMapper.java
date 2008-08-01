@@ -14,6 +14,8 @@ import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
 import org.springframework.beans.factory.annotation.Required;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +55,7 @@ import java.util.Map;
  */
 public class RouteMapper extends Mapper
 {
+    protected static final Log log = LogFactory.getLog( RouteMapper.class );
     /**
      * A Map keyed by URL patterns who's values are the delegate Mapper objects to
      * handle matching incoming Request URLs
@@ -78,6 +81,7 @@ public class RouteMapper extends Mapper
      */
     public Response handle( Request request )
     {
+
         // handle OPTIONS on the root RouteMapper (me)
         if( request.getUrl() == null || request.getUrl().equals( "/" ) )
         {

@@ -25,6 +25,8 @@
                                             <xsd:attribute name="put-mapper" type="xsd:string"/>
                                             <xsd:attribute name="post-mapper" type="xsd:string"/>
                                             <xsd:attribute name="delete-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="cache" type="xsd:string"/>
+                                            <xsd:attribute name="cache-groups" type="xsd:string"/>
                                         </xsd:extension>
                                     </xsd:complexContent>
                                 </xsd:complexType>
@@ -58,7 +60,7 @@
                     <xsd:sequence>
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
                             <xsd:element name="fields" type="fieldType"/>
-                            <xsd:element name="pivot-tree" type="pivotTreeType"/>
+                            <xsd:element name="pivot-tree" type="pivotTreeType" minOccurs="1" maxOccurs="1"/>
                             <xsd:element name="query" maxOccurs="1">
                                 <xsd:complexType>
                                     <xsd:simpleContent>

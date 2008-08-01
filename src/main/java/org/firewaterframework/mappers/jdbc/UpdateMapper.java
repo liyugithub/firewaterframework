@@ -20,6 +20,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +41,7 @@ import java.util.Map;
  */
 public class UpdateMapper extends JDBCMapper
 {
+    protected static final Log log = LogFactory.getLog( QueryMapper.class );
     public static DocumentFactory factory = DocumentFactory.getInstance();
 
     protected QueryHolder[] queries;
@@ -75,22 +78,29 @@ public class UpdateMapper extends JDBCMapper
 
                 KeyHolder keyHolder = new GeneratedKeyHolder();
 
-                Integer rowsAffected = template.update(
-                    new UpdateMapperStatementCreator( queryTemplate, translatedArgs, keys ),
-                    keyHolder );
+                UpdateMapperStatementCreator updateStatement =
+                        new UpdateMapperStatementCreator( queryTemplate, translatedArgs, keys );
 
-                Element element = root.addElement( "update" );
-                element.addAttribute( "rowsAffected", rowsAffected.toString() );
-                if( queryID != null )
+                // only execute the query if the query is non-empty
+                if( updateStatement.queryTemplate.toString().trim().length() > 0 )
                 {
-                    element.addAttribute( "updateID", queryID );
-                }
+                    Integer rowsAffected = template.update(
+                        updateStatement,
+                        keyHolder );
 
-                if( keyHolder.getKey() != null )
-                {
-                    Object key = keyHolder.getKeys().values().toArray()[0];
-                    keys.put( queryID, key );
-                    element.addAttribute( "key", key.toString() );
+                    Element element = root.addElement( "update" );
+                    element.addAttribute( "rowsAffected", rowsAffected.toString() );
+                    if( queryID != null )
+                    {
+                        element.addAttribute( "updateID", queryID );
+                    }
+
+                    if( keyHolder.getKey() != null )
+                    {
+                        Object key = keyHolder.getKeys().values().toArray()[0];
+                        keys.put( queryID, key );
+                        element.addAttribute( "key", key.toString() );
+                    }
                 }
             }
             DocumentResponse response = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
@@ -112,19 +122,16 @@ public class UpdateMapper extends JDBCMapper
      */
     public class UpdateMapperStatementCreator implements PreparedStatementCreator
     {
-        protected Map<String,Object> args;
-        protected StringTemplate queryTemplate;
-        protected Map<String,Object> keys;
+        Map<String,Object> args;
+        StringTemplate queryTemplate;
+        Map<String,Object> keys;
 
         public UpdateMapperStatementCreator( StringTemplate queryTemplate, Map<String,Object> args, Map<String,Object> keys )
         {
             this.args = args;
             this.queryTemplate = queryTemplate;
             this.keys = keys;
-        }
 
-        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
-        {
             // apply template
             for( Map.Entry<String, Object> entry: args.entrySet() )
             {
@@ -144,7 +151,11 @@ public class UpdateMapper extends JDBCMapper
             {
                 queryTemplate.setAttribute( key.getKey(), key.getValue() );
             }
+        }
 
+        public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
+        {
+            log.info( "Executing update: " + queryTemplate.toString() );            
             return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
         }
     }
