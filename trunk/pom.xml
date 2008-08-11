@@ -9,8 +9,8 @@
     <name>Firewater</name>
 
     <scm>
-        <connection>scm:svn:https://firewaterframework.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
+        <connection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:https://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
     </scm>
 
     <distributionManagement>
