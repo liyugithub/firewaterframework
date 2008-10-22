@@ -55,6 +55,12 @@ public class DocumentResponse extends Response
     }
 
     @Override
+    public String toString()
+    {
+        return document.asXML();
+    }
+
+    @Override
     public Document toDocument()
     {
         return document;

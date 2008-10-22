@@ -12,7 +12,6 @@ package org.firewaterframework.mappers.jdbc;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.firewaterframework.util.PrettyDocumentFactory;
 

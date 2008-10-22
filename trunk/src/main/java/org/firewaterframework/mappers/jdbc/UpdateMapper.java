@@ -95,7 +95,7 @@ public class UpdateMapper extends JDBCMapper
                         element.addAttribute( "updateID", queryID );
                     }
 
-                    if( keyHolder.getKey() != null )
+                    if( query.getKeyName() != null && query.getKeyName().length() > 0 && keyHolder.getKey() != null )
                     {
                         Object key = keyHolder.getKeys().values().toArray()[0];
                         keys.put( queryID, key );
@@ -155,7 +155,7 @@ public class UpdateMapper extends JDBCMapper
 
         public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
         {
-            log.info( "Executing update: " + queryTemplate.toString() );            
+            log.debug( "Executing update: " + queryTemplate.toString() );            
             return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
         }
     }

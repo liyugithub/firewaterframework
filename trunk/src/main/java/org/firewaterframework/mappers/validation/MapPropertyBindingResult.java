@@ -11,6 +11,7 @@ package org.firewaterframework.mappers.validation;
 */
 import org.springframework.beans.*;
 import org.springframework.validation.AbstractPropertyBindingResult;
+import org.springframework.core.MethodParameter;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyEditor;
@@ -184,6 +185,14 @@ public class MapPropertyBindingResult extends AbstractPropertyBindingResult
 
         public void setPropertyEditors(Map<String, MapPropertyEditor> propertyEditors) {
             this.propertyEditors = propertyEditors;
+        }
+
+        public Object convertIfNecessary(Object o, Class aClass) throws TypeMismatchException {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Object convertIfNecessary(Object o, Class aClass, MethodParameter methodParameter) throws TypeMismatchException {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

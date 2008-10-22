@@ -89,7 +89,7 @@ public class QueryMapper extends JDBCMapper
         List<Map<String,Object>> rows;
         try
         {
-            log.info( "Executing query: " + queryTemplate.toString() );
+            log.debug( "Executing query: " + queryTemplate.toString() );
 
             rows = template.queryForList( queryTemplate.toString() );
             Document resultDOM = pivotTreeBuilder.process( rows );

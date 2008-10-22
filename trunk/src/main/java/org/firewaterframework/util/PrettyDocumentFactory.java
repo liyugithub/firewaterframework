@@ -5,8 +5,6 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.ProcessingInstruction;
 
-import java.util.Map;
-
 public class PrettyDocumentFactory
 {
     protected static DocumentFactory df = DocumentFactory.getInstance();
