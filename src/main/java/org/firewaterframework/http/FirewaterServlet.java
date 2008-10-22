@@ -77,6 +77,7 @@ public class FirewaterServlet extends HttpServlet
     @Override
     public void service( HttpServletRequest request, HttpServletResponse response )
     {
+        long timeIn = System.currentTimeMillis();
         try
         {
             String path = request.getPathInfo();
@@ -118,13 +119,21 @@ public class FirewaterServlet extends HttpServlet
                 }
             }
 
+            // add any 'special' http request parameters
+            String requestURL = request.getRequestURL().toString();
+            int uriIndex = requestURL.indexOf( request.getRequestURI() );
+            String hostInfo = requestURL.substring( 0, uriIndex );
+            args.put( "_request_hostInfo", hostInfo );
+            args.put( "_request_remoteAddr", request.getRemoteHost() );
+
             String idURL = path;
             if( request.getQueryString() != null )
             {
                 idURL += '?' + request.getQueryString();
             }
 
-            Request restRequest = new Request( idURL, method, args, true );
+            Request restRequest = new Request( idURL, method, args, true ); 
+
             log.info( "handling REST request: " + restRequest.getMethod() + " " + restRequest.getUrl() );
             Response restResponse = dispatcher.handle( restRequest );
 
@@ -173,6 +182,10 @@ public class FirewaterServlet extends HttpServlet
                 response.sendError( 500, "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
             }
             catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
+        }
+        finally
+        {
+            log.info( "Firewater request completed in(ms): " + (Long)( System.currentTimeMillis() - timeIn ));
         }
     }
 

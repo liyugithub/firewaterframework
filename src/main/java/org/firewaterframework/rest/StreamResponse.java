@@ -51,6 +51,35 @@ public class StreamResponse extends Response
         this.writer = writer;
     }
 
+    public ByteArrayOutputStream getStream()
+    {
+        return stream;
+    }
+
+    public void setStream( ByteArrayOutputStream stream )
+    {
+        this.stream = stream;
+    }
+
+    public void setContent( Object value )
+    {
+        try
+        {
+            this.stream.write( value.toString().getBytes() );
+        }
+        catch( Exception e )
+        {
+            // swallow, gulp
+        }
+    }
+
+    @Override
+    public int getContentLength()
+    {
+        return stream.toString().length();
+    }
+
+
     @Override
     public Document toDocument()
     {
