@@ -45,6 +45,17 @@ public class QueryMapperBDParser extends AbstractMapperBDParser
                     {
                         queryMapper.addPropertyValue( "pivotTreeBuilder", parsePivotTree( child ));
                     }
+                    else if( "preferred-representation".equals( child.getLocalName() ))
+                    {
+                        try
+                        {
+                            queryMapper.addPropertyValue( "preferredRepresentation", Class.forName( child.getTextContent() ));
+                        }
+                        catch( Exception e )
+                        {
+                            // gulp
+                        }
+                    }
                 }
             }
         }

@@ -9,8 +9,7 @@ package org.firewaterframework.rest;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
+import org.firewaterframework.rest.representation.Representation;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -21,24 +20,24 @@ import java.io.Writer;
  */
 public class Response
 {
-    protected MIMEType mimeType;
     protected Status status;
     protected String baseURL;
+    protected Representation representation;
 
-    public Response( Status status, MIMEType mimeType )
+    public Response( Status status, Representation representation )
     {
         this.status = status;
-        this.mimeType = mimeType;
+        this.representation = representation;
     }
 
-    public Response( MIMEType mimeType )
+    public Response( Representation representation )
     {
-        this( Status.STATUS_OK, mimeType );
+        this( Status.STATUS_OK, representation );
     }
 
     public Response( Status status )
     {
-        this( status, MIMEType.text_plain );
+        this( status, null );
     }
 
     public Status getStatus() {
@@ -49,12 +48,26 @@ public class Response
         this.status = status;
     }
 
+    public Representation getRepresentation()
+    {
+        return representation;
+    }
+
+    public void setRepresentation( Representation representation )
+    {
+        this.representation = representation;
+    }
+
     public MIMEType getMimeType() {
-        return mimeType;
+        if( representation != null )
+        {
+            return representation.getMimeType();
+        }
+        return MIMEType.text_plain;
     }
 
     public void setMimeType(MIMEType mimeType) {
-        this.mimeType = mimeType;
+        if( representation != null ) representation.setMimeType( mimeType );
     }
 
     public String getBaseURL() {
@@ -65,17 +78,14 @@ public class Response
         this.baseURL = baseURL;
     }
 
-    public Document toDocument()
-    {
-        return null;
-    }
-
     public int getContentLength()
     {
+        if( representation != null ) return representation.getContentLength();
         return 0;
     }
 
     public void write( Writer out ) throws IOException
     {
+        if( representation != null ) representation.write( out );
     }
 }

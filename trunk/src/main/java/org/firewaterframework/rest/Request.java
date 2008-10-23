@@ -12,8 +12,7 @@ package org.firewaterframework.rest;
 import org.springframework.beans.MutablePropertyValues;
 
 import java.net.URLDecoder;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class is the Request object for the Firewater framework.  It contains the request URL, any arguments,
@@ -58,6 +57,7 @@ public class Request
     protected MutablePropertyValues args;
     protected Method method;
     protected String idString;
+    protected Map<Header,String> headers = new HashMap<Header,String>();
 
     /**
      * Create a new REST request.  Note that incoming URLs are not complete URLs, but rather logical URLs
@@ -106,7 +106,6 @@ public class Request
     {
         this( url, method, new MutablePropertyValues(args), argsAlreadyProcessed );
     }
-
 
     public Request( String url, Method method, Map args )
     {
@@ -217,5 +216,15 @@ public class Request
         if( args.getPropertyValue( parameterName ) != null )
             return args.getPropertyValue( parameterName ).getValue().toString();
         return null;
+    }
+
+    public Map<Header,String> getHeaders()
+    {
+        return headers;
+    }
+
+    public void addHeader( Header key, String value )
+    {
+        headers.put( key, value );
     }
 }

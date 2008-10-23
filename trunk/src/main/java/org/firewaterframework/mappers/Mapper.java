@@ -9,18 +9,19 @@ package org.firewaterframework.mappers;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.mappers.validation.MapDataBinder;
 import org.firewaterframework.mappers.validation.MapPropertyEditor;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
+import org.firewaterframework.rest.representation.Representation;
+import org.firewaterframework.rest.representation.XMLRepresentation;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.ObjectError;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,11 +41,13 @@ import java.util.Map;
  */
 public abstract class Mapper
 {
-    protected static DocumentFactory documentFactory = DocumentFactory.getInstance();
+    protected static final Log log = LogFactory.getLog( Mapper.class );
     /**
      * Allows for 'declaring' of Request parameters, and for their validation
      */
     protected Map<String, MapPropertyEditor> fields;
+    protected Map<String, Class> representations;
+    protected Class preferredRepresentation = XMLRepresentation.class;
 
     /**
      * Process a REST Request.  In subclasses this method will typically delegate to
@@ -55,15 +58,60 @@ public abstract class Mapper
      */
     public abstract Response handle( Request request );
 
-    public Element getOptions( Request request )
+    public Representation getRepresentation( Request request )
     {
-        Element rval = null;
+        try
+        {
+            if( representations != null && representations.size() > 0 )
+            {
+                String acceptString = request.getHeaders().get( Request.Header.Accept );
+
+                if( acceptString != null )
+                {
+                    // parse this - the accept header is a comma separated list of Mime types
+                    String[] mimes = acceptString.split( "," );
+
+                    // return the first one we find that matches our representations
+                    for( String mime: mimes )
+                    {
+                        if( representations.containsKey( mime ))
+                        {
+                            return (Representation)representations.get( mime ).newInstance();
+                        }
+                    }
+                }
+            }
+            return (Representation)preferredRepresentation.newInstance();
+        }
+        catch( Exception e )
+        {
+            throw new WSException( "Error creating Representation for Mapper: ", e );
+        }
+
+    }
+
+    public void setRepresentations( Map<String,Class> representations )
+    {
+        this.representations = representations;
+    }
+
+    public Class getPreferredRepresentation() {
+        return preferredRepresentation;
+    }
+
+    public void setPreferredRepresentation(Class preferredRepresentation) {
+        this.preferredRepresentation = preferredRepresentation;
+    }
+
+    public Representation getOptions( Request request )
+    {
+        Representation rval = getRepresentation( request );
         if( fields != null )
         {
-            rval = documentFactory.createElement( "fields" );
+            rval.setName( "fields" );
             for( Map.Entry<String,MapPropertyEditor> entry: fields.entrySet() )
             {
-                Element field = rval.addElement( "field" );
+                Representation field = rval.addChild( "field" );
                 field.addAttribute( "name", entry.getKey() );
                 field.addAttribute( "propertyEditor", entry.getValue().toString() );
                 Boolean required = entry.getValue().isRequired();
@@ -72,6 +120,7 @@ public abstract class Mapper
         }
         return rval;
     }
+    
     /**
      * Set validation fields for the Request.  By default, Request arguments are simply
      * passed, unchecked, into the handle method for he Mapper.  A subclass may explicity

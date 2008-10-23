@@ -25,14 +25,14 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.antlr.stringtemplate.StringTemplateGroup;
 import org.antlr.stringtemplate.StringTemplate;
-import org.dom4j.DocumentFactory;
-import org.dom4j.ProcessingInstruction;
+import org.w3c.dom.ProcessingInstruction;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -204,13 +204,8 @@ public class FirewaterServlet extends HttpServlet
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext( this.getServletContext() );
         String contextServletPath = req.getContextPath() + req.getServletPath();
 
-        // add the pretty print processing instruction for XML output
-        Map<String,String> instructions = new HashMap<String,String>();
-        instructions.put( "type", "text/xsl" );
-        instructions.put( "href", contextServletPath + XML_VERBATIM_URL );
-        ProcessingInstruction processingInstruction =
-                DocumentFactory.getInstance().createProcessingInstruction( "xml-stylesheet", instructions );
-        PrettyDocumentFactory.getInstance().setProcessingInstruction( processingInstruction );
+        String hrefPath = '"' + contextServletPath + XML_VERBATIM_URL + '"';
+        PrettyDocumentFactory.getInstance().setProcessingInstruction( "xml-stylesheet", "type=\"text/xsl\" href=" + hrefPath );
 
         // load the xmlverbatim.xsl file as a template
         StringTemplateGroup group = new StringTemplateGroup("xslgroup");

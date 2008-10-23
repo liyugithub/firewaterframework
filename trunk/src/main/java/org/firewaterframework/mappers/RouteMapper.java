@@ -9,10 +9,11 @@ package org.firewaterframework.mappers;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
-import org.dom4j.Document;
-import org.dom4j.Element;
+//import org.dom4j.Document;
+//import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
+import org.firewaterframework.rest.representation.Representation;
 import org.springframework.beans.factory.annotation.Required;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,23 +128,23 @@ public class RouteMapper extends Mapper
     protected Response doOptions( Request request, Mapper mapper )
     {
         //TODO: these can be cached as well
-        Document doc = documentFactory.createDocument();
-        Element root = doc.addElement( "options" );
-        root.add( mapper.getOptions( request ));
-        DocumentResponse rval = new DocumentResponse( MIMEType.application_xml );
-        rval.setDocument( doc );
+        Representation representation = getRepresentation( request );
+        representation.setName( "options" );
+        representation.addChild( mapper.getOptions( request ));
+        Response rval = new Response( representation );
         return rval;
     }
 
     @Override
-    public Element getOptions( Request request )
+    public Representation getOptions( Request request )
     {
-        Element rval = documentFactory.createElement( "routes" );
+        Representation rval = getRepresentation( request );
+        rval.setName( "routes" );
         for( Map.Entry<String,Mapper> entry: urlMap.entrySet() )
         {
-            Element route = entry.getValue().getOptions( request );
+            Representation route = entry.getValue().getOptions( request );
             route.addAttribute( "url", entry.getKey() );
-            rval.add( route );
+            rval.addChild( route );
         }
         return rval;
     }

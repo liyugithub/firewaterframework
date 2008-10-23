@@ -15,6 +15,7 @@ import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
+import org.firewaterframework.rest.representation.Representation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -81,7 +82,7 @@ public class MethodMapper extends Mapper
         {
             rval = processGet( request );
             // head doesn't include the actual content, create a new response excluding it
-            return new Response( rval.getStatus(), rval.getMimeType() );
+            return new Response( rval.getStatus() );
         }
         else
         {
@@ -203,30 +204,31 @@ public class MethodMapper extends Mapper
      * @return
      */
     @Override
-    public Element getOptions( Request request )
+    public Representation getOptions( Request request )
     {
-        Element rval = documentFactory.createElement( "methods" );
+        Representation rval = getRepresentation( request );
+        rval.setName( "methods" );
         if( getMapper != null )
         {
-            rval.add( getMapper.getOptions( request ));
+            rval.addChild( getMapper.getOptions( request ));
         }
         if( putMapper != null )
         {
-            Element element = putMapper.getOptions( request );
+            Representation element = putMapper.getOptions( request );
             element.setName( "put" );
-            rval.add( element );
+            rval.addChild( element );
         }
         if( postMapper != null )
         {
-            Element element = postMapper.getOptions( request );
+            Representation element = postMapper.getOptions( request );
             element.setName( "post" );
-            rval.add( element );
+            rval.addChild( element );
         }
         if( deleteMapper != null )
         {
-            Element element = deleteMapper.getOptions( request );
+            Representation element = deleteMapper.getOptions( request );
             element.setName( "delete" );
-            rval.add( element );
+            rval.addChild( element );
         }
         return rval;
     }

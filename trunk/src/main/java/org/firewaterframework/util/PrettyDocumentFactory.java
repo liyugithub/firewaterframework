@@ -1,15 +1,18 @@
 package org.firewaterframework.util;
 
-import org.dom4j.DocumentFactory;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.ProcessingInstruction;
+import org.w3c.dom.ProcessingInstruction;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class PrettyDocumentFactory
 {
-    protected static DocumentFactory df = DocumentFactory.getInstance();
+    protected static DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
     protected static PrettyDocumentFactory instance;
-    protected ProcessingInstruction processingInstruction;
+    //protected ProcessingInstruction processingInstruction;
+    private String instruction;
+    private String details;
 
     private PrettyDocumentFactory()
     {
@@ -27,21 +30,27 @@ public class PrettyDocumentFactory
 
     public Document createDocument()
     {
-        Document rval = df.createDocument();
-        rval.add( processingInstruction );
-        return rval;
+        try
+        {
+            Document rval = df.newDocumentBuilder().newDocument();
+            if( instruction != null && details != null )
+            {
+                ProcessingInstruction processingInstruction = rval.createProcessingInstruction( instruction, details );
+                rval.appendChild( processingInstruction );
+            }
+            return rval;
+        }
+        catch( Exception e )
+        {
+            //gulp -
+            return null;
+        }
     }
 
-    public Element createElement( String name )
+    public void setProcessingInstruction( String instruction, String details )
     {
-        return df.createElement( name );
+        this.instruction = instruction;
+        this.details = details;
     }
 
-    public ProcessingInstruction getProcessingInstruction() {
-        return processingInstruction;
-    }
-
-    public void setProcessingInstruction(ProcessingInstruction processingInstruction) {
-        this.processingInstruction = processingInstruction;
-    }
 }

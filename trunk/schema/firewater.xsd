@@ -70,6 +70,7 @@
                             </xsd:element>
                         </xsd:choice>
                     </xsd:sequence>
+                    <xsd:attribute name="preferred-representation" type="xsd:string"/>
                     <xsd:attribute name="default-page-size" type="xsd:int"/>
                     <xsd:attribute name="page-window-size" type="xsd:int"/>
                     <xsd:attribute name="page-count-pivot" type="xsd:string"/>
