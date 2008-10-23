@@ -10,11 +10,9 @@ package org.firewaterframework.mappers.jdbc;
     and limitations under the License.
 */
 import org.antlr.stringtemplate.StringTemplate;
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
+import org.firewaterframework.rest.representation.Representation;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -42,7 +40,7 @@ import java.util.Map;
 public class UpdateMapper extends JDBCMapper
 {
     protected static final Log log = LogFactory.getLog( QueryMapper.class );
-    public static DocumentFactory factory = DocumentFactory.getInstance();
+    //public static DocumentFactory factory = DocumentFactory.getInstance();
 
     protected QueryHolder[] queries;
 
@@ -63,8 +61,8 @@ public class UpdateMapper extends JDBCMapper
     @Transactional( readOnly=false,isolation=Isolation.READ_COMMITTED )
     public Response handle( Request request )
     {
-        Document rval = factory.createDocument();
-        Element root = rval.addElement( "result" );
+        Representation rval = getRepresentation( request );
+        rval.setName( "result" );
         Map<String,Object> keys = new HashMap<String,Object>();
 
         Map<String,Object> translatedArgs = bind( request );
@@ -88,7 +86,7 @@ public class UpdateMapper extends JDBCMapper
                         updateStatement,
                         keyHolder );
 
-                    Element element = root.addElement( "update" );
+                    Representation element = rval.addChild( "update" );
                     element.addAttribute( "rowsAffected", rowsAffected.toString() );
                     if( queryID != null )
                     {
@@ -103,8 +101,7 @@ public class UpdateMapper extends JDBCMapper
                     }
                 }
             }
-            DocumentResponse response = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
-            response.setDocument( rval );
+            Response response = new Response( Status.STATUS_OK, rval );
             return response;
         }
         catch( WSException e )
@@ -175,13 +172,14 @@ public class UpdateMapper extends JDBCMapper
     }
 
     @Override
-    public Element getOptions( Request request )
+    public Representation getOptions( Request request )
     {
-        Element rval = documentFactory.createElement( "update" );
-        Element fieldOptions = super.getOptions( request );
+        Representation rval = getRepresentation( request );
+        rval.setName( "update" );
+        Representation fieldOptions = super.getOptions( request );
         if( fieldOptions != null )
         {
-            rval.add( fieldOptions );
+            rval.addChild( fieldOptions );
         }
         return rval;
     }

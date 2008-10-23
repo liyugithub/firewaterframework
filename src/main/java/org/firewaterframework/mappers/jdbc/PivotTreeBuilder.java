@@ -11,9 +11,7 @@ package org.firewaterframework.mappers.jdbc;
 */
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.firewaterframework.util.PrettyDocumentFactory;
+import org.firewaterframework.rest.representation.Representation;
 
 import java.util.*;
 
@@ -97,7 +95,6 @@ public class PivotTreeBuilder
     protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
     protected ResourceDescriptor resourceDescriptor;
     protected Map<String,String> columnMappings;
-    protected static final PrettyDocumentFactory df = PrettyDocumentFactory.getInstance();
 
     /**
      * these represent the PivotTreeBuilders that will create the subnodes in our
@@ -113,19 +110,15 @@ public class PivotTreeBuilder
      * @param rows the SQL result set, a list of maps
      * @return the resultant XML document
      */
-    public Document process( List<Map<String,Object>> rows )
+    public void process( List<Map<String,Object>> rows, Representation representation )
     {
-        Document rval = df.createDocument( );
-
-        Element currentElement = df.createElement( "result" );
-        rval.add( currentElement );
+        representation.setName( "result" );
 
         int[] currRow = new int[] { 0 };
         while( currRow[0] < rows.size() )
         {
-            currentElement.add( processNextElement( rows, currRow, "" ));
+            processNextElement( representation, rows, currRow, "" );
         }
-        return rval;
     }
 
     /**
@@ -133,14 +126,13 @@ public class PivotTreeBuilder
      * @param rows the result set
      * @param rowNum the current row number being processed
      * @param url the current URL for the resource
-     * @return the Element to be added to the resulting XML Document
      */
-    protected Element processNextElement( List<Map<String,Object>> rows, int[] rowNum, String url )
+    protected void processNextElement( Representation parent, List<Map<String,Object>> rows, int[] rowNum, String url )
     {
         int startRowIndex = rowNum[0];
         Map<String,Object> startRow = rows.get( startRowIndex );
         Object topPivotValue = startRow.get( resourceDescriptor.pivotAttribute);
-        Element rval = df.createElement( resourceDescriptor.getTagname() );
+        Representation rval = parent.addChild( resourceDescriptor.getTagname() );
 
         if( resourceDescriptor.urlPrefix != null )
         {
@@ -168,7 +160,7 @@ public class PivotTreeBuilder
                     Object subPivotValue = rows.get( rangeRowIndex ).get( subNodeColumnName );
                     if( subPivotValue != null && !processedSubPivotValues.contains( subPivotValue ))
                     {
-                        rval.add( subNode.processNextElement( rows, new int[] { rangeRowIndex }, url ));
+                        subNode.processNextElement( rval, rows, new int[] { rangeRowIndex }, url );
                         processedSubPivotValues.add( subPivotValue );
                     }
                     rangeRowIndex++;
@@ -181,11 +173,9 @@ public class PivotTreeBuilder
         {
             rowNum[0]++;
         }
-
-        return rval;
     }
 
-    protected void processCurrentRow( Map<String,Object> row, Element element, String url )
+    protected void processCurrentRow( Map<String,Object> row, Representation element, String url )
     {
         Object pivotValue = row.get(resourceDescriptor.pivotAttribute);
 

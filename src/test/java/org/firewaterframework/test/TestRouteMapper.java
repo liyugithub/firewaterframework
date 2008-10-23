@@ -13,19 +13,23 @@ import junit.framework.Assert;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
+import org.apache.xpath.XPathAPI;
 import org.firewaterframework.mappers.RouteMapper;
 import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
+import org.firewaterframework.rest.representation.XMLRepresentation;
+import org.firewaterframework.rest.representation.Representation;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -40,7 +44,6 @@ import java.util.Map;
 public class TestRouteMapper extends Assert
 {
     protected static final Log log = LogFactory.getLog( TestRouteMapper.class );
-    public static DocumentFactory docFactory = DocumentFactory.getInstance();
     private static ApplicationContext appContext;
 
     @BeforeClass
@@ -107,20 +110,20 @@ public class TestRouteMapper extends Assert
         // default sort is by email address
         Response response = get( "/users" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
-        print(rval);
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
-        assertEquals( rval.selectSingleNode( "/result/user[1]/@email" ).getStringValue(), "jane@who.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[6]/@email" ).getStringValue(), "zorker@who.com" );
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        print(response.getRepresentation());
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
+        assertEquals( selectSingleNode( rval,  "/result/user[1]/@email" ).getNodeValue(), "jane@who.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[6]/@email" ).getNodeValue(), "zorker@who.com" );
 
         // sort again, by last name
         response = get( "/users?sort=last_name" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        rval = response.toDocument();
-        print(rval);
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
-        assertEquals( rval.selectSingleNode( "/result/user[1]/@last_name" ).getStringValue(), "morrison" );
-        assertEquals( rval.selectSingleNode( "/result/user[6]/@last_name" ).getStringValue(), "wonka" );
+        rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        print(response.getRepresentation());
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
+        assertEquals( selectSingleNode( rval,  "/result/user[1]/@last_name" ).getNodeValue(), "morrison" );
+        assertEquals( selectSingleNode( rval,  "/result/user[6]/@last_name" ).getNodeValue(), "wonka" );
     }
 
     @Test
@@ -129,22 +132,22 @@ public class TestRouteMapper extends Assert
         // get all users in 10033 zipcode
         Response response = get( "/users?zipcode=10033" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
-        print(rval);
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        print(response.getRepresentation());
         // should only return joe
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "joe" );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@first_name" ).getNodeValue(), "joe" );
 
         // get all users in 10012 zipcode
         response = get( "/users?zipcode=10012" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        rval = response.toDocument();
-        print(rval);
+        rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        print(response.getRepresentation());
         // should only return joe, willie, and jim
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 3 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='0']/@first_name" ).getStringValue(), "joe" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='4']/@first_name" ).getStringValue(), "jim" );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 3 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='0']/@first_name" ).getNodeValue(), "joe" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@first_name" ).getNodeValue(), "willie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='4']/@first_name" ).getNodeValue(), "jim" );
     }
 
     @Test
@@ -153,15 +156,15 @@ public class TestRouteMapper extends Assert
         // get all users with either dogs and/or fishes
         Response response = get( "/users?species_list=1,3" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
         //print(rval);
         // should only return willie and jane and their dogs and fishes
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 2 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='3']/@first_name" ).getStringValue(), "jane" );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 2 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@first_name" ).getNodeValue(), "willie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='3']/@first_name" ).getNodeValue(), "jane" );
         // willie should have only two pets which are dogs and/or fishes, jane should have 1
-        assertEquals( rval.selectNodes( "/result/user[@id='1']/pet" ).size(), 2 );
-        assertEquals( rval.selectNodes( "/result/user[@id='3']/pet" ).size(), 1 );
+        assertEquals( selectNodes( rval,  "/result/user[@id='1']/pet" ).getLength(), 2 );
+        assertEquals( selectNodes( rval,  "/result/user[@id='3']/pet" ).getLength(), 1 );
     }
 
     @Test
@@ -172,13 +175,13 @@ public class TestRouteMapper extends Assert
     {
         Response response = get( "/users" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
         //print(rval);
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 6 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@last_name" ).getStringValue(), "wonka" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='4']/@email" ).getStringValue(), "whoajee@who.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='5']/@city" ).getStringValue(), "los angeles" );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@first_name" ).getNodeValue(), "willie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@last_name" ).getNodeValue(), "wonka" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='4']/@email" ).getNodeValue(), "whoajee@who.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='5']/@city" ).getNodeValue(), "los angeles" );
     }
 
     @Test
@@ -189,11 +192,11 @@ public class TestRouteMapper extends Assert
     {
         Response response = get( "/users" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
         //print(rval);
-        assertEquals( rval.selectNodes( "/result/user[@id='1']/pet" ).size(), 3 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/pet[@id='0']/@name" ).getStringValue(), "trixie" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/pet[@id='0']/@type" ).getStringValue(), "dog" );
+        assertEquals( selectNodes( rval,  "/result/user[@id='1']/pet" ).getLength(), 3 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/pet[@id='0']/@name" ).getNodeValue(), "trixie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/pet[@id='0']/@type" ).getNodeValue(), "dog" );
     }
     
 
@@ -202,12 +205,12 @@ public class TestRouteMapper extends Assert
     {
         Response response = get( "/users/1" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@first_name" ).getStringValue(), "willie" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@last_name" ).getStringValue(), "who" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@email" ).getStringValue(), "willie@who.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='1']/@city" ).getStringValue(), "new york" );
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@first_name" ).getNodeValue(), "willie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@last_name" ).getNodeValue(), "who" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@email" ).getNodeValue(), "willie@who.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@city" ).getNodeValue(), "new york" );
     }
 
     @Test
@@ -230,13 +233,13 @@ public class TestRouteMapper extends Assert
 
         // fetch it back and ensure it's there
         response = get( "/users/6" );
-        Document rval = response.toDocument();
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@first_name" ).getStringValue(), "hanky" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@last_name" ).getStringValue(), "winters" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@email" ).getStringValue(), "mesuthela@hell.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='6']/@city" ).getStringValue(), "nashville" );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='6']/@first_name" ).getNodeValue(), "hanky" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='6']/@last_name" ).getNodeValue(), "winters" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='6']/@email" ).getNodeValue(), "mesuthela@hell.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='6']/@city" ).getNodeValue(), "nashville" );
     }
 
     @Test
@@ -258,12 +261,12 @@ public class TestRouteMapper extends Assert
         // fetch it back and ensure it's there
         response = get( "/users/2" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "newby" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@last_name" ).getStringValue(), "summers" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@email" ).getStringValue(), "crap@shoot.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@city" ).getStringValue(), "miami" );
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@first_name" ).getNodeValue(), "newby" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@last_name" ).getNodeValue(), "summers" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@email" ).getNodeValue(), "crap@shoot.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@city" ).getNodeValue(), "miami" );
     }
 
     @Test
@@ -279,12 +282,38 @@ public class TestRouteMapper extends Assert
         // fetch it back and ensure it's there
         response = get( "/users/2" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
-        Document rval = response.toDocument();
-        assertEquals( rval.selectNodes( "/result/user" ).size(), 1 );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@first_name" ).getStringValue(), "timby" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@last_name" ).getStringValue(), "summers" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@email" ).getStringValue(), "crap@shoot.com" );
-        assertEquals( rval.selectSingleNode( "/result/user[@id='2']/@city" ).getStringValue(), "miami" );
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@first_name" ).getNodeValue(), "timby" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@last_name" ).getNodeValue(), "summers" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@email" ).getNodeValue(), "crap@shoot.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@city" ).getNodeValue(), "miami" );
+    }
+
+    private NodeList selectNodes( Document rval, String xpath )
+    {
+        try
+        {
+            return XPathAPI.selectNodeList( rval, xpath );
+        }
+        catch( Exception e )
+        {
+            //gulp
+            return null;
+        }
+    }
+
+    private Node selectSingleNode( Document rval, String xpath )
+    {
+        try
+        {
+            return XPathAPI.selectSingleNode( rval, xpath );
+        }
+        catch( Exception e )
+        {
+            //gulp
+            return null;
+        }
     }
 
     private Response get( String url )
@@ -310,11 +339,15 @@ public class TestRouteMapper extends Assert
         return service.handle( request );
     }
 
-    private void print( Document doc )
+    private void print( Representation doc )
     {
         StringWriter writer = new StringWriter( );
-        XMLUtil.prettyPrint( doc, writer );
-        writer.flush();
+        try
+        {
+            doc.write( writer );
+        }
+        catch( Exception e ){
+        }
         log.debug( writer.toString() );
     }
 }

@@ -12,10 +12,9 @@ package org.firewaterframework.mappers.jdbc;
 import org.antlr.stringtemplate.StringTemplate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
+import org.firewaterframework.rest.representation.Representation;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +25,7 @@ import java.util.Map;
 /**
  * This class is responsible for servicing GET Rest requests against a back-end relational
  * database (through JDBC).  It is responsible for executing a configured query template and returning
- * it as a REST Response.  Note that currently this Mapper (and all JDBCMappers) return only
- * {@link DocumentResponse}s - which means that the only response type when using these
- * Mappers are XML documents.
+ * it as a REST Response.
  *
  * @author Tim Spurway
  * @see PivotTreeBuilder
@@ -59,7 +56,6 @@ public class QueryMapper extends JDBCMapper
     public Response handle( Request request )
     {
         StringTemplate queryTemplate = new StringTemplate( query );
-
         Map<String,Object> translatedArgs = bind( request );
 
         for( Map.Entry<String,Object> entry: translatedArgs.entrySet() )
@@ -92,12 +88,12 @@ public class QueryMapper extends JDBCMapper
             log.debug( "Executing query: " + queryTemplate.toString() );
 
             rows = template.queryForList( queryTemplate.toString() );
-            Document resultDOM = pivotTreeBuilder.process( rows );
+            Representation representation = getRepresentation( request );
+            pivotTreeBuilder.process( rows, representation );
 
             // add paging tags, if required
-            addPagingTags( resultDOM, pageCountQueryString, pageNum, pageSize, request.getUrl() );
-            DocumentResponse response = new DocumentResponse( Status.STATUS_OK, MIMEType.application_xml );
-            response.setDocument( resultDOM );
+            addPagingTags( representation, pageCountQueryString, pageNum, pageSize, request.getUrl() );
+            Response response = new Response( Status.STATUS_OK, representation );
             return response;
         }
         catch( WSException e )
@@ -132,13 +128,13 @@ public class QueryMapper extends JDBCMapper
         return rval.toString();
     }
 
-    protected void addPagingTags( Document resultDOM, String pageCountQueryString,
+    protected void addPagingTags( Representation result, String pageCountQueryString,
                                   Integer pageNum, Integer pageSize, String resourceURL )
     {
         if( defaultPageSize > 0 )
         {
             Integer totalRows = 0;
-            Element pages = resultDOM.getRootElement().addElement( "pages" );
+            Representation pages = result.addChild( "pages" );
             pages.addAttribute( "page_number", pageNum.toString() );
             pages.addAttribute( "page_size", pageSize.toString() );
             // add the URL of the current page
@@ -158,11 +154,11 @@ public class QueryMapper extends JDBCMapper
                 Integer pageCount = (totalRows / pageSize) + ((totalRows % pageSize > 0) ? 1 : 0);
 
                 // don't bother adding the pages tag if the pageCount isn't > 1
-                if( pageCount <= 1 )
+                /*if( pageCount <= 1 )
                 {
-                    resultDOM.getRootElement().remove( pages );
+                    result.removeChild( pages );
                     return;
-                }
+                }*/  // TODO: implement Representation.removeChild()
                 
                 pages.addAttribute( "num_pages", pageCount.toString() );
                 pages.addAttribute( "num_rows", totalRows.toString() );
@@ -190,7 +186,7 @@ public class QueryMapper extends JDBCMapper
 
                 for( Integer i = pageWindowStart; i <= pageWindowEnd; ++i )
                 {
-                    Element page = pages.addElement( "page" );
+                    Representation page = pages.addChild( "page" );
                     page.addAttribute( "url", buildPageURL( i, resourceURL ));
                     page.addAttribute ( "page_number", i.toString() );
                 }
@@ -406,13 +402,13 @@ public class QueryMapper extends JDBCMapper
     }
 
     @Override
-    public Element getOptions( Request request )
+    public Representation getOptions( Request request )
     {
-        Element rval = documentFactory.createElement( "get" );
-        Element fieldOptions = super.getOptions( request );
+        Representation rval = getRepresentation( request );
+        Representation fieldOptions = super.getOptions( request );
         if( fieldOptions != null )
         {
-            rval.add( fieldOptions );
+            rval.addChild( fieldOptions );
         }
         rval.addAttribute( "defaultPageSize", defaultPageSize.toString() );
         rval.addAttribute( "pageWindowSize", pageWindowSize.toString() );
