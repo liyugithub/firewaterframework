@@ -2,6 +2,7 @@ package org.firewaterframework.rest.representation;
 
 import org.firewaterframework.util.PrettyDocumentFactory;
 import org.firewaterframework.WSException;
+import org.firewaterframework.rest.MIMEType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
@@ -29,10 +30,12 @@ public class XMLRepresentation extends AbstractRepresentation
 
     public XMLRepresentation()
     {
+        mimeType = MIMEType.application_xml;
     }
 
     protected XMLRepresentation( Document parentDocument, Element element )
     {
+        this();
         this.parentDocument = parentDocument;
         this.element = element;
     }

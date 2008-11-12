@@ -15,7 +15,7 @@ import java.io.IOException;
 public abstract class AbstractRepresentation implements Representation
 {
     private String contentCache;
-    private MIMEType mimeType = MIMEType.text_plain;
+    protected MIMEType mimeType = MIMEType.text_plain;
 
     public MIMEType getMimeType()
     {

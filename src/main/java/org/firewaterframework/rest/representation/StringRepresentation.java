@@ -1,5 +1,7 @@
 package org.firewaterframework.rest.representation;
 
+import org.firewaterframework.rest.MIMEType;
+
 /**
  * Created by IntelliJ IDEA.
  * User: tspurway
@@ -11,9 +13,15 @@ public class StringRepresentation extends AbstractRepresentation
 {
     private StringBuffer buffer = new StringBuffer();
 
-    public StringRepresentation( String contents )
+    public StringRepresentation( String contents, MIMEType mimeType )
     {
         buffer.append( contents );
+        this.mimeType = mimeType;
+    }
+    
+    public StringRepresentation( String contents )
+    {
+        this( contents, MIMEType.text_plain );
     }
 
     public String getName() {

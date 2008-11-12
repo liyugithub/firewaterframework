@@ -290,6 +290,7 @@ public class MIMEType
     public static final MIMEType text_asp = new MIMEType( "text/asp");
     public static final MIMEType text_css = new MIMEType( "text/css");
     public static final MIMEType text_html = new MIMEType( "text/html");
+    public static final MIMEType text_javascript = new MIMEType( "text/javascript");
     public static final MIMEType text_mcf = new MIMEType( "text/mcf");
     public static final MIMEType text_pascal = new MIMEType( "text/pascal");
     public static final MIMEType text_plain = new MIMEType( "text/plain");
