@@ -203,6 +203,16 @@ public class Request
         this.args = args;
     }
 
+    public Object getArg( String name )
+    {
+        return getArgs().getPropertyValue( name );
+    }
+
+    public void setArg( String name, Object value )
+    {
+        getArgs().addPropertyValue( name, value );
+    }
+
     public Method getMethod() {
         return method;
     }
