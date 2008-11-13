@@ -72,7 +72,7 @@ public class QueryMapper extends JDBCMapper
 
         int pageNum = getPageNum( translatedArgs );
         int pageSize = getPageSize( translatedArgs );
-        if( defaultPageSize > 0 )
+        if( pageSize > 0 )
         {
             StringTemplate pageTokenFragmentTemplate = new StringTemplate( pageTokenFragment );
             int low_row = (pageNum - 1) * pageSize;
