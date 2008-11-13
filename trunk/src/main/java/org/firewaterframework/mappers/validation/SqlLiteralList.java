@@ -29,7 +29,7 @@ public class SqlLiteralList extends MapPropertyEditor
             for( String segment: segments )
             {
                 String stripSegment = segment.trim();
-                if( stripSegment.matches( "[0-9][0-9]*" ))
+                if( stripSegment.matches( "\\-?[0-9][0-9]*" ))
                 {
                     newValue.add( stripSegment );
                 }
