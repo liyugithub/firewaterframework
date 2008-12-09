@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+  <groupId>org.firewaterframework</groupId>
+  <artifactId>firewater</artifactId>
+  <version>0.9.3-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20081209193612</lastUpdated>
+  </versioning>
+</metadata>
