@@ -26,10 +26,13 @@ import java.beans.PropertyEditorSupport;
 public abstract class MapPropertyEditor extends PropertyEditorSupport
 {
     protected boolean required = false;
+    protected boolean nullable = false;
 
     public MapPropertyEditor copy()
     {
         MapPropertyEditor newCopy = (MapPropertyEditor)BeanUtils.instantiateClass( this.getClass() );
+        newCopy.required = required;
+        newCopy.nullable = nullable;
         return newCopy;
     }
 
@@ -39,11 +42,16 @@ public abstract class MapPropertyEditor extends PropertyEditorSupport
         return this.getClass().getName();
     }
 
-    protected boolean checkRequired( Object value )
+    protected boolean checkRequired( String value )
     {
         if( required && value == null )
         {
             throw new IllegalArgumentException( "Value required for field" );
+        }
+        else if( nullable && "null".equals( value ))
+        {
+            this.setValue( null );
+            return false;
         }
         return value != null;
     }
@@ -54,5 +62,13 @@ public abstract class MapPropertyEditor extends PropertyEditorSupport
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        this.nullable = nullable;
     }
 }

@@ -16,7 +16,7 @@ package org.firewaterframework.mappers.validation;
  * @see java.util.regex.Pattern
  * @author Tim Spurway
  */
-public class Pattern extends MapPropertyEditor
+public class ValidationPattern extends MapPropertyEditor
 {
     protected String pattern;
     protected boolean quote = false;
@@ -52,7 +52,7 @@ public class Pattern extends MapPropertyEditor
     @Override
     public MapPropertyEditor copy()
     {
-        Pattern rval = (Pattern)super.copy();
+        ValidationPattern rval = (ValidationPattern)super.copy();
         rval.setPattern( pattern );
         rval.setQuote( quote );
         return rval;
@@ -61,7 +61,7 @@ public class Pattern extends MapPropertyEditor
     @Override
     public String toString()
     {
-        return "Pattern: " + pattern + " quoted: " + quote;
+        return "ValidationPattern: " + pattern + " quoted: " + quote;
     }
     
     public String getPattern() {
@@ -70,7 +70,7 @@ public class Pattern extends MapPropertyEditor
 
     /**
      *
-     * @param pattern the regular expression {@link Pattern} string to be used for validation.
+     * @param pattern the regular expression {@link ValidationPattern} string to be used for validation.
      */
     public void setPattern(String pattern) {
         this.pattern = pattern;
