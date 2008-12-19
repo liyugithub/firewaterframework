@@ -41,6 +41,7 @@ import com.opensymphony.oscache.general.GeneralCacheAdministrator;
 public class MethodMapper extends Mapper
 {
     protected static final Log log = LogFactory.getLog( RouteMapper.class );
+    public static final String NOCACHE = "__nocache";
 
     protected GeneralCacheAdministrator cache;
     protected String[] cacheGroups;
@@ -115,7 +116,7 @@ public class MethodMapper extends Mapper
     protected Response processGet( Request request )
     {
         Response rval;
-        if( cache != null )
+        if( cache != null && request.getParameter( NOCACHE ) == null )
         {
             // note that the entries are cached using the full URL of the request
             try

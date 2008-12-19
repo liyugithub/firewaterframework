@@ -72,7 +72,7 @@
         <property name="fields">
             <map>
                 <entry key="sort">
-                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
                         <property name="pattern" value="last_name|email"/>
                     </bean>
                 </entry>
@@ -134,7 +134,7 @@
                     <bean class="org.firewaterframework.mappers.validation.SqlString"/>
                 </entry>
                 <entry key="state">
-                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
                         <property name="pattern" value="[A-Z][A-Z]"/>
                         <property name="quote" value="true"/>
                     </bean>
@@ -211,7 +211,7 @@
                     <bean class="org.firewaterframework.mappers.validation.SqlString"/>
                 </entry>
                 <entry key="state">
-                    <bean class="org.firewaterframework.mappers.validation.Pattern">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
                         <property name="pattern" value="[A-Z][A-Z]"/>
                         <property name="quote" value="true"/>
                     </bean>
