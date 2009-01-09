@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.postwidgets.flex</groupId>
+    <artifactId>chango-wideTower</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <name>Wide Tower adstyle</name>
+
+    <packaging>swf</packaging>
+
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>google-code-repo</id>
+            <url>svn:https://firewaterframework.googlecode.com/svn/repo</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <sourceDirectory>src/main/flex</sourceDirectory>
+        <extensions>
+            <extension>
+                <groupId>org.jvnet.wagon-svn</groupId>
+                <artifactId>wagon-svn</artifactId>
+                <version>1.8</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>info.flex-mojos</groupId>
+                <artifactId>flex-compiler-mojo</artifactId>
+                <version>2.0M6</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <locales>
+                        <locale>en_US</locale>
+                    </locales>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>flex-mojos-repository</id>
+            <url>http://svn.sonatype.org/flexmojos/repository/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <dependencies>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>flex-framework</artifactId>
+            <version>3.1.0.2710</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.postwidgets.flex</groupId>
+            <artifactId>chango-common</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <type>swc</type>
+        </dependency>
+    </dependencies>
+</project>
