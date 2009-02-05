@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class UpdateMapper extends JDBCMapper
 {
-    protected static final Log log = LogFactory.getLog( QueryMapper.class );
+    protected static final Log log = LogFactory.getLog( UpdateMapper.class );
     //public static DocumentFactory factory = DocumentFactory.getInstance();
 
     protected QueryHolder[] queries;
@@ -93,11 +93,19 @@ public class UpdateMapper extends JDBCMapper
                         element.addAttribute( "updateID", queryID );
                     }
 
-                    if( query.getKeyName() != null && query.getKeyName().length() > 0 && keyHolder.getKey() != null )
+                    try
                     {
-                        Object key = keyHolder.getKeys().values().toArray()[0];
-                        keys.put( queryID, key );
-                        element.addAttribute( "key", key.toString() );
+                        if( query.getKeyName() != null && query.getKeyName().length() > 0 && keyHolder.getKeyList().size() > 0 )
+                        {
+                            Object key = ((Map)keyHolder.getKeyList().get(0)).values().iterator().next();
+                            keys.put( queryID, key );
+                            element.addAttribute( "key", key.toString() );
+                        }
+                    }
+                    catch( Exception  e )
+                    {
+                        log.error( "Error accessing key: " + query.getKeyName() + " for query: " + updateStatement.queryTemplate.toString() );
+                        throw e;
                     }
                 }
             }

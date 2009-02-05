@@ -53,6 +53,16 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="ref">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="bean" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="query-mapper">
         <xsd:complexType>
             <xsd:complexContent>

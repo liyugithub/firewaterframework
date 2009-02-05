@@ -191,6 +191,7 @@ public class MIMEType
     public static final MIMEType application_x_wri = new MIMEType( "application/x-wri");
     public static final MIMEType application_x_zip_compressed = new MIMEType( "application/x-zip-compressed");
     public static final MIMEType application_xml = new MIMEType( "application/xml");
+    public static final MIMEType application_xhtml_xml = new MIMEType( "application/xhtml+xml");
     public static final MIMEType application_zip = new MIMEType( "application/zip");
     public static final MIMEType audio_aiff = new MIMEType( "audio/aiff");
     public static final MIMEType audio_basic = new MIMEType( "audio/basic");

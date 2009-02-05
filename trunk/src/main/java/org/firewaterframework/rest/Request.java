@@ -237,4 +237,24 @@ public class Request
     {
         headers.put( key, value );
     }
+
+    public String getQueryString( )
+    {
+        return getQueryString( true );
+    }
+    
+    public String getQueryString( boolean includeQuestionMark )
+    {
+        if( url != null )
+        {
+            // strip off any arguments from incoming URL
+            int questionIndex = url.indexOf( '?' );
+            if( questionIndex > 0 && questionIndex < url.length() )
+            {
+                if( includeQuestionMark ) return '?' + url.substring( questionIndex + 1 );
+                else return url.substring( questionIndex + 1 );
+            }
+        }
+        return "";
+    }
 }

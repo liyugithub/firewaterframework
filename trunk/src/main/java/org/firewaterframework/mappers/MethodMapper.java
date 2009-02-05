@@ -65,7 +65,11 @@ public class MethodMapper extends Mapper
         Response rval;
         if( request.getMethod() == Method.GET )
         {
-            return processGet( request );
+            rval = processGet( request );
+            
+            // conditionally flush cache if NOCACHE is specified
+            if( request.getParameter( NOCACHE ) != null ) flushCache( request );
+            return rval;
         }
         else if( request.getMethod() == Method.POST )
         {
@@ -91,6 +95,12 @@ public class MethodMapper extends Mapper
         }
 
         // note that the POST, PUT and DELETE will flush the entry and groups for this URL
+        flushCache( request );
+        return rval;
+    }
+
+    protected void flushCache( Request request )
+    {
         if( cache != null )
         {
             cache.flushEntry( request.getUrl() );
@@ -102,7 +112,6 @@ public class MethodMapper extends Mapper
                 }
             }
         }
-        return rval;
     }
 
     /**
