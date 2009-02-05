@@ -52,6 +52,7 @@ public abstract class AbstractMapperBDParser extends AbstractBeanDefinitionParse
         }
         return fields;
     }
+    
     protected String xmlStringToBeanName( String xmlString )
     {
         return xmlStringToBeanName( xmlString,  false );

@@ -44,14 +44,15 @@ public abstract class MapPropertyEditor extends PropertyEditorSupport
 
     protected boolean checkRequired( String value )
     {
-        if( required && value == null )
-        {
-            throw new IllegalArgumentException( "Value required for field" );
-        }
-        else if( nullable && "null".equals( value ))
+
+        if( nullable && value == null )
         {
             this.setValue( null );
             return false;
+        }
+        if( required && value == null )
+        {
+            throw new IllegalArgumentException( "Value required for field" );
         }
         return value != null;
     }

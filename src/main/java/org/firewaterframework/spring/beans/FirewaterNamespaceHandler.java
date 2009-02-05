@@ -18,5 +18,6 @@ public class FirewaterNamespaceHandler extends NamespaceHandlerSupport
         registerBeanDefinitionParser( "query-mapper", new QueryMapperBDParser() );
         registerBeanDefinitionParser( "update-mapper", new UpdateMapperBDParser() );
         registerBeanDefinitionParser( "resource", new ResourceBDParser() );
+        registerBeanDefinitionParser( "ref", new RefBDParser() );
     }
 }

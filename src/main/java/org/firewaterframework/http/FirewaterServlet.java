@@ -134,12 +134,12 @@ public class FirewaterServlet extends HttpServlet
 
             Request restRequest = new Request( idURL, method, args, true ); 
 
-            log.info( "handling REST request: " + restRequest.getMethod() + " " + restRequest.getUrl() );
+            log.debug( "handling REST request: " + restRequest.getMethod() + " " + restRequest.getUrl() );
             Response restResponse = dispatcher.handle( restRequest );
 
             if( restResponse != null )
             {
-                log.info( "Response for: " + restRequest.getMethod() + " " + restRequest.getUrl() + " " + restResponse.getStatus().getCode() );
+                log.info( "Response for: " + restRequest.getMethod() + " in (ms): " + (Long)( System.currentTimeMillis() - timeIn ) + " " + restRequest.getUrl() + " " + restResponse.getStatus().getCode() );
 	            // encode the baseUrl into the response - it is the requestURI - path
 	            String uri = request.getRequestURI();
 	            String baseURL = uri.substring( 0, uri.indexOf( path ));
@@ -182,10 +182,6 @@ public class FirewaterServlet extends HttpServlet
                 response.sendError( 500, "Error handling REST request for URL: " + request.getPathInfo() + " error: " + e.getMessage() );
             }
             catch( Exception ex ){ log.error( "Pathetic, caught error sending error..."); }
-        }
-        finally
-        {
-            log.info( "Firewater request completed in(ms): " + (Long)( System.currentTimeMillis() - timeIn ));
         }
     }
 
