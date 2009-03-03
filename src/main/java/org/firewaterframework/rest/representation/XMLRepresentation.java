@@ -33,6 +33,11 @@ public class XMLRepresentation extends AbstractRepresentation
         mimeType = MIMEType.application_xml;
     }
 
+    public XMLRepresentation( Document parentDocument )
+    {
+        this( parentDocument, parentDocument.getDocumentElement() );
+    }
+
     protected XMLRepresentation( Document parentDocument, Element element )
     {
         this();

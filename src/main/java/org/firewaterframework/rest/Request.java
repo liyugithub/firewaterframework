@@ -13,14 +13,15 @@ import org.springframework.beans.MutablePropertyValues;
 
 import java.net.URLDecoder;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * This class is the Request object for the Firewater framework.  It contains the request URL, any arguments,
  * and the METHOD of the underlying request.
  */
-public class Request
+public class Request implements Serializable
 {
-    public enum Header
+    public enum Header implements Serializable
     {
         Accept(),
         AcceptEncoding("Accept-Encoding"),
