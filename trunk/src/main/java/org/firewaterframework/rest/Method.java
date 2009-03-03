@@ -1,4 +1,7 @@
 package org.firewaterframework.rest;
+
+import java.io.Serializable;
+
 /*
     Copyright 2008 John TW Spurway
     Licensed under the Apache License, Version 2.0
@@ -14,7 +17,7 @@ package org.firewaterframework.rest;
  * of static properties to define all of the METHODs used by Firewater.
  * @author Tim Spurway
  */
-public class Method
+public class Method implements Serializable
 {
     protected String method;
 
