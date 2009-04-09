@@ -9,7 +9,6 @@ package org.firewaterframework.mappers;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
-import org.dom4j.Element;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.Method;
 import org.firewaterframework.rest.Request;
@@ -135,8 +134,23 @@ public class MethodMapper extends Mapper
             catch( NeedsRefreshException ex )
             {
                 // we  need to fetch the resource and cache it
-                rval = doGet( request );
-                cache.putInCache( request.getUrl(), rval, cacheGroups, entryRefreshPolicy );
+                try
+                {
+                    rval = doGet( request );
+                    cache.putInCache( request.getUrl(), rval, cacheGroups, entryRefreshPolicy );
+                }
+                catch( WSException e )
+                {
+                    log.error( "Caught exception trying to update cache for requestURL: " + request.getUrl(), e );
+                    cache.cancelUpdate( request.getUrl() );
+                    throw e;
+                }
+                catch( Exception e )
+                {
+                    log.error( "Caught exception trying to update cache for requestURL: " + request.getUrl(), e );
+                    cache.cancelUpdate( request.getUrl() );
+                    throw new WSException( "Caught exception trying to update cache for requestURL: " + request.getUrl(), e );
+                }
             }
         }
         else
