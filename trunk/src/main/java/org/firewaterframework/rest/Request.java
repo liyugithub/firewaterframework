@@ -190,8 +190,8 @@ public class Request implements Serializable
                         }
                         try{
                         	value = URLDecoder.decode( value, "ISO-8859-1" );
-                        }catch(Exception e){
-                        	throw new RuntimeException( "ISO-8859-1 Character encoding not supported." );
+                        }catch (Exception e){
+                        	throw new RuntimeException( "unable to decode URL: ", e);
                         }
                     }
                     this.getArgs().addPropertyValue( key, value );
