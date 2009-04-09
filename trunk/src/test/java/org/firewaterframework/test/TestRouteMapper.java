@@ -11,8 +11,8 @@ package org.firewaterframework.test;
 */
 import junit.framework.Assert;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.xpath.XPathAPI;
 import org.firewaterframework.mappers.RouteMapper;
 import org.firewaterframework.rest.Method;
@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class TestRouteMapper extends Assert
 {
-    protected static final Log log = LogFactory.getLog( TestRouteMapper.class );
+    protected static final Logger log = LoggerFactory.getLogger( TestRouteMapper.class );
     private static ApplicationContext appContext;
 
     @BeforeClass

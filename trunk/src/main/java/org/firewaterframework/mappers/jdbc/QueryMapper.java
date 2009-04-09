@@ -10,8 +10,8 @@ package org.firewaterframework.mappers.jdbc;
     and limitations under the License.
 */
 import org.antlr.stringtemplate.StringTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
 import org.firewaterframework.rest.representation.Representation;
@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class QueryMapper extends JDBCMapper
 {
-    protected static final Log log = LogFactory.getLog( QueryMapper.class );
+    protected static final Logger log = LoggerFactory.getLogger( QueryMapper.class );
     protected static final String pageCountQuery = "select count(distinct q.$pivot_column$) from ($query$) as q";
 
     protected String query;

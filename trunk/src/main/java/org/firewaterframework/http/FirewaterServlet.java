@@ -11,8 +11,8 @@ package org.firewaterframework.http;
     and limitations under the License.
 */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.firewaterframework.WSException;
 import org.firewaterframework.util.PrettyDocumentFactory;
 import org.firewaterframework.mappers.Mapper;
@@ -43,7 +43,7 @@ import java.util.HashSet;
  */
 public class FirewaterServlet extends HttpServlet
 {
-    protected static final Log log = LogFactory.getLog( FirewaterServlet.class );
+    protected static final Logger log = LoggerFactory.getLogger( FirewaterServlet.class );
     public static final String METHOD_ARG = "_method";
     public static final String DISPATCHER_BEAN_NAME = "dispatcher";
     public static final String XML_VERBATIM_URL = "/__prettyprint__";
