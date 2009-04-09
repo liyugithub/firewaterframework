@@ -84,6 +84,7 @@
                     <xsd:attribute name="default-page-size" type="xsd:int"/>
                     <xsd:attribute name="page-window-size" type="xsd:int"/>
                     <xsd:attribute name="page-count-pivot" type="xsd:string"/>
+                    <xsd:attribute name="do-paging-subquery" type="xsd:boolean"/>
                     <xsd:attribute name="data-source" type="xsd:string" use="required"/>
                 </xsd:extension>
             </xsd:complexContent>

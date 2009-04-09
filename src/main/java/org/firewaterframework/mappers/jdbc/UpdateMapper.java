@@ -82,10 +82,23 @@ public class UpdateMapper extends JDBCMapper
                 // only execute the query if the query is non-empty
                 if( updateStatement.queryTemplate.toString().trim().length() > 0 )
                 {
-                    Integer rowsAffected = template.update(
-                        updateStatement,
-                        keyHolder );
+                    //log.info( "STMT: " + updateStatement.queryTemplate.toString() );
+                    Integer rowsAffected = 0;
 
+                    try
+                    {
+                        rowsAffected = template.update(
+                            updateStatement,
+                            keyHolder );
+                    }
+                    catch( Exception xx )
+                    {
+                        log.error( "Exception executing update: " + xx.getMessage() );
+                        throw xx;
+                    }
+
+                    //log.info( "RowsAffected: " + rowsAffected );
+                    
                     Representation element = rval.addChild( "update" );
                     element.addAttribute( "rowsAffected", rowsAffected.toString() );
                     if( queryID != null )
@@ -100,6 +113,7 @@ public class UpdateMapper extends JDBCMapper
                             Object key = ((Map)keyHolder.getKeyList().get(0)).values().iterator().next();
                             keys.put( queryID, key );
                             element.addAttribute( "key", key.toString() );
+                            //log.info( "KEY=" + key.toString() );
                         }
                     }
                     catch( Exception  e )

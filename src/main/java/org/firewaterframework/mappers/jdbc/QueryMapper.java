@@ -41,6 +41,7 @@ public class QueryMapper extends JDBCMapper
     protected Integer pageWindowSize = 10;
     protected String pageCountPivot;
     protected String pageTokenFragment = "limit $page_size$ offset $low_row$";
+    protected boolean doPagingSubquery = true;
 
     /**
      * Handle a REST Request by querying a back-end relational database.
@@ -68,6 +69,7 @@ public class QueryMapper extends JDBCMapper
         StringTemplate pageCountTemplate = new StringTemplate( pageCountQuery );
         pageCountTemplate.setAttribute( "query", baseQuery );
         pageCountTemplate.setAttribute( "pivot_column", getPageCountPivot() );
+        
         String pageCountQueryString = pageCountTemplate.toString();
 
         int pageNum = getPageNum( translatedArgs );
@@ -79,6 +81,7 @@ public class QueryMapper extends JDBCMapper
 
             pageTokenFragmentTemplate.setAttribute( "low_row", low_row );
             pageTokenFragmentTemplate.setAttribute( "page_size", pageSize );
+            queryTemplate.setAttribute( "page_size", String.valueOf( pageSize ));
             queryTemplate.setAttribute( "page_token", pageTokenFragmentTemplate.toString() );
         }
 
@@ -148,52 +151,55 @@ public class QueryMapper extends JDBCMapper
 
             // if we fail adding the <page> tag (ie. the count query craps out), don't sweat it,
             // catch and log the error, and continue
-            try
+            if( doPagingSubquery )
             {
-                totalRows = template.queryForInt( pageCountQueryString );
-                Integer pageCount = (totalRows / pageSize) + ((totalRows % pageSize > 0) ? 1 : 0);
-
-                // don't bother adding the pages tag if the pageCount isn't > 1
-                /*if( pageCount <= 1 )
+                try
                 {
-                    result.removeChild( pages );
-                    return;
-                }*/  // TODO: implement Representation.removeChild()
-                
-                pages.addAttribute( "num_pages", pageCount.toString() );
-                pages.addAttribute( "num_rows", totalRows.toString() );
+                    totalRows = template.queryForInt( pageCountQueryString );
+                    Integer pageCount = (totalRows / pageSize) + ((totalRows % pageSize > 0) ? 1 : 0);
 
-                // now, add a <page> tag for REST links for each of the page that exist.
-                int pageWindowStart = 1;
-                int pageWindowEnd = pageCount;
-
-                // now do the page 'window' - try to center the current page in the window
-                if( pageWindowSize != -1 )
-                {
-                    int tryStart = pageNum - (pageWindowSize / 2);
-                    if( tryStart < 1 ) tryStart = 1;
-
-                    int tryEnd = (tryStart + pageWindowSize) - 1;
-                    if( tryEnd > pageCount )
+                    // don't bother adding the pages tag if the pageCount isn't > 1
+                    /*if( pageCount <= 1 )
                     {
-                        tryEnd = pageCount;
-                        tryStart = (pageCount - pageWindowSize) + 1;
-                        if( tryStart < 1 ) tryStart = 1;
-                    }
-                    pageWindowStart = tryStart;
-                    pageWindowEnd = tryEnd;
-                }
+                        result.removeChild( pages );
+                        return;
+                    }*/  // TODO: implement Representation.removeChild()
 
-                for( Integer i = pageWindowStart; i <= pageWindowEnd; ++i )
-                {
-                    Representation page = pages.addChild( "page" );
-                    page.addAttribute( "url", buildPageURL( i, resourceURL ));
-                    page.addAttribute ( "page_number", i.toString() );
+                    pages.addAttribute( "num_pages", pageCount.toString() );
+                    pages.addAttribute( "num_rows", totalRows.toString() );
+
+                    // now, add a <page> tag for REST links for each of the page that exist.
+                    int pageWindowStart = 1;
+                    int pageWindowEnd = pageCount;
+
+                    // now do the page 'window' - try to center the current page in the window
+                    if( pageWindowSize != -1 )
+                    {
+                        int tryStart = pageNum - (pageWindowSize / 2);
+                        if( tryStart < 1 ) tryStart = 1;
+
+                        int tryEnd = (tryStart + pageWindowSize) - 1;
+                        if( tryEnd > pageCount )
+                        {
+                            tryEnd = pageCount;
+                            tryStart = (pageCount - pageWindowSize) + 1;
+                            if( tryStart < 1 ) tryStart = 1;
+                        }
+                        pageWindowStart = tryStart;
+                        pageWindowEnd = tryEnd;
+                    }
+
+                    for( Integer i = pageWindowStart; i <= pageWindowEnd; ++i )
+                    {
+                        Representation page = pages.addChild( "page" );
+                        page.addAttribute( "url", buildPageURL( i, resourceURL ));
+                        page.addAttribute ( "page_number", i.toString() );
+                    }
                 }
-            }
-            catch( Exception e)
-            {
-                log.warn( "Couldn't generate page tags for URL request: " + resourceURL, e );
+                catch( Exception e)
+                {
+                    log.warn( "Couldn't generate page tags for URL request: " + resourceURL, e );
+                }
             }
         }
     }
@@ -414,5 +420,14 @@ public class QueryMapper extends JDBCMapper
         rval.addAttribute( "pageWindowSize", pageWindowSize.toString() );
         return rval;
     }
-    
+
+    public boolean isDoPagingSubquery()
+    {
+        return doPagingSubquery;
+    }
+
+    public void setDoPagingSubquery(boolean doPagingSubquery)
+    {
+        this.doPagingSubquery = doPagingSubquery;
+    }
 }

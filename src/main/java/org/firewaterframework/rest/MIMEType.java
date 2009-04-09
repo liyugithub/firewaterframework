@@ -29,6 +29,7 @@ public class MIMEType
     public static final MIMEType application_inf = new MIMEType( "application/inf");
     public static final MIMEType application_java = new MIMEType( "application/java");
     public static final MIMEType application_java_byte_code = new MIMEType( "application/java-byte-code");
+    public static final MIMEType application_json = new MIMEType( "application/json");
     public static final MIMEType application_lha = new MIMEType( "application/lha");
     public static final MIMEType application_lzx = new MIMEType( "application/lzx");
     public static final MIMEType application_mac_binary = new MIMEType( "application/mac-binary");

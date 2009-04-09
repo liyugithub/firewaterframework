@@ -82,7 +82,6 @@ public class RouteMapper extends Mapper
      */
     public Response handle( Request request )
     {
-
         // handle OPTIONS on the root RouteMapper (me)
         if( request.getUrl() == null || request.getUrl().equals( "/" ) )
         {
