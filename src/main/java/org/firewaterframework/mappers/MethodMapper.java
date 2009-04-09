@@ -15,8 +15,8 @@ import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Status;
 import org.firewaterframework.rest.representation.Representation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.opensymphony.oscache.base.EntryRefreshPolicy;
 import com.opensymphony.oscache.base.NeedsRefreshException;
@@ -39,7 +39,7 @@ import com.opensymphony.oscache.general.GeneralCacheAdministrator;
  */
 public class MethodMapper extends Mapper
 {
-    protected static final Log log = LogFactory.getLog( RouteMapper.class );
+    protected static final Logger log = LoggerFactory.getLogger( RouteMapper.class );
     public static final String NOCACHE = "__nocache";
 
     protected GeneralCacheAdministrator cache;

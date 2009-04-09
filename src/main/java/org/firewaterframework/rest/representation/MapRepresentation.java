@@ -1,8 +1,8 @@
 package org.firewaterframework.rest.representation;
 
 import org.firewaterframework.WSException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -15,7 +15,7 @@ import java.util.*;
  */
 public class MapRepresentation extends AbstractRepresentation
 {
-    protected static final Log log = LogFactory.getLog( MapRepresentation.class );
+    protected static final Logger log = LoggerFactory.getLogger( MapRepresentation.class );
 
     public class Entry
     {

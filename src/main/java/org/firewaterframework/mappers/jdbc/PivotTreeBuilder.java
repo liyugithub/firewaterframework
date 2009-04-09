@@ -9,8 +9,8 @@ package org.firewaterframework.mappers.jdbc;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.firewaterframework.rest.representation.Representation;
 
 import java.util.*;
@@ -92,7 +92,7 @@ import java.util.*;
  */
 public class PivotTreeBuilder
 {
-    protected static final Log log = LogFactory.getLog( PivotTreeBuilder.class );
+    protected static final Logger log = LoggerFactory.getLogger( PivotTreeBuilder.class );
     protected ResourceDescriptor resourceDescriptor;
     protected Map<String,String> columnMappings;
 

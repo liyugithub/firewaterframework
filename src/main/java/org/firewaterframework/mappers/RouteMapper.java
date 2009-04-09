@@ -15,8 +15,8 @@ import org.firewaterframework.WSException;
 import org.firewaterframework.rest.*;
 import org.firewaterframework.rest.representation.Representation;
 import org.springframework.beans.factory.annotation.Required;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ import java.util.Map;
  */
 public class RouteMapper extends Mapper
 {
-    protected static final Log log = LogFactory.getLog( RouteMapper.class );
+    protected static final Logger log = LoggerFactory.getLogger( RouteMapper.class );
     /**
      * A Map keyed by URL patterns who's values are the delegate Mapper objects to
      * handle matching incoming Request URLs
