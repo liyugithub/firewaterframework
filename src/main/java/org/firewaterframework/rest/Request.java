@@ -268,4 +268,16 @@ public class Request implements Serializable
         }
         return "";
     }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "url='" + url + '\'' +
+                ", baseUrl='" + baseUrl + '\'' +
+                ", args=" + args +
+                ", method=" + method +
+                ", idString='" + idString + '\'' +
+                ", headers=" + headers +
+                '}';
+    }
 }

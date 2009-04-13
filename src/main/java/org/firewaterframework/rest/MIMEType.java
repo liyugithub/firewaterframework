@@ -398,4 +398,11 @@ public class MIMEType
     {
         return type.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "MIMEType{" +
+                "type='" + type + '\'' +
+                '}';
+    }
 }
