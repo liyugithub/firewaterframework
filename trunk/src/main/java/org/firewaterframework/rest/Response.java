@@ -88,4 +88,13 @@ public class Response
     {
         if( representation != null ) representation.write( out );
     }
+
+    @Override
+    public String toString() {
+        return "Response{" +
+                "status=" + status +
+                ", baseURL='" + baseURL + '\'' +
+                ", representation=" + representation +
+                '}';
+    }
 }
