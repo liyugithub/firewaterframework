@@ -27,4 +27,8 @@ public class QueryHolder
     public void setKeyName(String keyName) {
         this.keyName = keyName;
     }
+
+    public boolean hasKey() {
+        return keyName != null && keyName.length() > 0;
+    }
 }
