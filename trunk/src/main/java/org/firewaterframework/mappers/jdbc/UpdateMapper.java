@@ -40,7 +40,6 @@ import java.util.Map;
 public class UpdateMapper extends JDBCMapper
 {
     protected static final Logger log = LoggerFactory.getLogger( UpdateMapper.class );
-    //public static DocumentFactory factory = DocumentFactory.getInstance();
 
     protected QueryHolder[] queries;
 
@@ -72,12 +71,12 @@ public class UpdateMapper extends JDBCMapper
             for( QueryHolder query: queries )
             {
                 StringTemplate queryTemplate = new StringTemplate( query.query );
-                String queryID = query.keyName;
+                //String queryID = query.keyName;
 
                 KeyHolder keyHolder = new GeneratedKeyHolder();
 
                 UpdateMapperStatementCreator updateStatement =
-                        new UpdateMapperStatementCreator( queryTemplate, translatedArgs, keys );
+                        new UpdateMapperStatementCreator( queryTemplate, translatedArgs, keys, query.hasKey() );
 
                 // only execute the query if the query is non-empty
                 if( updateStatement.queryTemplate.toString().trim().length() > 0 )
@@ -87,9 +86,16 @@ public class UpdateMapper extends JDBCMapper
 
                     try
                     {
-                        rowsAffected = template.update(
-                            updateStatement,
-                            keyHolder );
+                        if( query.hasKey() )
+                        {
+                            rowsAffected = template.update(
+                                updateStatement,
+                                keyHolder );
+                        }
+                        else
+                        {
+                            rowsAffected = template.update( updateStatement );
+                        }
                     }
                     catch( Exception xx )
                     {
@@ -101,17 +107,17 @@ public class UpdateMapper extends JDBCMapper
                     
                     Representation element = rval.addChild( "update" );
                     element.addAttribute( "rowsAffected", rowsAffected.toString() );
-                    if( queryID != null )
+                    if( query.hasKey() )
                     {
-                        element.addAttribute( "updateID", queryID );
+                        element.addAttribute( "updateID", query.keyName );
                     }
 
                     try
                     {
-                        if( query.getKeyName() != null && query.getKeyName().length() > 0 && keyHolder.getKeyList().size() > 0 )
+                        if( query.hasKey() && keyHolder.getKeyList().size() > 0 )
                         {
                             Object key = ((Map)keyHolder.getKeyList().get(0)).values().iterator().next();
-                            keys.put( queryID, key );
+                            keys.put( query.keyName, key );
                             element.addAttribute( "key", key.toString() );
                             //log.info( "KEY=" + key.toString() );
                         }
@@ -144,12 +150,15 @@ public class UpdateMapper extends JDBCMapper
         Map<String,Object> args;
         StringTemplate queryTemplate;
         Map<String,Object> keys;
+        boolean generateKey;
 
-        public UpdateMapperStatementCreator( StringTemplate queryTemplate, Map<String,Object> args, Map<String,Object> keys )
+        public UpdateMapperStatementCreator( StringTemplate queryTemplate, Map<String,Object> args,
+                                             Map<String,Object> keys, boolean generateKey )
         {
             this.args = args;
             this.queryTemplate = queryTemplate;
             this.keys = keys;
+            this.generateKey = generateKey;
 
             // apply template
             for( Map.Entry<String, Object> entry: args.entrySet() )
@@ -174,8 +183,15 @@ public class UpdateMapper extends JDBCMapper
 
         public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
         {
-            log.debug( "Executing update: " + queryTemplate.toString() );            
-            return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
+            log.debug( "Executing update: " + queryTemplate.toString() );
+            if( generateKey )
+            {
+                return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
+            }
+            else
+            {
+                return connection.prepareStatement( queryTemplate.toString() );
+            }
         }
     }
 
