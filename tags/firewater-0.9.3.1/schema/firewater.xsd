@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- firewater.xsd -->
+<xsd:schema xmlns="http://www.firewaterframework.org/schema/firewater"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            targetNamespace="http://www.firewaterframework.org/schema/firewater"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+    <xsd:element name="dispatcher">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="route">
+                                <xsd:complexType>
+                                    <xsd:complexContent>
+                                        <xsd:extension base="beans:identifiedType">
+                                            <xsd:attribute name="pattern" type="xsd:string" use="required"/>
+                                            <xsd:attribute name="mapper" type="xsd:string"/>
+                                            <xsd:attribute name="get-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="put-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="post-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="delete-mapper" type="xsd:string"/>
+                                            <xsd:attribute name="cache" type="xsd:string"/>
+                                            <xsd:attribute name="cache-groups" type="xsd:string"/>
+                                        </xsd:extension>
+                                    </xsd:complexContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="resource">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="pivot-attribute" type="xsd:string" use="required"/>
+                    <xsd:attribute name="url-prefix" type="xsd:string"/>
+                    <xsd:attribute name="sub-resource" type="xsd:boolean"/>
+                    <xsd:attribute name="tagname" type="xsd:string"/>
+                    <xsd:attribute name="attributes" type="xsd:string"/>
+                    <xsd:attribute name="relativeReferences" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="ref">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="bean" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="query-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="fields" type="fieldType"/>
+                            <xsd:element name="pivot-tree" type="pivotTreeType" minOccurs="1" maxOccurs="1"/>
+                            <xsd:element name="query" maxOccurs="1">
+                                <xsd:complexType>
+                                    <xsd:simpleContent>
+                                        <xsd:extension base="xsd:string"/>
+                                    </xsd:simpleContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                    <xsd:attribute name="preferred-representation" type="xsd:string"/>
+                    <xsd:attribute name="default-page-size" type="xsd:int"/>
+                    <xsd:attribute name="page-window-size" type="xsd:int"/>
+                    <xsd:attribute name="page-count-pivot" type="xsd:string"/>
+                    <xsd:attribute name="do-paging-subquery" type="xsd:boolean"/>
+                    <xsd:attribute name="data-source" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="update-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="fields" type="fieldType"/>
+                            <xsd:element name="queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                    <xsd:attribute name="data-source" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="conditional-update-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="fields" type="fieldType"/>
+                            <xsd:element name="condition-query" maxOccurs="1">
+                                <xsd:complexType>
+                                    <xsd:simpleContent>
+                                        <xsd:extension base="xsd:string"/>
+                                    </xsd:simpleContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="exists-queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="none-queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                    <xsd:attribute name="data-source" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="method-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="get">
+                                <xsd:complexType>
+                                    <xsd:complexContent>
+                                        <xsd:extension base="beans:identifiedType">
+                                            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+                                        </xsd:extension>
+                                    </xsd:complexContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="put">
+                                <xsd:complexType>
+                                    <xsd:complexContent>
+                                        <xsd:extension base="beans:identifiedType">
+                                            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+                                        </xsd:extension>
+                                    </xsd:complexContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="post">
+                                <xsd:complexType>
+                                    <xsd:complexContent>
+                                        <xsd:extension base="beans:identifiedType">
+                                            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+                                        </xsd:extension>
+                                    </xsd:complexContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="delete">
+                                <xsd:complexType>
+                                    <xsd:complexContent>
+                                        <xsd:extension base="beans:identifiedType">
+                                            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+                                        </xsd:extension>
+                                    </xsd:complexContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="fieldType">
+        <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+            <xsd:group ref="patternGroup"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:group name="patternGroup">
+        <xsd:choice>
+            <xsd:element name="pattern" type="patternType"/>
+            <xsd:element name="sql-literal" type="namedType"/>
+            <xsd:element name="sql-literal-list" type="namedType"/>
+            <xsd:element name="sql-number" type="namedType"/>
+            <xsd:element name="sql-string" type="namedType"/>
+            <xsd:element name="sql-string-list" type="namedType"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <xsd:complexType name="patternType">
+        <xsd:attribute name="pattern" type="xsd:string"/>
+        <xsd:attribute name="quote" type="xsd:boolean"/>
+        <xsd:attribute name="required" type="xsd:boolean"/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="namedType">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="required" type="xsd:boolean"/>
+        <xsd:attribute name="nullable" type="xsd:boolean"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="pivotTreeType">
+        <xsd:sequence>
+            <xsd:element name="column-mappings" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:choice maxOccurs="unbounded" minOccurs="0">
+                <xsd:element name="pivot-tree" type="pivotTreeType"/>
+            </xsd:choice>
+        </xsd:sequence>
+        <xsd:attribute name="resource" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+</xsd:schema>
