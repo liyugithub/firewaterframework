@@ -3,8 +3,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:fw="http://www.firewaterframework.org/schema/firewater"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
@@ -17,6 +19,7 @@
             <map>
                 <entry key="/users" value-ref="usersMapper"/>
                 <entry key="/users/{userID}" value-ref="userMapper"/>
+                <entry key="/gusers" value-ref="guserMapper"/>
             </map>
         </constructor-arg>
     </bean>
@@ -41,31 +44,31 @@
     <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
         <property name="query">
             <value>
-                select  u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
+                select u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
                 u.last_name as last_name, u.email as email, u.city as city, rl.name as role
                 from user u
-                left outer join pet p on u.id = p.owner_id 
+                left outer join pet p on u.id = p.owner_id
                 left outer join species r on p.species_id = r.id
                 left outer join user_role ur on u.id = ur.user_id
                 left outer join role rl on rl.id = ur.role_id
                 where
-                    $if(species_list)$
-                        p.species_id in ($species_list;separator=","$)
-                    $else$
-                        1 = 1
-                    $endif$
-                    and
-                    $if(zipcode)$
-                        u.zip = $zipcode$
-                    $else$
-                        1 = 1
-                    $endif$
+                $if(species_list)$
+                p.species_id in ($species_list;separator=","$)
+                $else$
+                1 = 1
+                $endif$
+                and
+                $if(zipcode)$
+                u.zip = $zipcode$
+                $else$
+                1 = 1
+                $endif$
                 order by
-                    $if(sort)$
-                        $sort$
-                    $else$
-                        email
-                    $endif$,u.id
+                $if(sort)$
+                $sort$
+                $else$
+                email
+                $endif$,u.id
             </value>
         </property>
         <property name="dataSource" ref="dataSource"/>
@@ -99,7 +102,7 @@
         </property>
     </bean>
 
-    <bean id="usersPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper" >
+    <bean id="usersPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
         <property name="dataSource" ref="dataSource"/>
         <property name="queries">
             <list>
@@ -178,7 +181,7 @@
         </property>
     </bean>
 
-    <bean id="userPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper" >
+    <bean id="userPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
         <property name="dataSource" ref="dataSource"/>
         <property name="queries">
             <list>
@@ -186,13 +189,13 @@
                     <property name="query">
                         <value>
                             update user set
-                                id = id
-                                $if(first_name)$, first_name = $first_name$ $endif$
-                                $if(last_name)$, last_name = $last_name$ $endif$
-                                $if(city)$, city = $city$ $endif$
-                                $if(state)$, state = $state$ $endif$
-                                $if(email)$, email = $email$ $endif$
-                                $if(zip)$, zip = $zip$ $endif$
+                            id = id
+                            $if(first_name)$, first_name = $first_name$ $endif$
+                            $if(last_name)$, last_name = $last_name$ $endif$
+                            $if(city)$, city = $city$ $endif$
+                            $if(state)$, state = $state$ $endif$
+                            $if(email)$, email = $email$ $endif$
+                            $if(zip)$, zip = $zip$ $endif$
                             where id = $userID$
                         </value>
                     </property>
@@ -231,6 +234,39 @@
         </property>
     </bean>
 
+    <fw:conditional-update-mapper id="guserMapper" data-source="dataSource">
+        <fw:condition-query>
+            select * from user where email = $if(email)$ $email$ $else$ '' $endif$
+        </fw:condition-query>
+        <fw:exists-queries>
+            <fw:query>
+                update user set
+                email = email
+                $if(first_name)$, first_name = $first_name$ $endif$
+                $if(last_name)$, last_name = $last_name$ $endif$
+                $if(city)$, city = $city$ $endif$
+                $if(state)$, state = $state$ $endif$
+                $if(zip)$, zip = $zip$ $endif$
+                where email = $email$
+            </fw:query>
+        </fw:exists-queries>
+        <fw:none-queries>
+            <fw:query>
+                insert into user (first_name, last_name, email, city, state, password, zip)
+                values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
+            </fw:query>
+        </fw:none-queries>
+        <fw:fields>
+            <fw:sql-string name="first_name"/>
+            <fw:sql-string name="last_name"/>
+            <fw:sql-string name="email"/>
+            <fw:sql-string name="city"/>
+            <fw:sql-string name="state"/>
+            <fw:sql-string name="password"/>
+            <fw:sql-string name="zip"/>
+        </fw:fields>
+    </fw:conditional-update-mapper>
+    
     <!-- dev -->
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
