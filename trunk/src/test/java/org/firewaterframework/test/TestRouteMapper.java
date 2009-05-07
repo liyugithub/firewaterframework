@@ -243,6 +243,54 @@ public class TestRouteMapper extends Assert
     }
 
     @Test
+    public void testConditionalPost()
+    {
+        Map<String,Object> args = new HashMap<String,Object>();
+        args.put( "first_name","bwible" );
+        args.put( "last_name","timbers" );
+        args.put( "email","barroom@gmail.com" );
+        args.put( "password","yahoo" );
+        args.put( "zip","12345" );
+        args.put( "city","nashville" );
+        args.put( "state","TN" );
+
+        // write the user to the database
+        Response response = post( "/gusers", args );
+        //Document res = response.toDocument();
+        //print( res );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+
+        // fetch it back and ensure it's there - this tests the 'none' case
+        response = get( "/users/7" );
+        Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@first_name" ).getNodeValue(), "bwible" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@last_name" ).getNodeValue(), "timbers" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@email" ).getNodeValue(), "barroom@gmail.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@city" ).getNodeValue(), "nashville" );
+
+        // change the args, and rePOST to test the 'exists' case
+        args.put( "first_name", "timmy" );
+        args.put( "last_name", "the dog" );
+
+        response = post( "/gusers", args );
+        //Document res = response.toDocument();
+        //print( res );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+
+        // fetch it back and ensure it's there - this tests the 'none' case
+        response = get( "/users/7" );
+        rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@first_name" ).getNodeValue(), "timmy" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@last_name" ).getNodeValue(), "the dog" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@email" ).getNodeValue(), "barroom@gmail.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='7']/@city" ).getNodeValue(), "nashville" );
+    }
+
+    @Test
     public void testSimplePost()
     {
         Map<String,Object> args = new HashMap<String,Object>();

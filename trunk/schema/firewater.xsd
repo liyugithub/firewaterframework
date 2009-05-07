@@ -121,6 +121,58 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="conditional-update-mapper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="fields" type="fieldType"/>
+                            <xsd:element name="condition-query" maxOccurs="1">
+                                <xsd:complexType>
+                                    <xsd:simpleContent>
+                                        <xsd:extension base="xsd:string"/>
+                                    </xsd:simpleContent>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="exists-queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="none-queries">
+                                <xsd:complexType>
+                                    <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:element name="query">
+                                            <xsd:complexType>
+                                                <xsd:simpleContent>
+                                                    <xsd:extension base="xsd:string">
+                                                        <xsd:attribute name="key-name" type="xsd:string"/>
+                                                    </xsd:extension>
+                                                </xsd:simpleContent>
+                                            </xsd:complexType>
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:sequence>
+                    <xsd:attribute name="data-source" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="method-mapper">
         <xsd:complexType>
             <xsd:complexContent>
