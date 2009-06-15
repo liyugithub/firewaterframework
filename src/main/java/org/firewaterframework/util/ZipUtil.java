@@ -93,6 +93,35 @@ public class ZipUtil
         return rval.toString();
     }
 
+    public static void deleteDirectory( String dir ) throws IOException
+    {
+        deleteDirectory( new File( dir ));
+    }
+
+    public static void deleteDirectory( File dir ) throws IOException
+    {
+        if( !dir.isDirectory() ) throw new IOException( "File: " + dir.getName() + " is not a directory." );
+
+        // delete every file in the directory, recursively
+        for( File file: dir.listFiles() )
+        {
+            if( file.isDirectory() ) deleteDirectory( file );
+            else
+            {
+                if( !file.delete() )
+                {
+                    throw new IOException( "Could not delete file: " + file.getName() );
+                }
+            }
+        }
+
+        // dir should now be empty, delete it
+        if( !dir.delete() )
+        {
+            throw new IOException( "Could not delete file: " + dir.getName() );
+        }
+    }
+
     protected static void zipDir( File zipDir, ZipOutputStream zos ) throws IOException
     {
         //get a listing of the directory content
