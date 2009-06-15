@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:fw="http://www.firewaterframework.org/schema/firewater"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean id="routingService" class="org.firewaterframework.mappers.RouteMapper">
+        <property name="urlMap" ref="urlMap"/>
+    </bean>
+
+    <bean id="urlMap" class="java.util.HashMap">
+        <constructor-arg index="0">
+            <map>
+                <entry key="/users" value-ref="usersMapper"/>
+                <entry key="/users/{userID}" value-ref="userMapper"/>
+                <entry key="/gusers" value-ref="guserMapper"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="userResource" class="org.firewaterframework.mappers.jdbc.ResourceDescriptor">
+        <property name="pivotAttribute" value="user"/>
+        <property name="urlPrefix" value="users"/>
+        <property name="attributesString" value="first_name,last_name,email,city,state,zip"/>
+    </bean>
+
+    <bean id="petResource" class="org.firewaterframework.mappers.jdbc.ResourceDescriptor">
+        <property name="pivotAttribute" value="pet"/>
+        <property name="urlPrefix" value="pets"/>
+        <property name="attributesString" value="name,type"/>
+    </bean>
+
+    <bean id="usersMapper" class="org.firewaterframework.mappers.MethodMapper">
+        <property name="getMapper" ref="usersGetMapper"/>
+        <property name="putMapper" ref="usersPutMapper"/>
+    </bean>
+
+    <bean id="usersGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+        <property name="query">
+            <value>
+                select u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
+                u.last_name as last_name, u.email as email, u.city as city, rl.name as role
+                from user u
+                left outer join pet p on u.id = p.owner_id
+                left outer join species r on p.species_id = r.id
+                left outer join user_role ur on u.id = ur.user_id
+                left outer join role rl on rl.id = ur.role_id
+                where
+                $if(species_list)$
+                p.species_id in ($species_list;separator=","$)
+                $else$
+                1 = 1
+                $endif$
+                and
+                $if(zipcode)$
+                u.zip = $zipcode$
+                $else$
+                1 = 1
+                $endif$
+                order by
+                $if(sort)$
+                $sort$
+                $else$
+                email
+                $endif$,u.id
+            </value>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="fields">
+            <map>
+                <entry key="sort">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
+                        <property name="pattern" value="last_name|email"/>
+                    </bean>
+                </entry>
+                <entry key="species_list">
+                    <bean class="org.firewaterframework.mappers.validation.SqlLiteralList"/>
+                </entry>
+                <entry key="zipcode">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+            </map>
+        </property>
+        <property name="pivotTreeBuilder">
+            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+                <property name="resourceDescriptor" ref="userResource"/>
+                <property name="subNodes">
+                    <list>
+                        <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+                            <property name="resourceDescriptor" ref="petResource"/>
+                            <property name="columnMappingsString" value="pet_name:name,pet_type:type"/>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="usersPutMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="keyName" value="userID"/>
+                    <property name="query">
+                        <value>
+                            insert into user (first_name, last_name, email, city, state, password, zip)
+                            values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
+                        </value>
+                    </property>
+                </bean>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="query">
+                        <value>
+                            insert into user_role ( user_id, role_id )
+                            values($userID$, 0)
+                        </value>
+                    </property>
+                </bean>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="first_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="last_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="city">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="state">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
+                        <property name="pattern" value="[A-Z][A-Z]"/>
+                        <property name="quote" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="email">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="password">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="zip">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="userMapper" class="org.firewaterframework.mappers.MethodMapper">
+        <property name="getMapper" ref="userGetMapper"/>
+        <property name="postMapper" ref="userPostMapper"/>
+    </bean>
+
+    <bean id="userGetMapper" class="org.firewaterframework.mappers.jdbc.QueryMapper">
+        <property name="query" value="
+            select  u.id as user, u.first_name as first_name, u.last_name as last_name, u.email as email, u.city as city,
+                u.state as state, u.zip zip
+            from user u
+            where u.id = $userID$"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="fields">
+            <map>
+                <entry key="userID">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+            </map>
+        </property>
+        <property name="pivotTreeBuilder">
+            <bean class="org.firewaterframework.mappers.jdbc.PivotTreeBuilder">
+                <property name="resourceDescriptor" ref="userResource"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="userPostMapper" class="org.firewaterframework.mappers.jdbc.UpdateMapper">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="queries">
+            <list>
+                <bean class="org.firewaterframework.mappers.jdbc.QueryHolder">
+                    <property name="query">
+                        <value>
+                            update user set
+                            id = id
+                            $if(first_name)$, first_name = $first_name$ $endif$
+                            $if(last_name)$, last_name = $last_name$ $endif$
+                            $if(city)$, city = $city$ $endif$
+                            $if(state)$, state = $state$ $endif$
+                            $if(email)$, email = $email$ $endif$
+                            $if(zip)$, zip = $zip$ $endif$
+                            where id = $userID$
+                        </value>
+                    </property>
+                </bean>
+            </list>
+        </property>
+        <property name="fields">
+            <map>
+                <entry key="first_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="last_name">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="city">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="state">
+                    <bean class="org.firewaterframework.mappers.validation.ValidationPattern">
+                        <property name="pattern" value="[A-Z][A-Z]"/>
+                        <property name="quote" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="email">
+                    <bean class="org.firewaterframework.mappers.validation.SqlString"/>
+                </entry>
+                <entry key="zip">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber"/>
+                </entry>
+                <entry key="userID">
+                    <bean class="org.firewaterframework.mappers.validation.SqlNumber">
+                        <property name="required" value="true"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <fw:conditional-update-mapper id="guserMapper" data-source="dataSource">
+        <fw:condition-query>
+            select * from user where email = $if(email)$ $email$ $else$ '' $endif$
+        </fw:condition-query>
+        <fw:exists-queries>
+            <fw:query>
+                update user set
+                email = email
+                $if(first_name)$, first_name = $first_name$ $endif$
+                $if(last_name)$, last_name = $last_name$ $endif$
+                $if(city)$, city = $city$ $endif$
+                $if(state)$, state = $state$ $endif$
+                $if(zip)$, zip = $zip$ $endif$
+                where email = $email$
+            </fw:query>
+        </fw:exists-queries>
+        <fw:none-queries>
+            <fw:query>
+                insert into user (first_name, last_name, email, city, state, password, zip)
+                values($first_name$, $last_name$, $email$, $city$, $state$, $password$, $zip$)
+            </fw:query>
+        </fw:none-queries>
+        <fw:fields>
+            <fw:sql-string name="first_name"/>
+            <fw:sql-string name="last_name"/>
+            <fw:sql-string name="email"/>
+            <fw:sql-string name="city"/>
+            <fw:sql-string name="state"/>
+            <fw:sql-string name="password"/>
+            <fw:sql-string name="zip"/>
+        </fw:fields>
+    </fw:conditional-update-mapper>
+    
+    <!-- dev -->
+    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:mem:test"/>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>
+<!--
+Copyright 2008 John TW Spurway
+Licensed under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+either express or implied. See the License for the specific language governing permissions
+and limitations under the License. -->
