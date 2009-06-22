@@ -217,6 +217,8 @@
                             </xsd:element>
                         </xsd:choice>
                     </xsd:sequence>
+                    <xsd:attribute name="cache" type="xsd:string"/>
+                    <xsd:attribute name="cache-groups" type="xsd:string"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

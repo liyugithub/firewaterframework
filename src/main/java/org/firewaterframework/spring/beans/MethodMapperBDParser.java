@@ -4,10 +4,11 @@ import org.firewaterframework.mappers.MethodMapper;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Attr;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,7 +17,7 @@ import org.w3c.dom.NodeList;
  * Time: 4:30:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MethodMapperBDParser extends AbstractBeanDefinitionParser
+public class MethodMapperBDParser extends AbstractMapperBDParser
 {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder methodMapper = BeanDefinitionBuilder.rootBeanDefinition( MethodMapper.class);
@@ -36,6 +37,26 @@ public class MethodMapperBDParser extends AbstractBeanDefinitionParser
                 }
             }
         }
+
+        NamedNodeMap attributes = element.getAttributes();
+        if( attributes != null )
+        {
+            for( int i = 0; i < attributes.getLength(); ++i )
+            {
+                Attr child = (Attr) attributes.item(i);
+                if( "cache".equals( child.getLocalName() ))
+                {
+                    RuntimeBeanReference ref = new RuntimeBeanReference( child.getValue() );
+                    methodMapper.addPropertyValue( "cache", ref );
+                }
+                else if( "cache-groups".equals( child.getLocalName() ))
+                {
+                    RuntimeBeanReference ref = new RuntimeBeanReference( child.getValue() );
+                    methodMapper.addPropertyValue( "cacheGroups", ref );
+                }
+            }
+        }
+
         return methodMapper.getBeanDefinition();
     }
 }

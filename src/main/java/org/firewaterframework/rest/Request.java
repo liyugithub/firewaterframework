@@ -234,7 +234,7 @@ public class Request implements Serializable
 
     public String getParameter( String parameterName )
     {
-        if( args.getPropertyValue( parameterName ) != null )
+        if( args.getPropertyValue( parameterName ) != null && args.getPropertyValue( parameterName ).getValue() != null )
             return args.getPropertyValue( parameterName ).getValue().toString();
         return null;
     }
