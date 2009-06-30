@@ -51,8 +51,12 @@ public class MethodMapperBDParser extends AbstractMapperBDParser
                 }
                 else if( "cache-groups".equals( child.getLocalName() ))
                 {
+                    methodMapper.addPropertyValue( "cacheGroups", child.getValue() );
+                }
+                else if( "entry-refresh-policy".equals( child.getLocalName() ))
+                {
                     RuntimeBeanReference ref = new RuntimeBeanReference( child.getValue() );
-                    methodMapper.addPropertyValue( "cacheGroups", ref );
+                    methodMapper.addPropertyValue( "entryRefreshPolicy", ref );
                 }
             }
         }
