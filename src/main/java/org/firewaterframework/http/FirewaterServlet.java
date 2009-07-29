@@ -121,8 +121,13 @@ public class FirewaterServlet extends HttpServlet
             String requestURL = request.getRequestURL().toString();
             int uriIndex = requestURL.indexOf( request.getRequestURI() );
             String hostInfo = requestURL.substring( 0, uriIndex );
+            String userAgent = request.getHeader("User-Agent");
+            String referer = request.getHeader("Referer");
+
             args.put( "_request_hostInfo", hostInfo );
             args.put( "_request_remoteAddr", request.getRemoteHost() );
+            args.put( "_request_userAgent", userAgent );
+            args.put( "_request_referer", referer );
 
             String idURL = path;
             if( request.getQueryString() != null )
