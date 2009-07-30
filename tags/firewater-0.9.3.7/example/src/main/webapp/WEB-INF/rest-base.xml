@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:fw="http://www.firewaterframework.org/schema/firewater"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd">
+
+    <fw:dispatcher id="dispatcher">
+        <fw:route pattern="/photos" get-mapper="photosGetMapper" put-mapper="photosPutMapper"/>
+        <fw:route pattern="/owners/{ownerID}/photos" get-mapper="photosGetMapper" put-mapper="photosPutMapper"/>
+        <fw:route pattern="/photos/{photoID}" get-mapper="photoGetMapper"
+                    delete-mapper="photoDeleteMapper" post-mapper="photoPostMapper"/>
+        <fw:route pattern="/owners" get-mapper="ownersGetMapper" put-mapper="ownersPutMapper"/>
+        <fw:route pattern="/owners/{ownerID}" mapper="ownerMethodMapper"/>
+    </fw:dispatcher>
+
+    <fw:resource id="photoResource" pivot-attribute="photo" url-prefix="photos" attributes="thumbnail,title,link"/>
+    <fw:resource id="ownerResource" pivot-attribute="owner" attributes="name,flickr_id"/>
+    <fw:resource id="tagResource" pivot-attribute="tag"/>
+
+    <fw:query-mapper id="photosGetMapper"
+            default-page-size="5"
+            page-window-size="10"
+            page-count-pivot="photo"
+            data-source="dataSource">
+        <fw:query>
+            select p.id as photo, p.thumbnail as thumbnail, p.title as title,
+                p.owner_id as owner, o.name as owner_name, pt.tag as tag, p.row_num
+            from (
+                select id, thumbnail, title, owner_id, rownum() as row_num
+                from photo inner_p
+                $if(tags)$
+                    join photo_tag inner_pt on inner_p.id = inner_pt.photo_id and
+                        ($tags:{ inner_pt.tag = $it$ }; separator=" or "$)
+                $endif$
+                $if(ownerID)$
+                    where inner_p.owner_id = $ownerID$
+                $endif$
+                $page_token$) as p
+            left outer join owner o on o.id = p.owner_id
+            left outer join photo_tag pt on pt.photo_id = p.id
+            order by p.row_num, p.owner_id
+        </fw:query>
+        <fw:fields>
+            <fw:sql-string-list name="tags"/>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+        <fw:pivot-tree resource="photoResource">
+            <fw:pivot-tree resource="ownerResource">
+                <fw:column-mappings>owner_name:name</fw:column-mappings>
+            </fw:pivot-tree>
+            <fw:pivot-tree resource="tagResource"/>
+        </fw:pivot-tree>
+    </fw:query-mapper>
+
+    <fw:update-mapper id="photosPutMapper"
+            data-source="dataSource">
+        <fw:queries>
+            <fw:query key-name="new_photo_id">
+                insert into photo(link, thumbnail, owner_id, title)
+                    values( $link$, $thumbnail$, $ownerID$,
+                        $if(title)$
+                            $title$
+                        $else$
+                            null
+                        $endif$ )
+            </fw:query>
+            <fw:query>
+                $if(tags)$
+                    insert into photo_tag( photo_id, tag ) values
+                        $tags:{( $new_photo_id$, $it$ ) };separator = ","$
+                $endif$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal required="true" name="link"/>
+            <fw:sql-literal required="true" name="thumbnail"/>
+            <fw:sql-number required="true" name="ownerID"/>
+            <fw:sql-literal name="title"/>
+            <fw:sql-string-list name="tags"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <fw:query-mapper id="photoGetMapper"
+            data-source="dataSource">
+        <fw:query>
+                select p.id as photo, p.thumbnail as thumbnail, p.link as link, p.title as title,
+                    p.owner_id as owner, o.name as owner_name, pt.tag as tag
+                from photo as p
+                left outer join owner o on o.id = p.owner_id
+                left outer join photo_tag pt on pt.photo_id = p.id
+                where p.id = $photoID$
+        </fw:query>
+        <fw:fields>
+            <fw:sql-number name="photoID"/>
+        </fw:fields>
+        <fw:pivot-tree resource="photoResource">
+            <fw:pivot-tree resource="ownerResource">
+                <fw:column-mappings>owner_name:name</fw:column-mappings>
+            </fw:pivot-tree>
+            <fw:pivot-tree resource="tagResource"/>
+        </fw:pivot-tree>
+    </fw:query-mapper>
+
+    <fw:update-mapper id="photoPostMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                update photo set id = $photoID$
+                    $if(thumbnail)$
+                        , thumbnail = $thumbnail$
+                    $endif$
+                    $if(link)$
+                        , link = $link$
+                    $endif$
+                    $if(title)$
+                        , title = $title$
+                    $endif$
+                    where id = $photoID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal name="link"/>
+            <fw:sql-literal name="thumbnail"/>
+            <fw:sql-literal name="title"/>
+            <fw:sql-number name="photoID" required="true"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <fw:update-mapper id="photoDeleteMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                delete from photo where id = $photoID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="photoID" required="true"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <fw:query-mapper id="ownersGetMapper"
+            data-source="dataSource"
+            default-page-size="20"
+            page-window-size="10">
+        <fw:query>select id as owner, name from owner $page_token$</fw:query>
+        <fw:pivot-tree resource="ownerResource"/>
+    </fw:query-mapper>
+
+    <fw:update-mapper id="ownersPutMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                insert into owner( flickr_id, name ) values
+                (
+                    $if(flickr_id)$
+                        $flickr_id$
+                    $else$
+                        null
+                    $endif$, $name$
+                )
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-literal name="flickr_id"/>
+            <fw:sql-string name="name"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <!-- just an example of the fw:method-mapper - this is optional - all the method declarations
+        can be put in the fw:dispatcher bean -->
+    <fw:method-mapper id="ownerMethodMapper">
+        <fw:get mapper="ownerGetMapper"/>
+        <fw:post mapper="ownerPostMapper"/>
+        <fw:delete mapper="ownerDeleteMapper"/>
+    </fw:method-mapper>
+
+    <fw:query-mapper id="ownerGetMapper" data-source="dataSource">
+        <fw:query>
+            select id as owner, name, flickr_id from owner where id = $ownerID$
+        </fw:query>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+        <fw:pivot-tree resource="ownerResource"/>
+    </fw:query-mapper>
+
+    <fw:update-mapper id="ownerPostMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>
+                update owner set id = $ownerID$
+                    $if(flickr_id)$
+                        , flickr_id = $flickr_id$
+                    $endif$
+                    $if(name)$
+                        , name = $name$
+                    $endif$
+                where id = $ownerID$
+            </fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+            <fw:sql-string name="flickr_id"/>
+            <fw:sql-string name="name"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <fw:update-mapper id="ownerDeleteMapper" data-source="dataSource">
+        <fw:queries>
+            <fw:query>delete from owner where id = $ownerID$</fw:query>
+            <fw:query>delete from photo_tag where photo_id = (select id from photo where owner_id = $ownerID$)</fw:query>
+            <fw:query>delete from photo where owner_id = $ownerID$</fw:query>
+        </fw:queries>
+        <fw:fields>
+            <fw:sql-number name="ownerID"/>
+        </fw:fields>
+    </fw:update-mapper>
+
+    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.h2.Driver"/>
+        <property name="url" value="jdbc:h2:mem:test"/>
+    </bean>
+
+    <bean id="executedSQL" class="org.firewaterframework.util.DatabaseUtil" factory-method="loadSQL" depends-on="dataSource">
+        <constructor-arg index="0" value="/WEB-INF/classes/flickrSampleData.sql"/>
+        <constructor-arg index="1" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven/>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>
+<!--
+Copyright 2008 John TW Spurway
+Licensed under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+either express or implied. See the License for the specific language governing permissions
+and limitations under the License. -->
