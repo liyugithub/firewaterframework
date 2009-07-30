@@ -78,7 +78,7 @@ public class ConditionalUpdateMapper extends JDBCMapper
         pageCountTemplate.setAttribute( "conditionalQuery", baseQuery );
 
         String conditionCountQueryString = pageCountTemplate.toString();
-        log.info( "Executing conditional update query: " + conditionCountQueryString );
+        log.debug( "Executing conditional update query: " + conditionCountQueryString );
         int numberOfRows = template.queryForInt( conditionCountQueryString );
 
         // decide on execution of the 'exists' or 'none' mappers
