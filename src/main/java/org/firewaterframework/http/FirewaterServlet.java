@@ -142,7 +142,7 @@ public class FirewaterServlet extends HttpServlet
 
             if( restResponse != null )
             {
-                log.info( "Response for: " + restRequest.getMethod() + " in (ms): " + (Long)( System.currentTimeMillis() - timeIn ) + " " + restRequest.getUrl() + " " + restResponse.getStatus().getCode() );
+                log.debug( "Response for: " + restRequest.getMethod() + " in (ms): " + (Long)( System.currentTimeMillis() - timeIn ) + " " + restRequest.getUrl() + " " + restResponse.getStatus().getCode() );
 	            // encode the baseUrl into the response - it is the requestURI - path
 	            String uri = request.getRequestURI();
 	            String baseURL = uri.substring( 0, uri.indexOf( path ));
