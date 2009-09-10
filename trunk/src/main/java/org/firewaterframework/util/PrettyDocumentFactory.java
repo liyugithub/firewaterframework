@@ -2,7 +2,6 @@ package org.firewaterframework.util;
 
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -10,7 +9,6 @@ public class PrettyDocumentFactory
 {
     protected static DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
     protected static PrettyDocumentFactory instance;
-    //protected ProcessingInstruction processingInstruction;
     private String instruction;
     private String details;
 
