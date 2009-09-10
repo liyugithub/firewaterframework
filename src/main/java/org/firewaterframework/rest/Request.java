@@ -118,6 +118,11 @@ public class Request implements Serializable
         this( "/_no_url_", Method.GET, new MutablePropertyValues( args ), false );
     }
 
+    public Request( Method method, Map args )
+    {
+        this( "/_no_url_", method, new MutablePropertyValues( args ), false );
+    }
+
     public Request( String url, Method method )
     {
         this( url, method, (MutablePropertyValues)null, false );
@@ -126,6 +131,11 @@ public class Request implements Serializable
     public Request( String url )
     {
         this( url, Method.GET, (MutablePropertyValues)null, false );
+    }
+
+    public Request(  )
+    {
+        this( "/_no_url_", Method.GET, (MutablePropertyValues)null, false );
     }
 
     public String getUrl() {
