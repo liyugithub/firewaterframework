@@ -3,12 +3,12 @@
     <groupId>org.firewaterframework</groupId>
     <artifactId>firewater</artifactId>
     <packaging>jar</packaging>
-    <version>0.9.3.11</version>
+    <version>0.9.3.12-SNAPSHOT</version>
     <name>Firewater</name>
 
     <scm>
-        <connection>scm:svn:http://firewaterframework.googlecode.com/svn/tags/firewater-0.9.3.11</connection>
-        <developerConnection>scm:svn:https://firewaterframework.googlecode.com/svn/tags/firewater-0.9.3.11</developerConnection>
+        <connection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:https://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
     </scm>
 
     <distributionManagement>
