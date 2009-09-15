@@ -19,7 +19,7 @@ public class SqlString extends MapPropertyEditor
     {
         if( checkRequired( text ))
         {
-            this.setValue( '\'' + text.replaceAll( "\'", "''" ) + '\'' );
+            this.setValue( '\'' + text.replaceAll( "\\\\*'", "''" ) + '\'' );
         }
     }
 }

@@ -81,7 +81,7 @@ public class UpdateMapper extends JDBCMapper
                 // only execute the query if the query is non-empty
                 if( updateStatement.queryTemplate.toString().trim().length() > 0 )
                 {
-                    //log.info( "STMT: " + updateStatement.queryTemplate.toString() );
+                    //log.info( "Q: " + updateStatement.queryTemplate.toString() );
                     Integer rowsAffected = 0;
 
                     try

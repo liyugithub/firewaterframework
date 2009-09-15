@@ -21,6 +21,8 @@ import java.io.Serializable;
  */
 public class Request implements Serializable
 {
+    private static final long serialVersionUID = -403250971215465050L;
+    
     public enum Header implements Serializable
     {
         Accept(),
