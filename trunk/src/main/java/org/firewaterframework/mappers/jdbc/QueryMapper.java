@@ -99,12 +99,9 @@ public class QueryMapper extends JDBCMapper
             Response response = new Response( Status.STATUS_OK, representation );
             return response;
         }
-        catch( WSException e )
-        {
-            throw e;
-        }
         catch( Exception e )
         {
+            log.error( "QUERY Mapper ERROR on query = " + query );
             // this is categorized as a 500
             throw new WSException( "Caught error executing SQL statement", e );
         }
