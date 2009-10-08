@@ -101,7 +101,7 @@ public class QueryMapper extends JDBCMapper
         }
         catch( Exception e )
         {
-            log.error( "QUERY Mapper ERROR on query = " + query );
+            log.error( "QUERY Mapper ERROR on query = " + query + " \n request = " + request.toString() );
             // this is categorized as a 500
             throw new WSException( "Caught error executing SQL statement", e );
         }
