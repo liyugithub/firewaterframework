@@ -132,12 +132,12 @@ public class UpdateMapper extends JDBCMapper
             Response response = new Response( Status.STATUS_OK, rval );
             return response;
         }
-        catch( WSException e )
-        {
-            throw e;
-        }
         catch( Exception e )
         {
+            String errorQuery = "<empty query>";
+            if( queries.length > 0 ) errorQuery = queries[0].query;
+            log.error( "UPDATE Mapper ERROR on query[0] = " + errorQuery );
+            
             throw new WSException( "Internal Error processing update.", e );
         }
     }
