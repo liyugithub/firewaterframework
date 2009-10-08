@@ -1,0 +1,2 @@
+# in 'META-INF/spring.handlers'
+http\://www.firewaterframework.org/schema/firewater=org.firewaterframework.spring.beans.FirewaterNamespaceHandler
