@@ -4,6 +4,7 @@ import org.firewaterframework.rest.Response;
 import org.firewaterframework.rest.Request;
 import org.firewaterframework.rest.Status;
 import org.firewaterframework.mappers.validation.MapPropertyEditor;
+import org.firewaterframework.WSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,36 +64,43 @@ public class ConditionalUpdateMapper extends JDBCMapper
     @Transactional( readOnly=false,isolation= Isolation.READ_COMMITTED )
     public Response handle(Request request)
     {
-        // set up and execute the conditional query
-        StringTemplate queryTemplate = new StringTemplate( conditionQuery );
-        Map<String,Object> translatedArgs = bind( request );
-
-        for( Map.Entry<String,Object> entry: translatedArgs.entrySet() )
+        try
         {
-            queryTemplate.setAttribute( entry.getKey(), entry.getValue() );
+            // set up and execute the conditional query
+            StringTemplate queryTemplate = new StringTemplate( conditionQuery );
+            Map<String,Object> translatedArgs = bind( request );
+
+            for( Map.Entry<String,Object> entry: translatedArgs.entrySet() )
+            {
+                queryTemplate.setAttribute( entry.getKey(), entry.getValue() );
+            }
+
+            // set up the query to count all rows returned
+            String baseQuery = queryTemplate.toString();
+            StringTemplate pageCountTemplate = new StringTemplate( conditionalCountQuery );
+            pageCountTemplate.setAttribute( "conditionalQuery", baseQuery );
+
+            String conditionCountQueryString = pageCountTemplate.toString();
+            log.debug( "Executing conditional update query: " + conditionCountQueryString );
+            int numberOfRows = template.queryForInt( conditionCountQueryString );
+
+            // decide on execution of the 'exists' or 'none' mappers
+            if( numberOfRows > 0 )
+            {
+                if( existsMapper.getQueries() != null )
+                    return existsMapper.handle( request );
+            }
+            else if( noneMapper.getQueries() != null )
+            {
+                return noneMapper.handle( request );
+            }
+            return new Response( Status.STATUS_OK );
         }
-
-        // set up the query to count all rows returned
-        String baseQuery = queryTemplate.toString();
-        StringTemplate pageCountTemplate = new StringTemplate( conditionalCountQuery );
-        pageCountTemplate.setAttribute( "conditionalQuery", baseQuery );
-
-        String conditionCountQueryString = pageCountTemplate.toString();
-        log.debug( "Executing conditional update query: " + conditionCountQueryString );
-        int numberOfRows = template.queryForInt( conditionCountQueryString );
-
-        // decide on execution of the 'exists' or 'none' mappers
-        if( numberOfRows > 0 )
+        catch( Exception e )
         {
-            if( existsMapper.getQueries() != null )
-                return existsMapper.handle( request );
+            log.error( "CONDITIONAL UPDATE Mapper ERROR on conditionQuery = " + conditionQuery + " \n request = " + request );
+            throw new WSException( "Internal Error processing update.", e );
         }
-        else if( noneMapper.getQueries() != null )
-        {
-            return noneMapper.handle( request );
-        }
-        return new Response( Status.STATUS_OK );
-
     }
 
     public String getConditionQuery() {
