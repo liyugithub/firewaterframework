@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.antlr.stringtemplate.StringTemplate;
 
 import javax.sql.DataSource;
@@ -61,7 +62,7 @@ public class ConditionalUpdateMapper extends JDBCMapper
      * @param request the REST request to process
      * @return
      */
-    @Transactional( readOnly=false,isolation= Isolation.READ_COMMITTED )
+    @Transactional( readOnly=false,isolation=Isolation.SERIALIZABLE )
     public Response handle(Request request)
     {
         try

@@ -81,7 +81,7 @@ public class UpdateMapper extends JDBCMapper
                 // only execute the query if the query is non-empty
                 if( updateStatement.queryTemplate.toString().trim().length() > 0 )
                 {
-                    //log.info( "Q: " + updateStatement.queryTemplate.toString() );
+                    log.debug( "Update Query: " + updateStatement.queryTemplate.toString() );
                     Integer rowsAffected = 0;
 
                     try
@@ -183,7 +183,7 @@ public class UpdateMapper extends JDBCMapper
 
         public PreparedStatement createPreparedStatement(Connection connection) throws SQLException
         {
-            log.debug( "Executing update: " + queryTemplate.toString() );
+            //log.debug( "Executing update: " + queryTemplate.toString() );
             if( generateKey )
             {
                 return connection.prepareStatement( queryTemplate.toString(), Statement.RETURN_GENERATED_KEYS );
