@@ -9,6 +9,8 @@ package org.firewaterframework.test;
     either express or implied. See the License for the specific language governing permissions
     and limitations under the License.
 */
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import junit.framework.Assert;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
@@ -111,7 +113,7 @@ public class TestRouteMapper extends Assert
         Response response = get( "/users" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
         Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
-        print(response.getRepresentation());
+        //print(response.getRepresentation());
         assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
         assertEquals( selectSingleNode( rval,  "/result/user[1]/@email" ).getNodeValue(), "jane@who.com" );
         assertEquals( selectSingleNode( rval,  "/result/user[6]/@email" ).getNodeValue(), "zorker@who.com" );
@@ -120,7 +122,7 @@ public class TestRouteMapper extends Assert
         response = get( "/users?sort=last_name" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
         rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
-        print(response.getRepresentation());
+        //print(response.getRepresentation());
         assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
         assertEquals( selectSingleNode( rval,  "/result/user[1]/@last_name" ).getNodeValue(), "morrison" );
         assertEquals( selectSingleNode( rval,  "/result/user[6]/@last_name" ).getNodeValue(), "wonka" );
@@ -133,7 +135,7 @@ public class TestRouteMapper extends Assert
         Response response = get( "/users?zipcode=10033" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
         Document rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
-        print(response.getRepresentation());
+        //print(response.getRepresentation());
         // should only return joe
         assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 1 );
         assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@first_name" ).getNodeValue(), "joe" );
@@ -142,7 +144,7 @@ public class TestRouteMapper extends Assert
         response = get( "/users?zipcode=10012" );
         assertEquals( response.getStatus(), Status.STATUS_OK );
         rval = (Document)response.getRepresentation().getUnderlyingRepresentation();
-        print(response.getRepresentation());
+        //print(response.getRepresentation());
         // should only return joe, willie, and jim
         assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 3 );
         assertEquals( selectSingleNode( rval,  "/result/user[@id='0']/@first_name" ).getNodeValue(), "joe" );
@@ -182,6 +184,40 @@ public class TestRouteMapper extends Assert
         assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@last_name" ).getNodeValue(), "wonka" );
         assertEquals( selectSingleNode( rval,  "/result/user[@id='4']/@email" ).getNodeValue(), "whoajee@who.com" );
         assertEquals( selectSingleNode( rval,  "/result/user[@id='5']/@city" ).getNodeValue(), "los angeles" );
+    }
+
+    @Test
+    /**
+     * Tests getting all users from database using REST /users url
+     */
+    public void testFast()
+    {
+        Response response = get( "/fusers" );
+        assertEquals( response.getStatus(), Status.STATUS_OK );
+        ArrayListMultimap<String,Object> users = (ArrayListMultimap<String,Object>)response.getRepresentation().getUnderlyingRepresentation();
+        log.debug( "Reslt: " + users.toString() );
+
+        assertEquals( users.get( "user" ).size(), 6 );
+        boolean found = false;
+        for( Object user: users.get( "user" ))
+        {
+            ArrayListMultimap<String,Object> userMap = (ArrayListMultimap<String,Object>)user;
+
+            // find id = 4
+            if( userMap.get( "id" ).get(0).equals( "4" ) )
+            {
+                found = true;
+                assertEquals( userMap.get("email").get(0), "whoajee@who.com" );
+            }
+        }
+        assertTrue( found );
+
+        //print(rval);
+        /*assertEquals( selectNodes( rval,  "/result/user" ).getLength(), 6 );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='1']/@first_name" ).getNodeValue(), "willie" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='2']/@last_name" ).getNodeValue(), "wonka" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='4']/@email" ).getNodeValue(), "whoajee@who.com" );
+        assertEquals( selectSingleNode( rval,  "/result/user[@id='5']/@city" ).getNodeValue(), "los angeles" );*/
     }
 
     @Test

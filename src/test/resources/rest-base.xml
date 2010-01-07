@@ -7,8 +7,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd
+       http://www.firewaterframework.org/schema/firewater http://www.firewaterframework.org/schema/firewater.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+      ">
 
     <bean id="routingService" class="org.firewaterframework.mappers.RouteMapper">
         <property name="urlMap" ref="urlMap"/>
@@ -20,6 +22,7 @@
                 <entry key="/users" value-ref="usersMapper"/>
                 <entry key="/users/{userID}" value-ref="userMapper"/>
                 <entry key="/gusers" value-ref="guserMapper"/>
+                <entry key="/fusers" value-ref="userQueryMapperFast"/>
             </map>
         </constructor-arg>
     </bean>
@@ -266,7 +269,50 @@
             <fw:sql-string name="zip"/>
         </fw:fields>
     </fw:conditional-update-mapper>
-    
+
+    <fw:query-mapper data-source="dataSource" id="userQueryMapperFast" preferred-representation="org.firewaterframework.rest.representation.FastRepresentation">
+        <fw:query>
+            select u.id as user, p.id as pet, p.name as pet_name, r.name as pet_type, u.first_name as first_name,
+                u.last_name as last_name, u.email as email, u.city as city, rl.name as role
+            from user u
+            left outer join pet p on u.id = p.owner_id
+            left outer join species r on p.species_id = r.id
+            left outer join user_role ur on u.id = ur.user_id
+            left outer join role rl on rl.id = ur.role_id
+            where
+                $if(species_list)$
+                    p.species_id in ($species_list;separator=","$)
+                $else$
+                    1 = 1
+                $endif$
+            and
+                $if(zipcode)$
+                    u.zip = $zipcode$
+                $else$
+                    1 = 1
+                $endif$
+            order by
+                $if(sort)$
+                    $sort$
+                $else$
+                    email
+                $endif$,u.id
+
+        </fw:query>
+        <fw:fields>
+            <fw:sql-string-list name="species_list"/>
+            <fw:sql-string name="zipcode"/>
+            <fw:sql-string name="sort"/>
+        </fw:fields>
+        <fw:pivot-tree resource="userResource">
+            <fw:pivot-tree resource="petResource" >
+                <fw:column-mappings>
+                    pet_name:name,pet_type:type
+                </fw:column-mappings>
+            </fw:pivot-tree>
+        </fw:pivot-tree>
+    </fw:query-mapper>
+
     <!-- dev -->
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
