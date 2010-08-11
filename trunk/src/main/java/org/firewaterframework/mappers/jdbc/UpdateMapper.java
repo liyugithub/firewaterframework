@@ -139,9 +139,9 @@ public class UpdateMapper extends JDBCMapper
         {
             String errorQuery = "<empty query>";
             if( queries.length > 0 ) errorQuery = queries[0].query;
-            log.error( "UPDATE Mapper ERROR on query[0] = " + errorQuery + " \n request = " + request );
+            //log.error( "UPDATE Mapper ERROR on query[0] = " + errorQuery + " \n request = " + request );
             
-            throw new WSException( "Internal Error processing update." );
+            //throw new WSException( "Internal Error processing update." );
         }
     }
 
