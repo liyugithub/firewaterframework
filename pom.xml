@@ -8,14 +8,14 @@
 
     <scm>
         <connection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
+        <developerConnection>scm:svn:http://firewaterframework.googlecode.com/svn/trunk/</developerConnection>
     </scm>
 
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
             <id>google-code-repo</id>
-            <url>svn:https://firewaterframework.googlecode.com/svn/repo</url>
+            <url>svn:http://firewaterframework.googlecode.com/svn/repo</url>
         </repository>
     </distributionManagement>
 
