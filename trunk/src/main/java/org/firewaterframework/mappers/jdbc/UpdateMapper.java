@@ -79,9 +79,10 @@ public class UpdateMapper extends JDBCMapper
                         new UpdateMapperStatementCreator( queryTemplate, translatedArgs, keys, query.hasKey() );
 
                 // only execute the query if the query is non-empty
-                if( updateStatement.queryTemplate.toString().trim().length() > 0 )
+                String updateSQL = updateStatement.queryTemplate.toString().trim();
+                if( updateSQL.length() > 0 )
                 {
-                    log.debug( "Update Query: " + updateStatement.queryTemplate.toString() );
+                    log.debug( "Update Query: " + updateSQL );
                     Integer rowsAffected = 0;
 
                     try
@@ -99,7 +100,9 @@ public class UpdateMapper extends JDBCMapper
                     }
                     catch( Exception xx )
                     {
-                        log.error( "Exception executing update: " + xx.getMessage() );
+                        log.error( "Exception executing update: " + xx.getMessage() + " for query: " + updateSQL );
+                        log.error( "Query: " + updateSQL );
+                        log.error( "Request: " + request );
                         throw xx;
                     }
 
@@ -138,7 +141,7 @@ public class UpdateMapper extends JDBCMapper
             if( queries.length > 0 ) errorQuery = queries[0].query;
             log.error( "UPDATE Mapper ERROR on query[0] = " + errorQuery + " \n request = " + request );
             
-            throw new WSException( "Internal Error processing update.", e );
+            throw new WSException( "Internal Error processing update." );
         }
     }
 
