@@ -103,7 +103,6 @@ public class UpdateMapper extends JDBCMapper
                         log.error( "Exception executing update: " + xx.getMessage() + " for query: " + updateSQL );
                         log.error( "Query: " + updateSQL );
                         log.error( "Request: " + request );
-                        throw xx;
                     }
 
                     //log.info( "RowsAffected: " + rowsAffected );
@@ -141,7 +140,7 @@ public class UpdateMapper extends JDBCMapper
             if( queries.length > 0 ) errorQuery = queries[0].query;
             //log.error( "UPDATE Mapper ERROR on query[0] = " + errorQuery + " \n request = " + request );
             
-            //throw new WSException( "Internal Error processing update." );
+            throw new WSException( "Internal Error processing update." );
         }
     }
 
