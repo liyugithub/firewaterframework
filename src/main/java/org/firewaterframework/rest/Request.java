@@ -10,6 +10,7 @@ package org.firewaterframework.rest;
     and limitations under the License.
 */
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 
 import java.net.URLDecoder;
 import java.util.*;
@@ -286,10 +287,22 @@ public class Request implements Serializable
         return "Request{" +
                 "url='" + url + '\'' +
                 ", baseUrl='" + baseUrl + '\'' +
-                ", args=" + args +
+                ", args=" + getPropVals() +
                 ", method=" + method +
                 ", idString='" + idString + '\'' +
                 ", headers=" + headers +
                 '}';
+    }
+
+    public String getPropVals()
+    {
+        StringBuffer buf = new StringBuffer( );
+        buf.append( '[' );
+        for( PropertyValue propVal: args.getPropertyValues() )
+        {
+            buf.append('(').append( propVal.getName() ).append( ": " ).append( propVal.getValue() ).append( "), " );
+        }
+        buf.append( ']' );
+        return buf.toString();
     }
 }
