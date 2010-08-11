@@ -3,7 +3,7 @@
     <groupId>org.firewaterframework</groupId>
     <artifactId>firewater</artifactId>
     <packaging>jar</packaging>
-    <version>0.9.3.22-SNAPSHOT</version>
+    <version>0.9.3.21-SNAPSHOT</version>
     <name>Firewater</name>
 
     <!-- change -->
@@ -16,7 +16,7 @@
         <repository>
             <uniqueVersion>false</uniqueVersion>
             <id>google-code-repo</id>
-            <url>svn:http://firewaterframework.googlecode.com/svn/repo</url>
+            <url>svn:https://firewaterframework.googlecode.com/svn/repo</url>
         </repository>
     </distributionManagement>
 
