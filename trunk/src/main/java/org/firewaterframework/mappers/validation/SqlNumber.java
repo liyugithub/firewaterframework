@@ -19,7 +19,7 @@ public class SqlNumber extends MapPropertyEditor
     {
         if( checkRequired( text ))
         {
-            if( text.matches( "\\-?[0-9][0-9]*(\\.[0-9][0-9]*)?" ))
+            if( text.matches( "\\-?[0-9][0-9]*(\\.[0-9][0-9]*)?([eE][\\+\\-][0-9]*)?" ))
             {
                 this.setValue( text );
             }
